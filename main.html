@@ -1,155 +1,263 @@
-<!doctype html>
-<html lang="en"> 
- <head> 
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>Simple Page</title> 
-  <style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kmrXz Mods</title>
+    <style>
         body {
-            font-family: Arial, sans-serif;
+            background-color: #252525;
+            color: MediumSeaGreen;
+            font-family: monospace;
             margin: 0;
             padding: 0;
-            background-color: #252525;
-            color: #fff;
-            position: relative;
-            height: 100vh;
-            width: 100%;
-            box-sizing: border-box; /* Includes padding and border in element's total width and height */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 100vh;
+            scroll-behavior: smooth;
+            transition: background-color 0.3s, color 0.3s;
         }
+
+        .header-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50vh;
+            width: 100%;
+        }
+
+        .header-image {
+            height: 300px;
+            width: 100%;
+            animation: upDown 4s infinite;
+        }
+
+        @keyframes upDown {
+            0% { transform: translateY(0); }
+            45% { transform: translateY(-20px); }
+            50% { transform: translateY(-20px); }
+            95% { transform: translateY(0); }
+            100% { transform: translateY(0); }
+        }
+
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 20px;
+        }
+
         header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #301934;
-            padding: 1rem;
-            z-index: 1000;
-        }
-        .title {
-            font-size: 48px;
-            color: #fff;
-            margin: 0;
-        }
-        .description {
-            position: absolute;
-            top: 6rem;
-            left: 1rem;
-            right: 1rem;
-        }
-        .options {
-            position: absolute;
-            top: 12rem;
-            left: 1rem;
-            right: 1rem;
-            bottom: 6rem;
-        }
-        .options p {
-            margin: 0 0 1rem 0; /* Add margin below the paragraph */
-        }
-        .options img {
-            max-width: 100%;
-            height: auto;
-            display: block; /* Ensures image doesn't have extra space below */
-            margin-bottom: 1rem; /* Adds space below the image */
-        }
-        .download-button {
-            display: block; /* Ensures the button is on its own line */
-            width: 100%;
-            background-color: green;
-            color: #fff;
             text-align: center;
-            padding: 1rem;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
+            font-size: 36px;
+        }
+
+        .drawer {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .drawer a {
+            display: inline-block;
+            margin: 0 10px;
+            color: MediumSeaGreen;
             text-decoration: none;
-            box-sizing: border-box; /* Includes padding in the width */
+            cursor: pointer;
         }
-        .download-button:hover {
-            background-color: darkgreen;
+
+        .content {
+            text-align: center;
+            width: 80%;
+            margin: 20px auto;
         }
-        
-        /* Hamburger Menu */
-.hamburger-menu {
-    font-size: 30px;
-    cursor: pointer;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1001; /* Ensure it's above other content */
-}
 
-/* Drawer Styles */
-.drawer {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 250px;
-    background-color: #301934;
-    color: #fff;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    padding: 2rem;
-    z-index: 1000;
-}
+        h2 {
+            margin: 40px 0 20px 0;
+            font-size: 28px;
+            text-transform: uppercase;
+        }
 
-.drawer a {
-    display: block;
-    color: #fff;
-    text-decoration: none;
-    margin-bottom: 1rem;
-}
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
 
-.drawer a:hover {
-    text-decoration: underline;
-}
+        .description {
+            margin: 20px 0;
+            font-size: 18px;
+        }
 
-.close-btn {
-    font-size: 30px;
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    margin-bottom: 1rem;
-}
+        .download-button {
+            background-color: MediumSeaGreen;
+            color: #252525;
+            border: none;
+            width: 96%;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
 
-/* Show Drawer */
-.drawer.show {
-    transform: translateX(0);
-}
+        .download-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: gray;
+            transition: width 0.5s, height 0.5s, top 0.5s, left 0.5s;
+            z-index: 0;
+            border-radius: 50%;
+            opacity: 0;
+            transform: translate(-50%, -50%);
+        }
 
-    </style> 
- </head> 
- <body> 
-  <header> 
-   <div class="title">
-    kmrXz mods
-   </div> 
-  </header> <!-- Hamburger Icon --> 
-  <div class="hamburger-menu" onclick="toggleDrawer()">
-    ☰ <!-- Unicode character for hamburger icon --> 
-  </div> <!-- Drawer --> 
-  <div class="drawer"> <button class="close-btn" onclick="toggleDrawer()">×</button> 
-   <nav> <a href="#">Home</a> <a href="#">About</a> <a href="#">Contact</a> <!-- Add more links as needed --> 
-   </nav> 
-  </div> 
-  <div class="description"> 
-   <p>Welcome to kmrXz's webpage, here you can find modified apps and other useful apps. Happy modding :)</p> 
-  </div> 
-  <div class="options"> 
-   <p>This is the paragraph content.</p> 
-   <img src="image.jpg" alt="Description of the image"> <a href="yourfile.pdf" class="download-button">Download</a> 
-  </div> 
-  <script>
-      
-    function toggleDrawer() {
-        var drawer = document.querySelector('.drawer');
-        drawer.classList.toggle('show');
-    }
-      
-        var x = prompt("What's your name?");
-        console.log("User's name: " + x); // Optional: log the name to the console
-    </script> 
- </body>
+        .download-button:hover::after {
+            width: 0;
+            height: 0;
+            top: 50%;
+            left: 50%;
+            opacity: 1;
+        }
+
+        .download-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        footer {
+            background-color: #000;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+        }
+
+        footer a {
+            color: MediumSeaGreen;
+            text-decoration: none;
+        }
+
+        .scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: MediumSeaGreen;
+            color: #252525;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 20px;
+            display: none;
+        }
+
+        .scroll-to-top.visible {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header-image {
+                height: 150px;
+            }
+
+            .content {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Centered Header Image -->
+    <div class="header-image-container">
+        <img src="header-image.jpg" alt="Header Image" class="header-image">
+    </div>
+
+    <!-- Content moved to the bottom -->
+    <div class="content-container">
+        <header>kmrXz Mods</header>
+
+        <div class="drawer">
+            <a href="#">Home</a>
+            <a id="theme-toggle">Theme</a>
+            <a href="#">About</a>
+            <a href="https://instagram.com/echo_rapt0r">Connect</a>
+        </div>
+
+        <div class="content">
+            <p>Welcome to my page, your support is highly appreciated. Check out my mods and hope you enjoy them.</p>
+
+            <div class="mod">
+                <h2>Mini Militia</h2>
+                <img src="images/image1.jpg" alt="Mini Militia Pro Pack Unlocked">
+                <p class="description">Pro Pack Unlocked</p>
+                <button class="download-button"><span>Download</span></button>
+            </div>
+
+            <div class="mod">
+                <h2>Mini Militia</h2>
+                <img src="image2.jpg" alt="Mini Militia Pro Pack Unlocked">
+                <p class="description">Pro Pack Unlocked</p>
+                <button class="download-button"><span>Download</span></button>
+            </div>
+
+            <div class="mod">
+                <h2>Mini Militia</h2>
+                <img src="image3.jpg" alt="Mini Militia Pro Pack Unlocked">
+                <p class="description">Pro Pack Unlocked</p>
+                <button class="download-button"><span>Download</span></button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://play.google.com/store/apps/details?id=com.openai.chatgpt">Made by @kmrXz and Chat GPT</a>
+        <button class="scroll-to-top" onclick="scrollToTop()">↑</button>
+    </footer>
+
+    <script>
+        // Scroll-to-top functionality
+        const scrollToTopButton = document.querySelector('.scroll-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollToTopButton.classList.add('visible');
+            } else {
+                scrollToTopButton.classList.remove('visible');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Theme toggle functionality
+        const themeToggleButton = document.getElementById('theme-toggle');
+        let isDefaultTheme = true;
+
+        themeToggleButton.addEventListener('click', () => {
+            if (isDefaultTheme) {
+                document.body.style.backgroundColor = '#04151f';
+                document.body.style.color = '#cccccc';
+            } else {
+                document.body.style.backgroundColor = '#252525';
+                document.body.style.color = 'MediumSeaGreen';
+            }
+            isDefaultTheme = !isDefaultTheme;
+        });
+    </script>
+
+</body>
 </html>
