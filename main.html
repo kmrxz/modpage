@@ -38,7 +38,7 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            height: 50vh;
+            height: 60vh; /* Increased height */
             width: 100%;
             position: relative;
         }
@@ -53,12 +53,12 @@
 
         .flower-image {
             position: absolute;
-            top: 150px; /* Moved 150px down */
-            height: 100%;
+            top: 180px; /* Adjusted position */
+            height: 80%; /* Adjusted height */
             width: 100%;
             object-fit: cover;
             z-index: 0;
-            opacity: 0.8; /* Optional: Adjust opacity if needed */
+            opacity: 0.8;
         }
 
         @keyframes upDown {
@@ -80,7 +80,7 @@
 
         header {
             text-align: center;
-            font-size: 36px;
+            font-size: 40px; /* Increased size */
         }
 
         .drawer {
@@ -104,16 +104,16 @@
 
         h2 {
             margin: 40px 0 20px 0;
-            font-size: 24px; /* Reduced size */
+            font-size: 24px;
             text-transform: uppercase;
-            text-align: left; /* Moved to the left */
+            text-align: left;
             position: relative;
         }
 
         h2::after {
             content: "v:1.0";
             font-size: 14px;
-            color: #ff6347; /* Dark gradient of red */
+            color: #ff6347;
             position: absolute;
             right: 0;
             top: 50%;
@@ -121,7 +121,7 @@
         }
 
         img {
-            width: 70%; /* Reduced size */
+            width: 70%;
             height: auto;
             display: block;
             margin: 0 auto;
