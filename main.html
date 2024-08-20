@@ -24,6 +24,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 50vh;
             width: 100%;
         }
@@ -32,49 +33,24 @@
             height: 300px;
             width: 100%;
             animation: upDown 4s infinite;
+            object-fit: contain;
         }
-        .header-image {
-    height: 300px;
-    width: 100%;
-    animation: beeMovement 12s infinite; /* Slowed down the animation */
-    object-fit: contain; /* Ensures the image fits well within the container */
-}
 
-@keyframes beeMovement {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-    10% {
-        transform: translate(10px, -20px) scale(1.2);
-    }
-    20% {
-        transform: translate(-15px, 10px) scale(0.9);
-    }
-    30% {
-        transform: translate(20px, 15px) scale(1.1);
-    }
-    40% {
-        transform: translate(-20px, -10px) scale(1);
-    }
-    50% {
-        transform: translate(15px, -25px) scale(1.3);
-    }
-    60% {
-        transform: translate(-10px, 20px) scale(0.8);
-    }
-    70% {
-        transform: translate(20px, -15px) scale(1.2);
-    }
-    80% {
-        transform: translate(-25px, 10px) scale(1);
-    }
-    90% {
-        transform: translate(15px, 20px) scale(1.1);
-    }
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-}
+        .flower-image {
+            height: 100px;
+            width: 100%;
+            margin-top: 20px;
+            object-fit: contain;
+        }
+
+        @keyframes upDown {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
 
         .content-container {
             display: flex;
@@ -204,42 +180,60 @@
                 height: 150px;
             }
 
+            .flower-image {
+                height: 50px;
+            }
+
             .content {
                 width: 95%;
             }
         }
     </style> 
  </head> 
- <body> <!-- Centered Header Image --> 
+ <body> 
   <div class="header-image-container"> 
-   <img src="images/bee.png" alt="Header Image" class="header-image"> 
-  </div> <!-- Content moved to the bottom --> 
+   <img src="images/bee.png" alt="Bee Image" class="header-image">
+   <img src="images/flowers.png" alt="Flowers Image" class="flower-image"> 
+  </div> 
   <div class="content-container"> 
    <header>
      kmrXz Mods 
    </header> 
-   <div class="drawer"> <a href="#">Home</a> <a id="theme-toggle">Theme</a> <a href="about.html">About</a> <a href="https://instagram.com/echo_rapt0r">Connect</a> 
+   <div class="drawer"> 
+     <a href="#">Home</a> 
+     <a id="theme-toggle">Theme</a> 
+     <a href="about.html">About</a> 
+     <a href="https://instagram.com/echo_rapt0r">Connect</a> 
    </div> 
    <div class="content"> 
     <p>Welcome to my page, your support is highly appreciated. Check out my mods and hope you enjoy them.</p> 
     <div class="mod"> 
      <h2>Auto clicker apk</h2> 
      <img src="images/image1.jpg" alt="Suni Militia Pro Pack Unlocked"> 
-     <p class="description">Pro Pack Unlocked</p> <a href="files/Auto_Clickercom.truedevelopersstudio.automatictap.autoclickerv2.1.4.apk"><button class="download-button"><span>Download</span></button></a> 
+     <p class="description">Pro Pack Unlocked</p> 
+     <a href="files/Auto_Clickercom.truedevelopersstudio.automatictap.autoclickerv2.1.4.apk">
+       <button class="download-button"><span>Download</span></button>
+     </a> 
     </div> 
     <div class="mod"> 
      <h2>Hill climb racing</h2> 
      <img src="images/default.jpg" alt="Hill climb unlimited"> 
-     <p class="description">Unlimited coins when sharing to Facebook</p> <button class="download-button"><span>Download</span></button> 
+     <p class="description">Unlimited coins when sharing to Facebook</p> 
+     <button class="download-button"><span>Download</span></button> 
     </div> 
     <div class="mod"> 
      <h2>Mini Militia</h2> 
      <img src="images/default.jpg" alt="Mini Militia Pro Pack Unlocked"> 
-     <p class="description">Pro Pack Unlocked</p> <a href="files/download.html"> <button class="download-button"><span>Download</span></button> </a>
+     <p class="description">Pro Pack Unlocked</p> 
+     <a href="files/download.html"> 
+       <button class="download-button"><span>Download</span></button>
+     </a>
     </div> 
    </div> 
   </div> 
-  <footer> <a href="https://play.google.com/store/apps/details?id=com.openai.chatgpt">Made by @kmrXz and Chat GPT</a> <button class="scroll-to-top" onclick="scrollToTop()">↑</button> 
+  <footer> 
+    <a href="https://play.google.com/store/apps/details?id=com.openai.chatgpt">Made by @kmrXz and Chat GPT</a> 
+    <button class="scroll-to-top" onclick="scrollToTop()">↑</button> 
   </footer> 
   <script>
         // Scroll-to-top functionality
