@@ -13,11 +13,24 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             min-height: 100vh;
             scroll-behavior: smooth;
             transition: background-color 0.3s, color 0.3s;
+        }
+
+        .top-bar {
+            width: 100%;
+            background-color: #000;
+            color: MediumSeaGreen;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .header-image-container {
@@ -27,6 +40,7 @@
             flex-direction: column;
             height: 50vh;
             width: 100%;
+            position: relative;
         }
 
         .header-image {
@@ -34,13 +48,16 @@
             width: 50%;
             animation: upDown 4s infinite;
             object-fit: contain;
+            z-index: 1;
         }
 
         .flower-image {
+            position: absolute;
             height: 100%;
             width: 100%;
-            margin-top: 20px;
-            object-fit: contain;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.8; /* Optional: Adjust opacity if needed */
         }
 
         @keyframes upDown {
@@ -181,7 +198,7 @@
             }
 
             .flower-image {
-                height: 50px;
+                height: 50%;
             }
 
             .content {
@@ -191,6 +208,9 @@
     </style> 
  </head> 
  <body> 
+  <div class="top-bar">
+    <span>kmrXz Mods</span>
+  </div>
   <div class="header-image-container"> 
    <img src="images/bee.png" alt="Bee Image" class="header-image">
    <img src="images/flowerbg.png" alt="Flowers Image" class="flower-image"> 
