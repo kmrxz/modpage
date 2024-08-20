@@ -53,6 +53,7 @@
 
         .flower-image {
             position: absolute;
+            top: -20px; /* Moved 20px up */
             height: 100%;
             width: 100%;
             object-fit: cover;
@@ -103,12 +104,24 @@
 
         h2 {
             margin: 40px 0 20px 0;
-            font-size: 28px;
+            font-size: 24px; /* Reduced size */
             text-transform: uppercase;
+            text-align: left; /* Moved to the left */
+            position: relative;
+        }
+
+        h2::after {
+            content: "v:1.0";
+            font-size: 14px;
+            color: #ff6347; /* Dark gradient of red */
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         img {
-            width: 100%;
+            width: 70%; /* Reduced size */
             height: auto;
             display: block;
             margin: 0 auto;
