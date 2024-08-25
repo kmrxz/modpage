@@ -62,7 +62,6 @@
 
         footer {
             background-color: #000000;
-            color: #cccccc;
             padding: 10px 0;
             text-align: center;
             position: fixed;
@@ -72,6 +71,7 @@
         }
 
         footer p {
+            color: #cccccc;
             margin: 0;
             text-transform: uppercase;
         }
@@ -82,22 +82,20 @@
             const userMobile = prompt("Your WhatsApp number");
             alert("You'll be redirected to WhatsApp now");
             alert("Thank you!");
-            window.open("https://wa.me/+91" + userMobile + "?text=Hi " + username + ", thanks for your support. Here's my UPI ID: akshayblend738@oksbi if you'd like to donate ₹1.");
+            window.open("https://wa.me/+91" + userMobile + "?text=Hi " + username + ", thanks for your support. Here's my UPI ID: akshayblend738@oksbi if you'd like to buy me a coffee :)");
         }
     </script>
 </head>
 <body>
     <div class="container">
         <h1>About kmrXz</h1>
-        <img src="images/myself.webp" alt="Profile picture of Akshay Kumar C S" class="profile-pic">
+        <img src="images/myself.webp" alt="Profile picture" class="profile-pic">
 
         <p>Hello! My name is Akshay Kumar C S, also known as kmrXz. I'm from Kochi, Kerala, India. I've been working on web development @ctea.</p>
 
         <p>All the files I share are safe, and I do not collect any data from your device.</p>
      
         <p>All these codes are created with the help of ChatGPT, and the IDE I use is Dcoder (Android). These pages are hosted on GitHub.</p>
-
-        <p>I'm not receiving any payments for my work since I don't use ads on my page. You can make a donation starting from ₹1. I will WhatsApp you my UPI ID. <a class="donate" onclick="payment()" href="#">Donate now</a></p>
         
         <p>Databases used include GitHub repository, Dropbox, and Google Drive.</p>
         
@@ -106,6 +104,8 @@
         <p>Share your feedback on my socials so I can work on it and improve.</p>
 
         <p>I am not currently looking for paid work but may be open to it in the future...</p>
+
+        <p>Buy me a <a class="donate" onclick="payment()" href="#">Coffee</a></p>
         
         <p>Suggest your ideas here; Instagram is preferred.</p>
         
@@ -117,7 +117,7 @@
     </div>
 
     <footer>
-        <p>Created by ChatGPT</p>
+        <p>Created by kmrXz and ChatGPT</p>
     </footer>
 </body>
 </html>
