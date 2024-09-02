@@ -1,71 +1,47 @@
+/* Apply a fancy font family */
 body {
-    background-color: #04151f;
-    color: #cccccc;
-    font-family: monospace;
+    font-family: 'Roboto', sans-serif; /* Change to any other fancy font if you prefer */
+    background-color: #5B0F17;
+    color: #EAEAEA; /* Light color for better contrast on dark background */
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Ensure space between header and footer */
-    align-items: center;
-    min-height: 100vh;
-    scroll-behavior: smooth;
 }
 
 header {
-    width: 100%;
-    background-color: #04151f;
-    position: fixed;
-    top: 0;
-    left: 0;
+    background-color: #760A16;
+    color: #EAEAEA;
     padding: 20px;
     text-align: center;
-    z-index: 1000;
-}
-
-main {
-    margin-top: 80px; /* To avoid content being hidden behind the fixed header */
-    width: 90%;
-}
-
-section {
-    margin: 40px 0;
-    width: 100%;
-}
-
-h1 {
-    text-align: left;
-    text-transform: uppercase; /* Make heading text uppercase */
-}
-
-img {
-    display: block;
-    margin: 20px auto;
-    max-width: 96%;
-    height: auto;
-}
-
-p {
-    text-align: center;
-}
-
-button {
-    display: block;
-    background-color: MediumSeaGreen;
-    color: #cccccc;
-    padding: 10px 20px;
-    margin: 10px auto;
-    border: none;
-    cursor: pointer;
-    font-family: monospace;
 }
 
 footer {
-    width: 100%;
-    background-color: #000000; /* Changed to black */
-    color: #cccccc;
+    background-color: #44040B;
+    color: #EAEAEA;
+    padding: 10px 0; /* Smaller footer height */
     text-align: center;
-    padding: 20px 0;
-    position: relative; /* Ensures footer stays at the bottom */
+    position: fixed;
     bottom: 0;
+    width: 100%;
+}
+
+main {
+    padding: 20px;
+}
+
+h1 {
+    font-size: 1.5em; /* Increase size for better visibility */
+}
+
+button {
+    background-color: #760A16; /* Matching button color */
+    color: #EAEAEA;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #EAEAEA;
+    color: #760A16;
 }
