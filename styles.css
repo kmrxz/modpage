@@ -7,6 +7,12 @@ body {
     padding: 0;
 }
 
+img{
+    height: 80%;
+    width: 80%;
+}
+
+
 header {
     background-color: #760A16;
     color: #EAEAEA;
