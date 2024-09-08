@@ -2,7 +2,7 @@
 body {
     font-family: 'Roboto', sans-serif; /* Change to any other fancy font if you prefer */
     background-color: #80ED99;
-    color: #333333; /* Light color for better contrast on dark background */
+    color: #14919B; /* Light color for better contrast on dark background */
     margin: 0;
     padding: 0;
 }
@@ -15,14 +15,18 @@ img{
 
 header {
     background-color: #0B6477;
-    color: #213A57;
+    color: #333333;
+    border: none;
+    border-radius: 5px;
+    font-size: 50px;
+    text-transform: uppercase;
     padding: 20px;
     text-align: center;
 }
 
 footer {
     background-color: #0B6477;
-    color: #213A57;
+    color: #333333;
     padding: 10px 0; /* Smaller footer height */
     text-align: center;
     position: fixed;
