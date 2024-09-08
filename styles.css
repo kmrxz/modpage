@@ -2,7 +2,7 @@
 body {
     font-family: 'Roboto', sans-serif; /* Change to any other fancy font if you prefer */
     background-color: #80ED99;
-    color: #EAEAEA; /* Light color for better contrast on dark background */
+    color: #333333; /* Light color for better contrast on dark background */
     margin: 0;
     padding: 0;
 }
@@ -14,15 +14,15 @@ img{
 
 
 header {
-    background-color: #45DFB1;
-    color: #EAEAEA;
+    background-color: #0B6477;
+    color: #213A57;
     padding: 20px;
     text-align: center;
 }
 
 footer {
-    background-color: #45DFB1;
-    color: #EAEAEA;
+    background-color: #0B6477;
+    color: #213A57;
     padding: 10px 0; /* Smaller footer height */
     text-align: center;
     position: fixed;
@@ -40,7 +40,7 @@ h1 {
 
 button {
     background-color: #14919B; /* Matching button color */
-    color: #EAEAEA;
+    color: #213A57;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
