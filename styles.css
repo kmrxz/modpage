@@ -1,7 +1,7 @@
 /* Apply a fancy font family */
 body {
     font-family: 'Roboto', sans-serif; /* Change to any other fancy font if you prefer */
-    background-color: #5B0F17;
+    background-color: #80ED99;
     color: #EAEAEA; /* Light color for better contrast on dark background */
     margin: 0;
     padding: 0;
@@ -14,14 +14,14 @@ img{
 
 
 header {
-    background-color: #760A16;
+    background-color: #45DFB1;
     color: #EAEAEA;
     padding: 20px;
     text-align: center;
 }
 
 footer {
-    background-color: #44040B;
+    background-color: #45DFB1;
     color: #EAEAEA;
     padding: 10px 0; /* Smaller footer height */
     text-align: center;
@@ -39,7 +39,7 @@ h1 {
 }
 
 button {
-    background-color: #760A16; /* Matching button color */
+    background-color: #14919B; /* Matching button color */
     color: #EAEAEA;
     border: none;
     padding: 10px 20px;
@@ -49,5 +49,5 @@ button {
 
 button:hover {
     background-color: #EAEAEA;
-    color: #760A16;
+    color: #14919B;
 }
