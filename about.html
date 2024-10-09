@@ -25,9 +25,12 @@
             background-color: #04151f;
             color: mediumseagreen;
         }
-        .donate{
+        .donate {
             background: mediumseagreen;
             color: #04151f;
+            //padding: 10px 20px;
+           // border-radius: 5px;
+            text-decoration: none;
         }
 
         h1 {
@@ -77,11 +80,12 @@
         }
     </style>
     <script>
-        function payment(){
+        function payment(event) {
+            event.preventDefault(); // Prevent default anchor behavior
             const username = prompt("Your name");
             const userMobile = prompt("Your WhatsApp number");
             alert("You'll be redirected to WhatsApp now");
-            alert("If it showed "popup blocked", click on "show"");
+            alert('If it showed "popup blocked", click on "show"');
             alert("Thank you!");
             window.open("https://wa.me/+91" + userMobile + "?text=Hi " + username + ", thanks for your support. Here's my UPI ID: akshayblend738@oksbi if you'd like to buy me a coffee :)");
         }
@@ -94,21 +98,21 @@
 
         <p>Hello! My name is Akshay Kumar C S, also known as kmrXz. I'm from Kochi, Kerala, India.</p>
 
-        <p>All the files I share are safe,and I do not collect any data from your device.I actually don't know how to do it</p>
-     
+        <p>All the files I share are safe, and I do not collect any data from your device. I actually don't know how to do it.</p>
+
         <p>All these codes are created with the help of ChatGPT, and the IDE I use is Dcoder (Android). These pages are hosted on GitHub.</p>
-        
+
         <p>Databases used include GitHub repository, Dropbox, and Google Drive.</p>
-        
+
         <p>"Who the hell do you think you are..?" ~Stewie (family guy)</p>
 
         <p>Share your feedback on my socials so I can work on it and improve.</p>
 
-        <p>I am not currently looking for paid work,lemme finish this frist:(</p>
+        <p>I am not currently looking for paid work, let me finish this first :(</p>
 
-        <p>Buy me a <a class="donate" onclick="payment()">Coffee</a></p>
-<p> And a <a class="donate" href="files/flow.html">Flower</a> for you :) </p>
-        
+        <p>Buy me a <a class="donate" href="#" onclick="payment(event)">Coffee</a></p>
+        <p>And a <a class="donate" href="files/flow.html">Flower</a> for you :)</p>
+
         <div class="social-icons">
             <a href="https://x.com/echo_rapt0r?t=w1oXQdGzIoxRJPyC0RYhCw&s=09">Twitter</a> |
             <a href="https://instagram.com/echo_rapt0r">Instagram</a> |
