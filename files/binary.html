@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Binary Converter</title> 
+  <link rel="stylesheet" href="styles.css"> 
+ <style type="text/css" id="dcoder_stylesheet">body {
+    font-family: 'Courier New', Courier, monospace; /* Monospace font */
+    background-color: #04151f; /* Dark background */
+    color: #cccccc; /* Light text color */
+    text-align: center;
+    padding: 0; /* No padding for body */
+    margin: 0; /* Remove default margins */
+    scroll-behavior: smooth; /*Enables smooth scrolling*/
+}
+
+header, footer {
+    background-color: #000000; /* Header and footer background */
+    color: #cccccc; /* Light text color */
+    padding: 10px 0; /* Padding for header and footer */
+    width: 100%; /* Full width */
+    position: relative; /* Ensure positioning */
+    box-sizing: border-box; /* Include padding in width */
+}
+footer{
+  height: 100%;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto; /* Center container */
+    padding: 20px;
+}
+
+h1 {
+    color: #ff9800; /* Orange color for the main heading */
+}
+
+h2 {
+    text-transform: uppercase;
+    color: MediumSeaGreen; /* Green color for subheadings */
+}
+
+.kmrxz{
+  color: MediumSeaGreen;
+}
+
+textarea {
+    width: 97%;
+    height: 100px;
+    margin-bottom: 10px;
+    padding: -10px;
+    font-size: 16px;
+    border: 1px solid #444; /* Darker border for text areas */
+    border-radius: 4px;
+    background-color: #1c1c1c; /* Dark background for text areas */
+    color: #f1f1f1; /* Light text color */
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #3a3a3a; /* Dark button background */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: MediumSeaGreen; /* Color on hover */
+}
+
+p {
+    margin: 0; /* Remove margin for the p tag */
+    color: #f1f1f1; /* Light text color */
+    font-size: 16px;
+    /* No background or border */
+    background: none; /* Ensure no background */
+}</style></head> 
+ <body> 
+  <header> 
+   <h1>&gt;_kmrXz.git</h1> 
+  </header> 
+  <div class="container"> 
+   <h2>Convert to Binary</h2> <textarea id="textInput" placeholder="Enter text here..."></textarea> 
+   <div class="button-group"> <button onclick="textToBinary()">Encode</button> <button onclick="copyToClipboard('binaryOutput')">Copy</button> <button onclick="clearInputAndOutput('textInput', 'binaryOutput')">Clear</button> 
+   </div> 
+   <p id="binaryOutput">Waiting for text input...</p> 
+   <h2>Convert to Text</h2> <textarea id="binaryInput" placeholder="Enter binary here..."></textarea> 
+   <div class="button-group"> <button onclick="binaryToText()">Decode</button> <button onclick="copyToClipboard('textOutput')">Copy</button> <button onclick="clearInputAndOutput('binaryInput', 'textOutput')">Clear</button> 
+   </div> 
+   <p id="textOutput">Waiting for binary input...</p> 
+  </div> 
+  <footer> 
+   <p>Made by <span onclick="ope()" class="kmrxz">kmrXz</span> and ChatGPT</p> 
+  </footer> 
+  <script src="script.js"></script> 
+ 
+<script type="text/javascript" id="dcoder_script">// Function to convert text to binary
+function textToBinary() {
+    const text = document.getElementById('textInput').value;
+    if (!text) {
+        alert('Please enter text to convert.');
+        return;
+    }
+
+    let binaryResult = '';
+    for (let i = 0; i < text.length; i++) {
+        binaryResult += text[i].charCodeAt(0).toString(2).padStart(8, '0') + ' ';
+    }
+    document.getElementById('binaryOutput').innerText = binaryResult.trim();
+}
+
+// Function to convert binary to text
+function binaryToText() {
+    const binary = document.getElementById('binaryInput').value.trim();
+    if (!binary) {
+        alert('Please enter binary to convert.');
+        return;
+    }
+
+    if (!/^[01\s]+$/.test(binary)) {
+        alert('Please enter valid binary values.');
+        return;
+    }
+
+    let textResult = '';
+    const binaryArray = binary.split(' ');
+    for (let i = 0; i < binaryArray.length; i++) {
+        textResult += String.fromCharCode(parseInt(binaryArray[i], 2));
+    }
+    document.getElementById('textOutput').innerText = textResult;
+}
+
+// Function to copy output to clipboard
+function copyToClipboard(id) {
+    const textToCopy = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('Copied to clipboard!');
+    });
+}
+//Function to open social profile
+function ope(){
+  window.open("https://instagram.com/echo_rapt0r");
+}
+
+// Function to clear input and output
+function clearInputAndOutput(inputId, outputId) {
+    document.getElementById(inputId).value = ''; // Clear input
+    document.getElementById(outputId).innerText = 'Cleared! Waiting for input'; // Clear output
+}</script></body></html>
