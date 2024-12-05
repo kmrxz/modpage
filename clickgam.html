@@ -8,7 +8,7 @@
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background-color: #f9f9f9;
+      background-color: #253525;
       margin: 0;
       padding: 0;
     }
@@ -44,7 +44,7 @@
   </style>
 </head>
 <body>
-  <h1>Tap to Earn Game</h1>
+  <h1>Guhster Kombat</h1>
   <div class="game-container">
     <img src="images/bee.png" alt="Tap Me" class="tap-image" id="tapImage">
     <div class="score-board" id="scoreBoard">Score: 0</div>
@@ -61,7 +61,7 @@
     tapImage.addEventListener('click', () => {
       score++;
       scoreBoard.textContent = `Score: ${score}`;
-      if (score === 10) {
+      if (score === 1000000000000000000) {
         endGame();
       }
     });
