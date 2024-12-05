@@ -1,229 +1,273 @@
-<!doctype html>
-<html lang="en"> 
- <head> 
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>Guhster Oombat</title> 
-  <link rel="stylesheet" href="style.css"> 
- <style type="text/css" id="dcoder_stylesheet">/* style.css */
-*{
-  user-select: none;
-}
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: linear-gradient(to bottom, #141414, #222, #333);
-  color: #ffffff;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KmrXz Mods</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Garamond;
+            background-color: #04151f;
+            color: #cccccc;
+            overflow-x: hidden;
+        }
+        header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            color: mediumseagreen;
+            margin: 0;
+            font-size: 2rem;
+        }
+        h2 {
+            font-family: cursive;
+        }
+        .description {
+            font-family: Ariel;
+            text-align: center;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            display: flex;
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 15px;
+            color: #cccccc;
+            align-items: center;
+            gap: 15px;
+        }
+        .card .photo {
+            width: 60px;
+            height: 60px;
+            background-color: #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .card .photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card .details {
+            flex: 1;
+        }
+.card .details h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: mediumseagreen;
+        }
+.card .details p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+.card .button {
+            padding: 10px 15px;
+            background-color: mediumseagreen;
+            color: #04151f;
+            text-transform: uppercase;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+.card .button:hover {
+            background-color: #28a745;
+        }
+/* Footer and Back Button */
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+.back-button, .top-button {
+            padding: 10px 20px;
+            background-color: mediumseagreen;
+            color: #04151f;
+            text-transform: uppercase;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+.back-button:hover, .top-button:hover {
+            background-color: #28a745;
+        }
+/* Scroll to Top Button */
+        .top-button {
+            display: none;
+        }
+</style>
+</head>
+<body>
+    <header>
+        <h1>KmrXz mods</h1>
+    </header>
+<div class="description">
+        Surprisingly,Chat GPT and KmrXz both are working for you at 4:00AM.<br>
+        This is a collection of useful apps some are made/modified by me.<br>
+        If you have a request:<a href="https://instagram.com/echo_rapt0r">@kmrXz</a>
+    </div>
+<div class="container">
+        <!-- Card 1 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default.jpg" alt="Card Image 1">
+    </div>
+    <div class="details">
+        <h2>Auto clicker</h2>
+        <p>Automatically clicks and scrolls on your screen</p>
+    </div>
+    <a href="files/Auto_Clickercom.truedevelopersstudio.automatictap.autoclickerv2.1.4.apk" class="button">Download</a>
+</div> <!-- End Card 1 -->
 
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+<!-- Card 2 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default.jpg" alt="Card Image 2">
+    </div>
+    <div class="details">
+        <h2>Mini militia 4.2.8(mod)</h2>
+        <p>Hehe</p>
+    </div>
+    <a href="files/download.html" class="button">Download</a>
+</div> <!-- End Card 2 -->
 
-header {
-  width: 100%;
-  background: #000;
-  padding: 10px 15px;
-  color: white;
-}
+<!-- Card 3 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/spotify.png" alt="Spoify logo">
+    </div>
+    <div class="details">
+        <h2>Spotify mod</h2>
+        <p>No advertisements,no restrictions and fully unlimited</p>
+    </div>
+    <a href="https://t.me/theappchannel6/5" class="button" onlick="spotify()">Download</a>
+</div> <!-- End Card 3 -->
 
-.app-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+<!-- Card 4 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default1.jpg" alt="Card Image 4">
+    </div>
+    <div class="details">
+        <h2>Hex editor</h2>
+        <p>Easily modify Hexadecimal files</p>
+    </div>
+    <a href="https://play.google.com/store/apps/details?id=com.myprog.hexedit" class="button">Download</a>
+</div> <!-- End Card 4 -->
 
-.app-bar h1 {
-  font-size: 18px;
-}
+<!-- Card 5 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default.jpg" alt="Card Image 5">
+    </div>
+    <div class="details">
+        <h2>Droidscript</h2>
+        <p>Make own Android apps</p>
+    </div>
+    <a href="https://play.google.com/store/apps/details?id=com.smartphoneremote.androidscriptfree" class="button">Download</a>
+</div> <!-- End Card 5 -->
 
-.verified {
-  color: #00aaff;
-}
+<!-- Card 6 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default.jpg" alt="Card Image 6">
+    </div>
+    <div class="details">
+        <h2>Dcoder IDE</h2>
+        <p>Best Coding platform for Android <br> With 30+ language support</p>
+    </div>
+    <a href="https://play.google.com/store/apps/details?id=com.paprbit.dcoder" class="button">Download</a>
+</div> <!-- End Card 6 -->
 
-.user-info {
-  display: flex;
-  align-items: center;
-  margin-top: 15px;
-}
+<!-- Card 7 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default.jpg" alt="Card Image 7">
+    </div>
+    <div class="details">
+        <h2>Termux CLI</h2>
+        <p>Best Command line interface for Android</p>
+    </div>
+    <a href="https://play.google.com/store/apps/details?id=com.termux" class="button">Download</a>
+</div> <!-- End Card 7 -->
 
-.profile-pic {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-}
+<!-- Card 8 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default.jpg" alt="Card Image 8">
+    </div>
+    <div class="details">
+        <h2>F-Droid</h2>
+        <p>App store for developers</p>
+    </div>
+    <a href="https://f-droid.org/en/" class="button">Download</a>
+</div> <!-- End Card 8 -->
 
-.details {
-  margin-left: 10px;
-}
+<!-- Card 9 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default.jpg" alt="Card Image 9">
+    </div>
+    <div class="details">
+        <h2>Caustic 4</h2>
+        <p>Make own music on Android</p>
+    </div>
+    <a href="#" class="button">Download</a>
+</div> <!-- End Card 9 -->
 
-.profit {
-  display: flex;
-  align-items: center;
-}
 
-.profit img {
-  width: 18px;
-  height: 18px;
-}
+<!-- Card 10 -->
+<div class="card">
+    <div class="photo">
+        <img src="images/default.jpg" alt="Card Image 10">
+    </div>
+    <div class="details">
+        <h2>Null's Clash</h2>
+        <p>Clash of clans Unlimited coins and resources private server </p>
+    </div>
+    <a href="https://t.me/theappchannel6/8" class="button">Download</a>
+</div> <!-- End Card 10 -->
 
-.memories-btn {
-  margin-left: auto;
-  background: #222;
-  border-radius: 20px;
-  padding: 5px 10px;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  border: none;
-}
-
-.memories-btn img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-}
-
-.new-today {
-  text-align: center;
-  margin: 20px 0;
-}
-
-.cards {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-.card {
-  text-align: center;
-  background: #333;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.card img {
-  width: 70px;
-}
-
-.center-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 30px 0;
-}
-
-.diamond-points {
-  font-size: 32px;
-  color: #00aaff;
-  margin-bottom: 15px;
-}
-
-.center-circle {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #6a1b9a, #9c27b0, #ba68c8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.center-image {
-  width: 150px;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.center-image.animate {
-  transform: scale(1.2);
-  opacity: 0.8;
-}
-
-footer {
-  background: #000;
-  width: 100%;
-  padding: 10px 0;
-}
-
-nav {
-  display: flex;
-  justify-content: space-around;
-}
-
-button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 14px;
-}</style></head> 
- <body> 
-  <div class="container"> <!-- App Bar --> 
-   <header> 
-    <div class="app-bar"> <button class="back-btn">X</button> 
-     <h1>Guhster Oombat <span class="verified">✔</span></h1> 
-     <div class="dropdown">
-      ▼
-     </div> 
-    </div> 
-    <div class="user-info"> 
-     <img src="images/hamster-profile.png" alt="Profile" class="profile-pic"> 
-     <div class="details"> 
-      <p>Akshay (CEO)</p> 
-      <div class="profit"> 
-       <img src="images/diamond.png" alt="Diamond"> <span>+94.789</span> 
-      </div> 
-     </div> <button class="memories-btn"> <img src="images/heart.png" alt="Heart"> Memories </button> 
-    </div> 
-   </header> <!-- New Today Section --> 
-   <main> 
-    <section class="new-today"> 
-     <h2>New Today</h2> 
-     <div class="cards"> 
-      <div class="card"> 
-       <img src="images/game1.png" alt="Game 1"> 
-       <p>Merge Dale</p> 
-      </div> 
-      <div class="card"> 
-       <img src="images/game2.png" alt="Game 2"> 
-       <p>Merge Away</p> 
-      </div> 
-      <div class="card"> 
-       <img src="images/game3.png" alt="Game 3"> 
-       <p>Factory World</p> 
-      </div> 
-     </div> 
-    </section> <!-- Center Content --> 
-    <div class="center-container"> 
-     <div class="diamond-points" id="points">
-      0
-     </div> 
-     <div class="center-circle"> 
-      <img src="images/hamster-center.png" alt="Hamster" class="center-image" id="hamster-image"> 
-     </div> 
-    </div> 
-   </main> <!-- Footer Navigation --> 
-   <footer> 
-    <nav> <button>Exchange</button> <button>Playground</button> <button>Airdrop</button> <button>Friends</button> <button>Earn</button> 
-    </nav> 
-   </footer> 
-  </div> 
-  <script src="script.js"></script> 
- 
-<script type="text/javascript" id="dcoder_script">// script.js
-let points = 0;
-const pointsDisplay = document.getElementById("points");
-const hamsterImage = document.getElementById("hamster-image");
-
-hamsterImage.addEventListener("click", () => {
-  // Add points
-  points += 5;
-  pointsDisplay.textContent = points;
-
-  // Bubble animation
-  hamsterImage.classList.add("animate");
-  setTimeout(() => {
-    hamsterImage.classList.remove("animate");
-  }, 300);
-});</script></body></html>
+<!-- Footer with Back Button -->
+    <div class="footer">
+        <a href="https://kmrxz.github.io/modpage/main.html" class="back-button">Back to Home</a>
+        <a href="#" class="top-button">Scroll to Top</a> <!-- Scroll to Top Button -->
+    </div>
+ <!-- End conclusion -->
+   <div class°"description">
+     If you have a request 
+   </div>
+    <script>
+        // Get the top button
+        let topButton = document.querySelector('.top-button');
+// When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                topButton.style.display = "block";
+            } else {
+                topButton.style.display = "none";
+            }
+        };
+// When the user clicks on the button, scroll to the top of the document
+        topButton.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+function spotify(){
+    alert("If you're updating,don't uninstall the old app installed");
+</script>
+</body>
+</html>
