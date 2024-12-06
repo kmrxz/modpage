@@ -1,196 +1,175 @@
 <!doctype html>
 <html lang="en"> 
  <head> 
-<style>
-/* General Styles */
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta http-equiv="X-UA-Compatible" content="ie=edge"> 
+  <title>Responsive Layout with Score</title> 
+  <link rel="stylesheet" href="styles.css"> 
+  <script defer src="script.js"></script> 
+ <style type="text/css" id="dcoder_stylesheet">/* General Styles */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     background-color: #000;
     color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Move everything to the bottom */
+    height: 100vh;
+    overflow: hidden;
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     text-align: center;
-}
-
-/* Header */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    width: 100%;
-    background-color: #111;
-}
-
-.time {
-    font-size: 14px;
-    color: #aaa;
-}
-
-h1 {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.verified {
-    color: #3498db;
-}
-
-.actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.profit {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.profit-text {
-    font-size: 14px;
-    color: #ffcc00;
-}
-
-.settings-btn,
-.memories-btn {
-    border: none;
-    background: none;
-    color: #fff;
-    cursor: pointer;
-}
-
-.memories-btn {
-    background-color: #3d006e;
-    border-radius: 15px;
-    padding: 5px 10px;
-}
-
-/* New Today Section */
-.new-today {
-    width: 90%;
-    margin: 20px auto;
-    padding: 15px;
-    border-radius: 10px;
-}
-
-.new-today h2 {
-    margin-bottom: 15px;
-    font-size: 16px;
-}
-
-.card-container {
-    display: flex;
-    justify-content: space-around;
-}
-
-.card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    background-color: #333;
-    padding: 10px;
-    border-radius: 10px;
-    width: 30%;
-}
-
-.card img {
+    gap: 20px;
     width: 100%;
+}
+
+/* Heading */
+.heading {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: purple;
+    text-transform: uppercase;
+}
+
+/* Scoreboard */
+.scoreboard {
+    background-color: #222;
+    padding: 10px 20px;
+    color: #fff;
     border-radius: 10px;
-}
-
-/* Score Section */
-.diamonds {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 20px 0;
-    font-size: 20px;
-    color: #4bd5ee;
-}
-
-.diamond-icon {
-    width: 20px;
-    height: 20px;
+    font-size: 16px;
+    position: absolute;
+    top: 300px; /* Position above the circle */
+    font-size: 38px;
+    color: darkyellow;
 }
 
 /* Main Character */
-.main-character img {
-    width: 120px;
-    height: auto;
-    cursor: pointer;
-}
-
-/* Footer */
-.footer {
+.main-character {
+    position: relative;
     display: flex;
-    justify-content: space-around;
-    width: 100%;
-    padding: 10px;
-    background-color: #121212;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 20px; /* Keep a gap from the icons */
 }
 
-.footer button {
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
+/* Concentric Rings */
+.circle-gradient {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
 }
-</style>
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>Guhster oombat</title> 
-  <link rel="stylesheet" href="styles.css"> 
-  <script defer src="script.js"></script> 
- </head> 
- <body> 
-  <div class="container"> 
-   <header class="header"> 
-    <h1>Guhster oombat <span class="verified">✔</span></h1> 
-    <div class="actions"> 
-     <div class="profit"> 
-      <img src="images/default.jpg" alt="Binance" class="binance-icon"> 
-     </div> <button class="settings-btn">⚙</button> <button class="memories-btn">Memories</button> 
+
+.outer-ring {
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(128, 0, 128, 0.5), rgba(0, 0, 0, 0.1));
+}
+
+.mid-ring {
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(128, 0, 128, 0.7), rgba(0, 0, 0, 0.1));
+}
+
+.inner-ring {
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(128, 0, 128, 0.9), rgba(0, 0, 0, 0.1));
+}
+
+.inner-ring img {
+    width: 80px;
+    height: 80px;
+}
+
+/* Icon Section */
+.icon-section {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 10px; /* Space between icons and screen edge */
+}
+
+.icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #552586;
+    padding: 10px;
+    width: 80px;
+    height: 50px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+.icon img {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+}
+
+.icon span {
+    font-size: 12px;
+    color: #fff;
+}</style></head> 
+ <body> <!-- Heading --> 
+  <div class="heading">
+   Guhster Oombat
+  </div> 
+  <div class="container"> <!-- Scoreboard --> 
+   <div class="scoreboard" id="scoreboard">
+      <span>$<span id="score">0</span></span> 
+   </div> <!-- Main Character --> 
+   <div class="main-character" onclick="mainCharacterClick()"> 
+    <div class="circle-gradient outer-ring"> 
+     <div class="circle-gradient mid-ring"> 
+      <div class="circle-gradient inner-ring"> 
+       <img src="images/ikka1.png" alt="Main Character"> 
+      </div> 
+     </div> 
     </div> 
-   </header> 
-   <section class="new-today"> 
-    <h2>New today</h2> 
-    <div class="card-container"> 
-     <div class="card"> 
-      <img src="images/default.jpg" alt="Merge Dale"> <span>Guhan game</span> 
-     </div> 
-     <div class="card"> 
-      <img src="images/default.jpg" alt="Merge Away"> <span>Merge Away</span> 
-     </div> 
-     <div class="card"> 
-      <img src="images/default.jpg" alt="Factory World"> <span>Factory World</span> 
-     </div> 
+   </div> <!-- Icon Section --> 
+   <div class="icon-section"> 
+    <div class="icon" onclick="alert('Exchange icon clicked!')"> 
+     <img src="images/default.jpg" alt="Exchange"> <span>Withdraw</span> 
     </div> 
-   </section> 
-   <div class="diamonds"> 
-    <img src="images/default.jpg" alt="Diamond" class="diamond-icon"> <span id="score">0</span> 
+    <div class="icon" onclick="alert('Playground icon clicked!')"> 
+     <img src="images/default.jpg" alt="Playground"> <span>Airdrop</span> 
+    </div> 
+    <div class="icon" onclick="alert('Airdrop icon clicked!')"> 
+     <img src="images/default.jpg" alt="Airdrop"> <span>Earn more</span> 
+    </div> 
    </div> 
-   <div class="main-character" onclick="incrementScore()"> 
-    <img src="images/bee.png" alt="Main Character"> 
-   </div> 
-   <nav class="footer"> <button>Exchange</button> <button>Playground</button> <button>Airdrop</button> <button>Friends</button> <button>Earn</button> 
-   </nav> 
-  </div>
-<script>
-// script.js
+  </div> 
+ 
+<script type="text/javascript" id="dcoder_script">// Initialize score
 let score = 0;
 
-function incrementScore() {
-    score += 0.1;
-    document.getElementById('score').textContent = score.toFixed(2);
-}
-</script>
- </body>
-</html>
+// Click event for the main character
+function mainCharacterClick() {
+  // Increment score
+  score += 0.1;
+  
+  // Update the scoreboard
+  const scoreElement = document.getElementById('score');
+  scoreElement.textContent = score.toFixed(2);
+}</script></body></html>
