@@ -1,86 +1,196 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guhster Kombat</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #252525;
-      margin: 0;
-      padding: 0;
-    }
-    .game-container {
-      margin-top: 50px;
-      border: none;
-      background: #252525;
-    }
-    .tap-image {
-      width: 150px;
-      height: 150px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    .tap-image:active {
-      transform: scale(1.1);
-    }
-    .score-board {
-      margin: 20px 0;
-      font-size: 24px;
-      color: #333;
-    }
-    .play-again {
-      padding: 10px 20px;
-      font-size: 18px;
-      color: #fff;
-      background-color: #28a745;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .play-again:hover {
-      background-color: #218838;
-    }
-  </style>
-</head>
-<body>
-  <h1>Guhster Kombat</h1>
-  <div class="game-container">
-    <img src="images/bee.png" alt="Tap Me" class="tap-image" id="tapImage">
-    <div class="score-board" id="scoreBoard">Score: 0</div>
-    <button class="play-again" id="playAgainBtn" style="display: none;">Play Again</button>
+<!doctype html>
+<html lang="en"> 
+ <head> 
+<style>
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    width: 100%;
+    background-color: #111;
+}
+
+.time {
+    font-size: 14px;
+    color: #aaa;
+}
+
+h1 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.verified {
+    color: #3498db;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profit {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.profit-text {
+    font-size: 14px;
+    color: #ffcc00;
+}
+
+.settings-btn,
+.memories-btn {
+    border: none;
+    background: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.memories-btn {
+    background-color: #3d006e;
+    border-radius: 15px;
+    padding: 5px 10px;
+}
+
+/* New Today Section */
+.new-today {
+    width: 90%;
+    margin: 20px auto;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.new-today h2 {
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.card-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 10px;
+    width: 30%;
+}
+
+.card img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+/* Score Section */
+.diamonds {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+    font-size: 20px;
+    color: #4bd5ee;
+}
+
+.diamond-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Main Character */
+.main-character img {
+    width: 120px;
+    height: auto;
+    cursor: pointer;
+}
+
+/* Footer */
+.footer {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 10px;
+    background-color: #121212;
+}
+
+.footer button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+</style>
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Guhster oombat</title> 
+  <link rel="stylesheet" href="styles.css"> 
+  <script defer src="script.js"></script> 
+ </head> 
+ <body> 
+  <div class="container"> 
+   <header class="header"> 
+    <h1>Guhster oombat <span class="verified">✔</span></h1> 
+    <div class="actions"> 
+     <div class="profit"> 
+      <img src="images/default.jpg" alt="Binance" class="binance-icon"> 
+     </div> <button class="settings-btn">⚙</button> <button class="memories-btn">Memories</button> 
+    </div> 
+   </header> 
+   <section class="new-today"> 
+    <h2>New today</h2> 
+    <div class="card-container"> 
+     <div class="card"> 
+      <img src="images/default.jpg" alt="Merge Dale"> <span>Guhan game</span> 
+     </div> 
+     <div class="card"> 
+      <img src="images/default.jpg" alt="Merge Away"> <span>Merge Away</span> 
+     </div> 
+     <div class="card"> 
+      <img src="images/default.jpg" alt="Factory World"> <span>Factory World</span> 
+     </div> 
+    </div> 
+   </section> 
+   <div class="diamonds"> 
+    <img src="images/default.jpg" alt="Diamond" class="diamond-icon"> <span id="score">0</span> 
+   </div> 
+   <div class="main-character" onclick="incrementScore()"> 
+    <img src="images/bee.png" alt="Main Character"> 
+   </div> 
+   <nav class="footer"> <button>Exchange</button> <button>Playground</button> <button>Airdrop</button> <button>Friends</button> <button>Earn</button> 
+   </nav> 
   </div>
+<script>
+// script.js
+let score = 0;
 
-  <script>
-    let score = 0;
-    const tapImage = document.getElementById('tapImage');
-    const scoreBoard = document.getElementById('scoreBoard');
-    const playAgainBtn = document.getElementById('playAgainBtn');
-
-    // Tap to increase score
-    tapImage.addEventListener('click', () => {
-      score++;
-      scoreBoard.textContent = `Score: ${score}`;
-      if (score === 1000000000000000000) {
-        endGame();
-      }
-    });
-
-    // End game logic
-    function endGame() {
-      tapImage.style.pointerEvents = 'none'; // Disable further clicks
-      scoreBoard.textContent = `Game Over! Final Score: ${score}`;
-      playAgainBtn.style.display = 'inline-block';
-    }
-
-    // Play again logic
-    playAgainBtn.addEventListener('click', () => {
-      score = 0;
-      scoreBoard.textContent = `Score: ${score}`;
-      tapImage.style.pointerEvents = 'auto'; // Enable clicks again
-      playAgainBtn.style.display = 'none';
-    });
-  </script>
-</body>
+function incrementScore() {
+    score += 0.1;
+    document.getElementById('score').textContent = score.toFixed(2);
+}
+</script>
+ </body>
 </html>
