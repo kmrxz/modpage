@@ -4,152 +4,191 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta http-equiv="X-UA-Compatible" content="ie=edge"> 
-  <title>Responsive Layout with Score</title> 
+  <title>Guhster Kombat</title> 
   <link rel="stylesheet" href="styles.css"> 
   <script defer src="script.js"></script> 
- <style type="text/css" id="dcoder_stylesheet">/* General Styles */
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #000;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end; /* Move everything to the bottom */
-    height: 100vh;
-    overflow: hidden;
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    
+ 
+
+
+
+    .container {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+    /*Top container*/
+    .cont{
+      background: MediumSeaGreen;
+      font-size: 28px;
+      color: #252525;
+      height: 30px;
+      width: 96%;
+    }
+
+    /* Heading */
+    .heading {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 38px;
+      font-weight: bold;
+      color: #cccccc;
+      text-transform: uppercase;
+    }
+
+    /* Scoreboard */
+    .scoreboard {
+      padding: 10px 20px;
+      font-size: 38px;
+      color: darkyellow;
+      position: absolute;
+      top: 280px;
+      transition: font-size 0.1s ease-in-out;
+    }
+    .scoreboard.pop-up {
+    font-size: 45px;
+    /* Increased size for the pop-up effect */
 }
 
-.container {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-}
+    /* Main Character */
+    .main-character {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
 
-/* Heading */
-.heading {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 24px;
-    font-weight: bold;
-    color: purple;
-    text-transform: uppercase;
-}
+    /* Concentric Rings */
+    .circle-gradient {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+    }
 
-/* Scoreboard */
-.scoreboard {
-    background-color: #222;
-    padding: 10px 20px;
-    color: #fff;
-    border-radius: 10px;
-    font-size: 16px;
-    position: absolute;
-    top: 300px; /* Position above the circle */
-    font-size: 38px;
-    color: darkyellow;
-}
+    .extra-ring {
+      width: 210px;
+      height: 210px;
+      background: radial-gradient(circle, rgba(128, 0, 128, 0.3), rgba(0, 0, 0, 0.1));
+    }
 
-/* Main Character */
-.main-character {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    margin-bottom: 20px; /* Keep a gap from the icons */
-}
+    .outer-ring {
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(128, 0, 128, 0.5), rgba(0, 0, 0, 0.1));
+    }
 
-/* Concentric Rings */
-.circle-gradient {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-}
+    .mid-ring {
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(128, 0, 128, 0.7), rgba(0, 0, 0, 0.1));
+    }
 
-.outer-ring {
-    width: 180px;
-    height: 180px;
-    background: radial-gradient(circle, rgba(128, 0, 128, 0.5), rgba(0, 0, 0, 0.1));
-}
+    .inner-ring {
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(128, 0, 128, 0.9), rgba(0, 0, 0, 0.1));
+    }
 
-.mid-ring {
-    width: 150px;
-    height: 150px;
-    background: radial-gradient(circle, rgba(128, 0, 128, 0.7), rgba(0, 0, 0, 0.1));
-}
+    .inner-ring img {
+      width: 80px;
+      height: 80px;
+    }
 
-.inner-ring {
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle, rgba(128, 0, 128, 0.9), rgba(0, 0, 0, 0.1));
-}
+    /* Icon Section */
+    .icon-section {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      width: 100%;
+      margin-bottom: 30px; /* Space between icons and screen edge */
+    }
 
-.inner-ring img {
-    width: 80px;
-    height: 80px;
-}
+    .icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #552586;
+      padding: 10px;
+      width: 80px;
+      height: 50px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-/* Icon Section */
-.icon-section {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    width: 100%;
-    margin-bottom: 10px; /* Space between icons and screen edge */
-}
+    .icon:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+    }
 
-.icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #552586;
-    padding: 10px;
-    width: 80px;
-    height: 50px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
+    .icon img {
+      width: 30px;
+      height: 30px;
+      margin-bottom: 5px;
+    }
 
-.icon:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-}
+    .icon span {
+      font-size: 12px;
+      color: #fff;
+    }
 
-.icon img {
-    width: 30px;
-    height: 30px;
-    margin-bottom: 5px;
-}
-
-.icon span {
-    font-size: 12px;
-    color: #fff;
-}</style></head> 
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .icon-section {
+        margin-bottom: 60px; /* Ensure buttons are visible */
+      }
+    }
+  </style> 
+ </head> 
  <body> <!-- Heading --> 
   <div class="heading">
-   Guhster Oombat
+    Guhster Kombat 
+   <div class="cont">
+     PlAy NoW
+    <br>GeT n0thin' 
+   </div> 
   </div> 
   <div class="container"> <!-- Scoreboard --> 
    <div class="scoreboard" id="scoreboard">
-      <span>$<span id="score">0</span></span> 
+     $<span id="score">1000</span> 
    </div> <!-- Main Character --> 
    <div class="main-character" onclick="mainCharacterClick()"> 
-    <div class="circle-gradient outer-ring"> 
-     <div class="circle-gradient mid-ring"> 
-      <div class="circle-gradient inner-ring"> 
-       <img src="images/ikka1.png" alt="Main Character"> 
+    <div class="circle-gradient extra-ring"> 
+     <div class="circle-gradient outer-ring"> 
+      <div class="circle-gradient mid-ring"> 
+       <div class="circle-gradient inner-ring"> 
+        <img src="images/ikka1.png" alt="Main Character"> 
+       </div> 
       </div> 
      </div> 
     </div> 
-   </div> <!-- Icon Section --> 
+   </div>
+   
+
+   <!-- Icon Section --> 
    <div class="icon-section"> 
-    <div class="icon" onclick="alert('Exchange icon clicked!')"> 
+    <div class="icon" onclick="Exchange()"> 
      <img src="images/default.jpg" alt="Exchange"> <span>Withdraw</span> 
     </div> 
     <div class="icon" onclick="alert('Playground icon clicked!')"> 
@@ -160,16 +199,45 @@ body {
     </div> 
    </div> 
   </div> 
- 
-<script type="text/javascript" id="dcoder_script">// Initialize score
-let score = 0;
+  <script>
+    // Initialize score
+    alert("Daily login bonus of 1000 received")
+    let score = 1000;
 
-// Click event for the main character
-function mainCharacterClick() {
-  // Increment score
-  score += 0.1;
-  
-  // Update the scoreboard
-  const scoreElement = document.getElementById('score');
-  scoreElement.textContent = score.toFixed(2);
-}</script></body></html>
+    // Update score every second
+    setInterval(() => {
+      score += 1;
+      updateScore();
+    }, 1000);
+      
+    
+   
+
+
+    // Click event for the main character
+    function mainCharacterClick() {      
+      score += 1;
+      updateScore();
+      
+            // Trigger the pop-up effect
+    const scoreboard = document.querySelector('.scoreboard');
+    scoreboard.classList.add('pop-up');
+
+    // Remove the pop-up effect after 0.4s to reset the size
+    setTimeout(() => {
+        scoreboard.classList.remove('pop-up');
+    }, 100); // The duration of the pop-up effect
+    
+    }
+
+    // Update the scoreboard
+    function updateScore() {
+      const scoreElement = document.getElementById('score');
+      scoreElement.textContent = score;
+    }
+    function Exchange(){
+      alert("Test");
+    }
+  </script> 
+ </body>
+</html>
