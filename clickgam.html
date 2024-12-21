@@ -247,9 +247,15 @@ function mainCharacterClick() {
       const scoreElement = document.getElementById('score');
       scoreElement.textContent = score;
     }
-    function Exchange(){
-      alert("Test");
-    }
+    function Exchange() {
+  if (score >= 500) {
+    score -= 500;
+    updateScore();
+    alert("500 points exchanged successfully!");
+  } else {
+    alert("Not enough points to exchange!");
+  }
+}
   </script> 
  </body>
 </html>
