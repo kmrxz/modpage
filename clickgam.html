@@ -181,12 +181,6 @@
    </div> 
   </div> 
   <div class="container"> <!-- Scoreboard -->
-<audio id="background-audio" autoplay loop>
-  <source src="Sounds/background.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
-<audio id="click-sound" src="Sounds/click.mp3"></audio>
-<button id="mute-toggle">Mute</button>
    <div class="scoreboard" id="scoreboard">
      $<span id="score">1000</span> 
    </div> <!-- Main Character --> 
@@ -229,14 +223,12 @@
       
     const clickSound = document.getElementById('click-sound');
 function mainCharacterClick() {
-  clickSound.play();
   score += 1;
   updateScore();
-  // Add pop-up effect
 }
    
       
-            // Trigger the pop-up effect
+    // Trigger the pop-up effect
     const scoreboard = document.querySelector('.scoreboard');
     scoreboard.classList.add('pop-up');
 
@@ -252,18 +244,7 @@ function mainCharacterClick() {
       const scoreElement = document.getElementById('score');
       scoreElement.textContent = score;
     }
-const audio = document.getElementById('background-audio');
-const muteToggle = document.getElementById('mute-toggle');
 
-muteToggle.addEventListener('click', () => {
-  if (audio.muted) {
-    audio.muted = false;
-    muteToggle.textContent = 'Mute';
-  } else {
-    audio.muted = true;
-    muteToggle.textContent = 'Unmute';
-  }
-});
     function Exchange() {
   if (score >= 500) {
     score -= 500;
