@@ -180,6 +180,7 @@
    </div> 
   </div> 
   <div class="container"> <!-- Scoreboard --> 
+<audio id="click-sound" src="sounds/click.mp3"></audio>
    <div class="scoreboard" id="scoreboard">
      $<span id="score">1000</span> 
    </div> <!-- Main Character --> 
@@ -220,14 +221,14 @@
       updateScore();
     }, 1000);
       
-    
+    const clickSound = document.getElementById('click-sound');
+function mainCharacterClick() {
+  clickSound.play();
+  score += 1;
+  updateScore();
+  // Add pop-up effect
+}
    
-
-
-    // Click event for the main character
-    function mainCharacterClick() {      
-      score += 1;
-      updateScore();
       
             // Trigger the pop-up effect
     const scoreboard = document.querySelector('.scoreboard');
