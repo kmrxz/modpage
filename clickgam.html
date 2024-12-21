@@ -212,7 +212,7 @@
   </div> 
   <script>
     // Initialize score
-    alert("Daily login bonus of $1000 received")
+    alert("Daily login bonus of 1000 received")
     let score = 1000;
 
     // Update score every second
@@ -221,13 +221,16 @@
       updateScore();
     }, 1000);
       
-function mainCharacterClick() {
-  score += 1;
-  updateScore();
-}
+    
    
+
+
+    // Click event for the main character
+    function mainCharacterClick() {      
+      score += 1;
+      updateScore();
       
-    // Trigger the pop-up effect
+            // Trigger the pop-up effect
     const scoreboard = document.querySelector('.scoreboard');
     scoreboard.classList.add('pop-up');
 
@@ -243,16 +246,9 @@ function mainCharacterClick() {
       const scoreElement = document.getElementById('score');
       scoreElement.textContent = score;
     }
-
-    function Exchange() {
-  if (score >= 500) {
-    score -= 500;
-    updateScore();
-    alert("500 points exchanged successfully!");
-  } else {
-    alert("Not enough points to exchange!");
-  }
-}
+    function Exchange(){
+      alert("oomb");
+    }
   </script> 
  </body>
 </html>
