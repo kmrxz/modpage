@@ -8,43 +8,52 @@
   <link rel="stylesheet" href="Guhster/clickgam.css"> 
   <script defer src="Guhster/clickgam.js"></script> 
  </head> 
- <body> <!-- Heading --> 
+ <body> 
   <div class="heading">
     Guhster Kombat 
    <div class="cont">
-     PlAy NoW
-    <br>GeT n0thin' 
+     PlAy NoW 
+    <br><span class="getnothin">GeT n0thin'</span> 
    </div> 
   </div> 
-  <div class="container"> <!-- Scoreboard -->
+  <div class="container"> 
    <div class="scoreboard" id="scoreboard">
-     $<span id="score">1000</span> 
-   </div> <!-- Main Character --> 
+     IKC: $<span id="score">1000</span> 
+   </div> 
+   <div class="profit-text">
+     PROFIT:60/h 
+   </div> 
+   <div class="name"> 
+    <h4 onclick="changeName()">user:<span id="user"></span></h4> 
+   </div> <!-- Triggers only on prompt --> 
+   <div class="modal" id="dialogBox"> 
+    <div class="modal-content"> <h id="dialogTitle"></h> 
+     <input id="name" placeholder="enter name" type="text"> 
+     <p id="dialogContent"></p> <button class="back-button" onclick="closeDialog()">Back</button> 
+    </div> 
+   </div> 
    <div class="main-character" onclick="mainCharacterClick()"> 
     <div class="circle-gradient extra-ring"> 
      <div class="circle-gradient outer-ring"> 
       <div class="circle-gradient mid-ring"> 
        <div class="circle-gradient inner-ring"> 
-        <img class="ikkachi" src="images/ikka1.png" alt="Main Character"> 
+        <img alt="img" class="ikkachi" src="images/ikka1.png" alt=" "> 
        </div> 
       </div> 
      </div> 
     </div> 
-   </div>
-   
-
-   <!-- Icon Section --> 
+   </div> 
    <div class="icon-section"> 
-    <div class="icon" onclick="Exchange()"> 
-     <img src="images/coin.png" alt="Exchange"> <span>Withdraw</span> 
+    <div class="icon" onclick="coin()"> 
+     <img src="images/coin.png" alt="coin"> <span>Earn</span> 
     </div> 
-    <div class="icon" onclick="alert('Playground icon clicked!')"> 
-     <img src="images/home.png" alt="Playground"> <span>Airdrop</span> 
+    <div class="icon" onclick="home()"> 
+     <img src="images/home.png" alt="home"> <span>Home</span> 
     </div> 
-    <div class="icon" onclick="alert('Airdrop icon clicked!')"> 
-     <img src="images/instagram.png" alt="Airdrop"> <span>Earn more</span> 
+    <div class="icon" onclick="instagram()"> 
+     <img src="images/instagram.png" alt="ig"> <span>Follow</span> 
     </div> 
    </div> 
-  </div>
+  </div> 
  </body>
 </html>
