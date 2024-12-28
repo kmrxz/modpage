@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Cube with Custom Images</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(120deg, #04151f, #252525);
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    .scene {
+      perspective: 800px;
+      width: 300px;
+      height: 300px;
+    }
+
+    .cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(0deg) rotateY(0deg);
+      transition: transform 0.2s ease-out;
+    }
+
+    .cube:hover {
+      transition: none;
+    }
+
+    .face {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border: 2px solid #ccc;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      background-image: url('images/cat.webp');
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+    }
+
+    .face:nth-child(1) { transform: rotateY(0deg) translateZ(150px); }
+    .face:nth-child(2) { transform: rotateY(90deg) translateZ(150px); }
+    .face:nth-child(3) { transform: rotateY(180deg) translateZ(150px); }
+    .face:nth-child(4) { transform: rotateY(-90deg) translateZ(150px); }
+    .face:nth-child(5) { transform: rotateX(90deg) translateZ(150px); }
+    .face:nth-child(6) { transform: rotateX(-90deg) translateZ(150px); }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="cube" id="cube">
+      <div class="face"></div>
+      <div class="face"></div>
+      <div class="face"></div>
+      <div class="face"></div>
+      <div class="face"></div>
+      <div class="face"></div>
+    </div>
+  </div>
+
+  <script>
+    const cube = document.getElementById('cube');
+    document.addEventListener('mousemove', (event) => {
+      const xRotation = (event.clientY / window.innerHeight) * 360 - 180;
+      const yRotation = (event.clientX / window.innerWidth) * 360 - 180;
+      cube.style.transform = `rotateX(${xRotation}deg) rotateY(${yRotation}deg)`;
+    });
+  </script>
+</body>
+</html>
