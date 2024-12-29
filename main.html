@@ -19,6 +19,14 @@
             scroll-behavior: smooth;
             transition: background-color 0.3s, color 0.3s;
         }
+        
+        .snowflake {
+            position: absolute;
+            color: #fff; 
+            font-size: 10px; 
+            opacity: 0.7; 
+            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black; 
+        }
 
         .top-bar {
             width: 100%;
@@ -344,6 +352,54 @@
             }
             isDefaultTheme = !isDefaultTheme;
         });
+
+const snowflakeCount = 1; // Number of snowflakes
+
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.textContent = '❄'; 
+
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * 10; // Start snowflakes from top
+
+            snowflake.style.left = `${x}px`;
+            snowflake.style.top = `-${y}px`; 
+
+            // Randomize size and fall speed
+            const size = Math.random() * 3 + 1; // Size between 1px and 4px
+            const speed = Math.random() * 3 + 2; // Fall speed (seconds)
+
+            snowflake.style.fontSize = `${size}px`;
+            snowflake.style.animation = `fall ${speed}s linear infinite`;
+
+            document.body.appendChild(snowflake);
+
+            // Remove snowflake after animation ends
+            snowflake.addEventListener('animationend', () => {
+                snowflake.remove();
+            });
+        }
+
+        // Simple CSS animation for falling snowflakes
+        const styleSheet = document.createElement('style');
+        styleSheet.innerHTML = `
+            @keyframes fall {
+                100% {
+                    transform: translateY(100vh);
+                    opacity: 0; 
+                }
+            }
+        `;
+        document.head.appendChild(styleSheet); 
+
+        // Create initial snowflakes
+        for (let i = 0; i < snowflakeCount; i++) {
+            createSnowflake();
+        }
+
+        // Continuously create new snowflakes
+        setInterval(createSnowflake, 200);
     </script> 
  </body>
 </html>
