@@ -28,18 +28,20 @@
             text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black; 
         }
 
-        .top-bar {
-            width: 100%;
-            background-color: #000;
-            color: MediumSeaGreen;
-            padding: 10px 0;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+     .top-bar {
+  width: 100%;
+  background-color: #000;
+  color: MediumSeaGreen;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  position: fixed; 
+  top: -100px; 
+  z-index: 1000;
+  transition: top 0.5s ease-in-out; 
+}
+
 
         .header-image-container {
             display: flex;
@@ -321,6 +323,17 @@
     <button class="scroll-to-top" onclick="scrollToTop()">↑</button> 
   </footer> 
   <script>
+//Top bar appear
+window.addEventListener('scroll', () => {
+  const scrollPosition = window.scrollY; 
+  if (scrollPosition > 50) { 
+    document.querySelector('.top-bar').style.top = '0'; 
+  } else {
+    document.querySelector('.top-bar').style.top = '-100px'; 
+  }
+});
+
+
         // Scroll-to-top functionality
         const scrollToTopButton = document.querySelector('.scroll-to-top');
         window.addEventListener('scroll', () => {
