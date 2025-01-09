@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Moving Bubbles</title> 
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style> 
+ </head> 
+ <body> 
+  <canvas id="bubbleCanvas"></canvas> 
+  <script src="bubbles.js"></script> 
+ 
+<script type="text/javascript" id="dcoder_script">const canvas = document.getElementById("bubbleCanvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const bubbles = [];
+const colors = [
+  "#FF5733", "#33FF57", "#5733FF", "#FFC300", "#FF33A1",
+  "#33FFF2", "#FF8C33", "#8C33FF", "#33FF8C", "#FF3333",
+  "#33FFDD", "#DD33FF", "#A1FF33", "#FF3357", "#5733A1",
+  "#FFB833", "#B833FF", "#33FF57", "#33A1FF", "#FF5733",
+  "#F2FF33", "#FF33C4", "#A133FF", "#33FFD7", "#FFA833",
+  "#FF3367", "#33B8FF", "#8CFF33", "#FF3333", "#5733FF"
+];
+
+// Resize canvas when window is resized
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// Bubble class
+class Bubble {
+  constructor(x, y, radius, dx, dy, color) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.dx = dx;
+    this.dy = dy;
+    this.color = color;
+    this.lifetime = 0; // To track lifetime of smaller bubbles
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  update() {
+    if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+      this.dx = -this.dx;
+    }
+    if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+      this.dy = -this.dy;
+    }
+
+    this.x += this.dx;
+    this.y += this.dy;
+
+    if (this.lifetime > 0) {
+      this.lifetime--;
+      this.radius -= 0.1; // Gradual shrinking
+      if (this.radius <= 0) {
+        this.radius = 0;
+      }
+    }
+
+    this.draw();
+  }
+}
+
+// Add bubbles on click or touch
+canvas.addEventListener("click", (e) => {
+  const x = e.clientX;
+  const y = e.clientY;
+
+  // Find and pop the clicked bubble
+  for (let i = bubbles.length - 1; i >= 0; i--) {
+    const dist = Math.hypot(x - bubbles[i].x, y - bubbles[i].y);
+    if (dist < bubbles[i].radius) {
+      // Pop the bubble into smaller bubbles and new random bubbles
+      const bubble = bubbles[i];
+      for (let j = 0; j < 5; j++) {
+        const newRadius = bubble.radius / 2;
+        const newDx = (Math.random() - 0.5) * 4;
+        const newDy = (Math.random() - 0.5) * 4;
+        const newBubble = new Bubble(
+          bubble.x,
+          bubble.y,
+          newRadius,
+          newDx,
+          newDy,
+          colors[Math.floor(Math.random() * colors.length)]
+        );
+        newBubble.lifetime = 50; // Set lifetime for smaller bubbles
+        bubbles.push(newBubble);
+      }
+      // Add new random bubbles
+      for (let j = 0; j < 3; j++) {
+        const radius = Math.random() * 30 + 10;
+        const dx = (Math.random() - 0.5) * 4;
+        const dy = (Math.random() - 0.5) * 4;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const randomBubble = new Bubble(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height,
+          radius,
+          dx,
+          dy,
+          color
+        );
+        bubbles.push(randomBubble);
+      }
+      bubbles.splice(i, 1); // Remove the original bubble
+    }
+  }
+});
+
+// Generate initial bubbles
+function init() {
+  for (let i = 0; i < 20; i++) {
+    const radius = Math.random() * 30 + 10;
+    const x = Math.random() * (canvas.width - radius * 2) + radius;
+    const y = Math.random() * (canvas.height - radius * 2) + radius;
+    const dx = (Math.random() - 0.5) * 4;
+    const dy = (Math.random() - 0.5) * 4;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    bubbles.push(new Bubble(x, y, radius, dx, dy, color));
+  }
+}
+
+// Animate the bubbles
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  bubbles.forEach((bubble, index) => {
+    if (bubble.radius === 0) {
+      bubbles.splice(index, 1); // Remove the bubble when it disappears
+    } else {
+      bubble.update();
+    }
+  });
+  requestAnimationFrame(animate);
+}
+
+init();
+animate();</script></body></html>
