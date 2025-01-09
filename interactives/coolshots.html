@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cool Shots</title>
+  <style>
+    body {
+      background-color: #252525;
+      color: mediumseagreen;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #cccccc;
+      color: #252525;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background-color: #333333;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      margin: 15px;
+      width: 250px;
+      padding: 15px;
+      text-align: center;
+      color: mediumseagreen;
+    }
+
+    .card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      font-size: 20px;
+      margin: 10px 0;
+    }
+
+    .card p {
+      font-size: 14px;
+      margin: 10px 0;
+    }
+
+    .card button {
+      background-color: mediumseagreen;
+      border: none;
+      width: 90%;
+      color: #252525;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .card button:hover {
+      background-color: #1e7a56;
+    }
+
+    .footer-buttons {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .footer-buttons button {
+      background-color: mediumseagreen;
+      border: none;
+      color: #252525;
+      padding: 10px 15px;
+      margin: 5px 0;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .footer-buttons button:hover {
+      background-color: #1e7a56;
+    }
+  </style>
+</head>
+<body>
+  <header>Cool Shots</header>
+  <H3>This page is currently under process and i have no idea how to finish it</H3>
+  <div class="container">
+    <!-- Card Example -->
+    <div class="card">
+      <img src="images/default.png" alt="Icon">
+      <h3>Bubble pop</h3>
+      <p>A cool interactive screensaver</p>
+      <button onclick="window.location.href='files/interactives/bubble.html';">Pop up</button>
+    </div>
+    <div class="card">
+      <img src="images/default.png" alt="Icon">
+      <h3>Coming soon!</h3>
+      <p>Content is under work</p>
+      <button>Hmmmmmm...</button>
+    </div>
+    <!-- Add more cards as needed -->
+      <div class="card">
+      <img src="images/default.png" alt="Icon">
+      <h3>Coming soon!</h3>
+      <p>This content is under bug fixing</p>
+      <button>Hugh!!</button>
+    </div>
+    <!--more-->
+    <div class="card">
+      <img src="images/default.png" alt="Icon">
+      <h3>Coming soon!</h3>
+      <p>I missed a } somewhere</p>
+      <button>I'm sad </button>
+    </div>
+  </div>
+
+  <div class="footer-buttons">
+    <button onclick="goHome()">Home</button>
+    <button onclick="scrollToTop()">To Top</button>
+  </div>
+
+  <script>
+    function goHome() {
+      window.location.href = "main.html"; // Change this to your home page URL
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
