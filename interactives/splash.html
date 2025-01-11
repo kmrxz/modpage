@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Splash Effect</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #000;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="splashCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('splashCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Function to resize canvas
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // Initial call to set canvas size
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * 5 + 2; // Particle size
+        this.color = color;
+        this.speedX = (Math.random() - 0.5) * 10; // Random horizontal speed
+        this.speedY = (Math.random() - 0.5) * 10; // Random vertical speed
+        this.alpha = 1; // Transparency
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha -= 0.02; // Fade out
+      }
+    }
+
+    const particles = [];
+
+    function createSplash(x, y) {
+      const colors = [
+        '#f1c40f', '#e74c3c', '#9b59b6', '#e67e22', '#d35400',
+        '#fd79a8', '#6c5ce7', '#00cec9', '#55efc4', '#81ecec', '#ffeaa7',
+        '#ff7675', '#00b894', '#d1ccc0', '#ee5253', '#48dbfb', '#1dd1a1',
+        '#576574', '#00a8ff', '#4cd137', '#192a56', '#f6b93b', '#60a3bc',
+        '#1e3799', '#6a89cc', '#3c6382', '#fa983a', '#079992', '#16a085',
+        '#e55039', '#4a69bd', '#60a3bc'
+      ];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      for (let i = 0; i < 50; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].alpha <= 0) {
+          particles.splice(i, 1); // Remove faded particles
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    canvas.addEventListener('click', (e) => {
+      createSplash(e.clientX, e.clientY);
+    });
+
+    animate();
+  </script>
+</body>
+</html>
