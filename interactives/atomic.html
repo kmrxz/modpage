@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Interactive Particle System</title> 
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle, #04151f, #000); /* Dark background */
+    }
+    canvas {
+      display: block;
+    }
+  </style> 
+ </head> 
+ <body> 
+  <canvas id="particleCanvas"></canvas> 
+  <script>
+    const canvas = document.getElementById("particleCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Set canvas size to full screen
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const explosionParticles = [];
+    const rippleEffects = [];
+    const colors = ["#0000ff"]; // Green particles
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * 5 + 2;
+        this.color = color || colors[Math.floor(Math.random() * colors.length)];
+        this.vx = Math.random() * 6 - 3; // Random horizontal velocity
+        this.vy = Math.random() * 6 - 3; // Random vertical velocity
+      }
+
+      draw() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Keep particles within the screen boundaries
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+      }
+    }
+
+    class Ripple {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 0;
+        this.alpha = 0.1;
+        this.maxRadius = Math.max(canvas.width, canvas.height) / 2;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = "#0000ff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      update() {
+        this.radius += 5;
+        this.alpha -= 0.02; // Fade the ripple effect
+        if (this.alpha <= 0) {
+          this.alpha = 0;
+        }
+      }
+    }
+
+    function createParticles() {
+      for (let i = 0; i < 6; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        particles.push(new Particle(x, y));
+      }
+    }
+
+    function triggerExplosion(x, y) {
+      //const numParticles = 5 + Math.random() * 50;
+      const numParticles = 2;
+      for (let i = 0; i < numParticles; i++) {
+        const particle = new Particle(x, y, "#0000ff");
+        particle.vx = Math.random() * 6 - 3; // Random horizontal velocity
+        particle.vy = Math.random() * 6 - 3; // Random vertical velocity
+        explosionParticles.push(particle);
+      }
+
+      // Add a ripple effect
+      const ripple = new Ripple(x, y);
+      rippleEffects.push(ripple);
+
+      // Explosion effect should last for 1 second, then remove particles
+      setTimeout(() => {
+        explosionParticles.length = 0;
+        rippleEffects.length = 0;
+      }, 1000);
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((particle) => {
+        particle.draw();
+        particle.update();
+      });
+
+      explosionParticles.forEach((particle) => {
+        particle.draw();
+        particle.update();
+      });
+
+      rippleEffects.forEach((ripple) => {
+        ripple.draw();
+        ripple.update();
+      });
+
+      // Add new explosion particles to the main particles array
+      if (explosionParticles.length > 0) {
+        particles.push(...explosionParticles);
+        explosionParticles.length = 0;
+      }
+
+      // Remove particles if the total count exceeds 100
+      if (particles.length > 60) {
+        particles.splice(0, particles.length - 60);
+      }
+
+      connectParticles();
+      requestAnimationFrame(animate);
+    }
+
+    function connectParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 100) {
+            ctx.save();
+            ctx.globalAlpha = 1 - distance / 100;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = "#ff00ff";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    // Handle window resize
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Handle mouse click to trigger explosion and ripple effect
+    canvas.addEventListener("click", (event) => {
+      triggerExplosion(event.clientX, event.clientY);
+    });
+
+    createParticles();
+    animate();
+  </script> 
+ </body>
+</html>
