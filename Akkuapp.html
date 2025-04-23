@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>KMRXZ - Special Page</title>
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>KMRXZ - Special Page</title> 
   <style>
     body {
       margin: 0;
@@ -23,11 +23,11 @@
     }
 
     header h1 {
-  margin: 0;
-  color: mediumseagreen;
-  font-size: 2em;
-  padding-left: 40px; /* Added padding to shift it right */
-}
+      margin: 0;
+      color: mediumseagreen;
+      font-size: 2em;
+      padding-left: 40px;
+    }
 
     h2 {
       color: mediumseagreen;
@@ -56,9 +56,57 @@
       display: none;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+    .drawer-toggle {
+      position: fixed;
+      top: 25px;
+      left: 20px;
+      background: none;
+      border: none;
+      color: mediumseagreen;
+      font-size: 24px;
+      z-index: 10001;
+    }
+
+    #drawer {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 10000;
+      top: 0;
+      left: 0;
+      background-color: #0b1e3f;
+      overflow-x: hidden;
+      transition: 0.3s;
+      padding-top: 60px;
+    }
+
+    #drawer a {
+      padding: 10px 20px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #ccc;
+      display: block;
+    }
+
+    #todoSection {
+      margin-top: 40px;
+    }
+
+    #todoList {
+      list-style: none;
+      padding: 0;
+    }
+
+    .todo-item {
+      margin: 10px 0;
+    }
+
+    .todo-button {
+      background: mediumseagreen;
+      color: #04151f;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 5px;
     }
 
     .alert-box {
@@ -74,104 +122,91 @@
       z-index: 9999;
       font-weight: bold;
     }
-  </style>
-</head>
-<body>
-<!-- Add this inside <body> -->
 
-<!-- Drawer Toggle Button -->
-<button onclick="toggleDrawer()" id="drawerToggle" style="position: fixed; top: 25px; left: 20px; background: none; border: none; color: mediumseagreen; font-size: 24px; z-index: 10001;">&#9776;</button>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style> 
+ </head> 
+ <body>
+  <!-- Drawer Toggle Button -->
+  <button onclick="toggleDrawer()" id="drawerToggle" class="drawer-toggle">☰</button>
 
-<!-- Drawer -->
-<div id="drawer" style="
-  height: 100%;
-  width: 0;
-  position: fixed;
-  z-index: 10000;
-  top: 0;
-  left: 0;
-  background-color: #0b1e3f;
-  overflow-x: hidden;
-  transition: 0.3s;
-  padding-top: 60px;
-">
-  <a href="#" style="padding: 10px 20px; text-decoration: none; font-size: 18px; color: #ccc; display: block;">Home</a>
-  <a href="#" style="padding: 10px 20px; text-decoration: none; font-size: 18px; color: #ccc; display: block;">Settings</a>
-  <a href="#" style="padding: 10px 20px; text-decoration: none; font-size: 18px; color: #ccc; display: block;">Theme</a>
-  <a href="#" style="padding: 10px 20px; text-decoration: none; font-size: 18px; color: #ccc; display: block;">About</a>
-</div>
+  <!-- Drawer -->
+  <div id="drawer">
+    <a href="#">Home</a>
+    <a href="#">Cool shots</a>
+    <a href="#">AI Music</a>
+    <a href="#">Settings</a>
+    <a href="#">Theme</a>
+    <a href="#">About</a> 
+  </div>
 
-<script>
-  function toggleDrawer() {
-    const drawer = document.getElementById("drawer");
-    drawer.style.width = drawer.style.width === "250px" ? "0" : "250px";
-  }
-</script>
-<header>
-  <h1>Akkuapp</h1>
-</header>
+  <header> 
+   <h1>Akkuapp</h1> 
+  </header> 
 
-<h2>Hey Injaa...</h2>
-<p class="subtitle">Have you had water today?</p>
-<div id="todoSection" style="margin-top: 40px;">
-  <h3 style="color: mediumseagreen;">Your To-Do List</h3>
-  <ul id="todoList" style="list-style: none; padding: 0;"></ul>
-</div>
-<button onclick="scrollToTop()" class="scroll-top" id="scrollTopBtn">&#8679;</button>
+  <h2>Hey Injaa...</h2> 
+  <p class="subtitle">Have you had water today?</p> 
 
-<script>
-  function scrollToTop() {
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }
+  <div id="todoSection"> 
+   <h3 style="color: mediumseagreen;">Your To-Do List</h3> 
+   <ul id="todoList"></ul> 
+  </div> 
 
-  window.onscroll = () => {
-    const btn = document.getElementById("scrollTopBtn");
-    btn.style.display = window.scrollY > 300 ? "block" : "none";
-  };
-  
-  const todoList = document.getElementById("todoList");
+  <button onclick="scrollToTop()" class="scroll-top" id="scrollTopBtn">⇧</button> 
 
-  // To-Do items
-  const tasks = [
-    { text: "Drink water", frequency: 2 * 60 * 60 * 1000 }, // every 2 hours
-    { text: "Eat food", frequency: 4 * 60 * 60 * 1000 } // every 4 hours
-  ];
+  <script>
+    function toggleDrawer() {
+      const drawer = document.getElementById("drawer");
+      drawer.style.width = drawer.style.width === "250px" ? "0" : "250px";
+    }
 
-  // Function to create a task
-  function addTask(taskText) {
-    const li = document.createElement("li");
-    li.style.margin = "10px 0";
+    function scrollToTop() {
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
 
-    const span = document.createElement("span");
-    span.textContent = taskText;
-    span.style.marginRight = "10px";
-
-    const btn = document.createElement("button");
-    btn.textContent = "Mark as done";
-    btn.style.background = "mediumseagreen";
-    btn.style.color = "#04151f";
-    btn.style.border = "none";
-    btn.style.padding = "4px 10px";
-    btn.style.borderRadius = "5px";
-    btn.onclick = () => {
-      li.style.opacity = 0.5;
-      btn.disabled = true;
-      btn.textContent = "Done!";
+    window.onscroll = () => {
+      const btn = document.getElementById("scrollTopBtn");
+      btn.style.display = window.scrollY > 300 ? "block" : "none";
     };
 
-    li.appendChild(span);
-    li.appendChild(btn);
-    todoList.appendChild(li);
-  }
+    const todoList = document.getElementById("todoList");
 
-  // Function to repeatedly add task based on frequency
-  tasks.forEach(task => {
-    addTask(task.text); // initial
-    setInterval(() => {
+    const tasks = [
+      { text: "Drink water", frequency: 2 * 60 * 60 * 1000 },
+      { text: "Eat food", frequency: 4 * 60 * 60 * 1000 }
+    ];
+
+    function addTask(taskText) {
+      const li = document.createElement("li");
+      li.className = "todo-item";
+
+      const span = document.createElement("span");
+      span.textContent = taskText;
+      span.style.marginRight = "10px";
+
+      const btn = document.createElement("button");
+      btn.className = "todo-button";
+      btn.textContent = "Mark as done";
+      btn.onclick = () => {
+        li.style.opacity = 0.5;
+        btn.disabled = true;
+        btn.textContent = "Done!";
+      };
+
+      li.appendChild(span);
+      li.appendChild(btn);
+      todoList.appendChild(li);
+    }
+
+    tasks.forEach(task => {
       addTask(task.text);
-    }, task.frequency);
-  });
-</script>
-
-</body>
+      setInterval(() => {
+        addTask(task.text);
+      }, task.frequency);
+    });
+  </script> 
+ </body>
 </html>
