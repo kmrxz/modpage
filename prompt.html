@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatGPT Prompt</title>
+  <style>
+    body {
+      background-color: #04151f;
+      color: #ccc;
+      font-family: monospace;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    img {
+      width: 80%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    textarea {
+      width: 90%;
+      max-width: 600px;
+      height: 250px;
+      background-color: #1a1a1a;
+      color: #ccc;
+      border: 1px solid #444;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 14px;
+      resize: none;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: MediumSeaGreen;
+      color: #252525;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chat GPT Prompt</h1>
+  <img src="images/alven.png" alt="Prompt Illustration" />
+  <textarea id="promptText" readonly>
+Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-body boy peeking out of an Instagram post frame, as if he's a social media character. He is sitting on the bottom bar of the frame with his legs hanging down. He is holding a smartphone in his hands. His outfit and hairstyle should match the ones shown in the reference photos. The background is neutral. The boy looks joyful and cute, with big wide eyes and a bright smile. The frame includes the profile name. Add Instagram-style icons for "like," "comment," and "share." The entire frame is held by a large hand. Use a 9:16 vertical format. 📱✨
+  </textarea>
+  <button onclick="copyPrompt()">Copy Prompt</button>
+
+  <script>
+    function copyPrompt() {
+      const textArea = document.getElementById("promptText");
+      textArea.select();
+      textArea.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Prompt copied to clipboard!");
+    }
+  </script>
+</body>
+</html>
