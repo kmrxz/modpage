@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Puncture Help Ernakulam</title> 
+  <style>
+    body {
+        background-color: #04151f;
+        color: #ccc;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 {
+        color: white;
+        text-align: center;
+    }
+    #searchBar {
+        display: block;
+        margin: 10px auto 20px auto;
+        padding: 10px;
+        width: 90%;
+        max-width: 400px;
+        border-radius: 5px;
+        border: none;
+        font-size: 16px;
+    }
+    .contact-card {
+        background-color: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+    .contact-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .name {
+        color: mediumseagreen;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    .location {
+        color: orange;
+        font-size: 14px;
+    }
+    .phone {
+        color: white;
+        margin: 8px 0;
+        font-size: 32px;
+    }
+    .btn-container {
+        display: flex;
+        gap: 10px;
+    }
+    .btn {
+        background-color: mediumseagreen;
+        color: #04151f;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .btn:hover {
+        opacity: 0.9;
+    }
+    .highlight {
+        background-color: yellow;
+        color: black;
+    }
+    /* Toast */
+    #toast {
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 5px;
+        padding: 10px;
+        position: fixed;
+        z-index: 1000;
+        left: 50%;
+        bottom: 30px;
+        transform: translateX(-50%);
+        font-size: 14px;
+        opacity: 0;
+        transition: opacity 0.5s, bottom 0.5s;
+    }
+    #toast.show {
+        visibility: visible;
+        opacity: 1;
+        bottom: 50px;
+    }
+</style> 
+ </head> 
+ <body> 
+  <h1>Puncture help Ernakulam</h1> 
+  <input type="text" id="searchBar" placeholder="Search..."> 
+  <div id="contacts"></div> 
+  <div id="toast">
+    Number copied! 
+  </div> 
+  <footer> 
+    <a href="https://wa.me/+919895700438?text=Hii,i+would+like+to+add+this+number+to+your+webpage"><button class="btn">Add NUMBER</button></a>
+   <div class="footer-content"> 
+    <p>Sibichan ee pageinte ishwaryam</p> 
+    <p>Non profitable webpage</p> 
+   </div> 
+  </footer> 
+  <style>
+  footer {
+    background-color: #031018; /* slightly darker than main bg */
+    color: #ccc;
+    padding: 18px 10px;
+    margin-top: 30px;
+    text-align: center;
+    font-size: 14px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  footer a {
+    color: mediumseagreen;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+</style> 
+<script>
+const contacts = [
+    { name: "Solo Tech(extra distance available)", location: "Vyttila", phone: "+91 86505 05034" },
+    { name: "No name", location: "Kakkanad", phone: "+91 95671 77597" },
+    { name: "Shihab", location: "Kalamassery", phone: "+91 97464 78468" },
+    { name: "No name", location: "Ekm south", phone: "+91 94476 63150" },
+    { name: "No name", location: "Ernakulam", phone: "+91 98460 14385" },
+    { name: "Name", location: "Location", phone: "+91 0000000000" },
+    { name: "Name", location: "Location", phone: "+91 0000000000" },
+    { name: "Name", location: "Location", phone: "+91 0000000000" },
+    { name: "Name", location: "Location", phone: "+91 0000000000" },
+    { name: "Name", location: "Location", phone: "+91 0000000000" },
+    { name: "Name", location: "Location", phone: "+91 0000000000" },
+    { name: "Name", location: "Locatiom", phone: "+91 0000000000" }
+];
+
+const container = document.getElementById("contacts");
+
+// Render contacts
+contacts.forEach(c => {
+    const card = document.createElement("div");
+    card.className = "contact-card";
+    card.innerHTML = `
+        <div class="contact-header">
+            <div class="name">${c.name}</div>
+            <div class="location">${c.location}</div>
+        </div>
+        <div class="phone">${c.phone}</div>
+        <div class="btn-container">
+            <a href="tel:${c.phone.replace(/\s/g, '')}" class="btn">CALL</a>
+            <button class="btn copy-btn" data-phone="${c.phone}">COPY</button>
+        </div>
+    `;
+    container.appendChild(card);
+});
+
+// Toast function
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+// Copy number function
+document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("copy-btn")) {
+        const number = e.target.getAttribute("data-phone");
+        navigator.clipboard.writeText(number).then(() => {
+            showToast(`Number copied: ${number}`);
+        });
+    }
+});
+
+// Escape special regex characters
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function removeHighlights(element) {
+    const highlighted = element.querySelectorAll("span.highlight");
+    highlighted.forEach(span => {
+        span.replaceWith(span.textContent);
+    });
+}
+
+function highlightText(element, searchTerm) {
+    if (!searchTerm) return;
+    const regex = new RegExp(escapeRegExp(searchTerm), "gi");
+
+    element.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (regex.test(node.textContent)) {
+                const spanWrapper = document.createElement("span");
+                spanWrapper.innerHTML = node.textContent.replace(regex, match => `<span class="highlight">${match}</span>`);
+                node.replaceWith(...spanWrapper.childNodes);
+            }
+        } else {
+            highlightText(node, searchTerm);
+        }
+    });
+}
+
+document.getElementById("searchBar").addEventListener("input", function() {
+    const searchTerm = this.value.trim();
+    const cards = document.querySelectorAll(".contact-card");
+    let firstMatch = null;
+
+    cards.forEach(card => {
+        removeHighlights(card);
+        if (searchTerm && card.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+            highlightText(card, searchTerm);
+            if (!firstMatch) firstMatch = card;
+        }
+    });
+
+    if (firstMatch) {
+        firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+});
+</script> 
+ 
+</body></html>
