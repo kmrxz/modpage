@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"> 
- <head> 
+<head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <title>Puncture Help Ernakulam</title> 
@@ -94,41 +94,41 @@
         opacity: 1;
         bottom: 50px;
     }
-</style> 
- </head> 
- <body> 
+    footer {
+      background-color: #031018; /* slightly darker than main bg */
+      color: #ccc;
+      padding: 18px 10px;
+      margin-top: 30px;
+      text-align: center;
+      font-size: 14px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    footer a {
+      color: mediumseagreen;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style> 
+</head> 
+<body> 
   <h1>Puncture help Ernakulam</h1> 
   <input type="text" id="searchBar" placeholder="Search..."> 
   <div id="contacts"></div> 
-  <div id="toast">
-    Number copied! 
-  </div> 
+  <div id="toast">Number copied!</div> 
+
   <footer> 
-    <a href="https://wa.me/+919895700438?text=Hii,i+would+like+to+add+this+number+to+your+webpage"><button class="btn">Add NUMBER</button></a>
-   <div class="footer-content"> 
-    <p>Sibichan ee pageinte ishwaryam</p> 
-    <p>Non profitable webpage</p> 
-   </div> 
+    <a href="https://wa.me/+919895700438?text=Hii,i+would+like+to+add+this+number+to+your+webpage">
+      <button class="btn">Add NUMBER</button>
+    </a>
+    <div class="footer-content"> 
+      <p>Sibichan ee pageinte ishwaryam</p> 
+      <p>Non profitable webpage</p> 
+    </div> 
   </footer> 
-  <style>
-  footer {
-    background-color: #031018; /* slightly darker than main bg */
-    color: #ccc;
-    padding: 18px 10px;
-    margin-top: 30px;
-    text-align: center;
-    font-size: 14px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-  footer a {
-    color: mediumseagreen;
-    text-decoration: none;
-    font-weight: 600;
-  }
-  footer a:hover {
-    text-decoration: underline;
-  }
-</style> 
+
 <script>
 const contacts = [
     { name: "Solo Tech(extra distance available)", location: "Vyttila", phone: "+91 86505 05034" },
@@ -143,7 +143,7 @@ const contacts = [
     { name: "Nil", location: "Maradu", phone: "+91 99475 90559" },
     { name: "Name", location: "Thevara", phone: "+91 98955 24946" },
     { name: "Name", location: "Panampilli", phone: "+91 88485 81492" },
-    { name: "Name", location: "Pulleppadi", phone: "+91 98461 11295" }
+    { name: "Name", location: "Pulleppadi", phone: "+91 98461 11295" },
     { name: "Name", location: "Banerji road", phone: "+91 77366 43204" },
     { name: "Name", location: "Kalamassery", phone: "+91 80896 51125" },
     { name: "Name", location: "Thoppumpadi", phone: "+91 86063 68187" },
@@ -160,7 +160,7 @@ contacts.forEach(c => {
     card.innerHTML = `
         <div class="contact-header">
             <div class="name">${c.name}</div>
-        { name: "Name", location: "Locatiom", phone: "+91 0000000000" }    <div class="location">${c.location}</div>
+            <div class="location">${c.location}</div>
         </div>
         <div class="phone">${c.phone}</div>
         <div class="btn-container">
@@ -236,5 +236,5 @@ document.getElementById("searchBar").addEventListener("input", function() {
     }
 });
 </script> 
- 
-</body></html>
+</body>
+</html>
