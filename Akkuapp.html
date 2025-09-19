@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Akkuapp</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Courgette&display=swap');
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -18,13 +21,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #0b1e3f;
+      background-color: #0d1a2f;
       padding: 15px;
-      color: mediumseagreen;
-      font-size: 22px;
+      color: #cccccc;
+      font-size: 24px;
       font-weight: bold;
       position: relative;
       z-index: 1000;
+      font-family: 'Pacifico', cursive;
     }
 
     /* Drawer */
@@ -34,7 +38,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      background-color: #0b1e3f;
+      background-color: #0d1a2f;
       overflow-x: hidden;
       transition: 0.3s;
       padding-top: 60px;
@@ -45,13 +49,14 @@
       padding: 10px 20px;
       text-decoration: none;
       font-size: 18px;
-      color: #ccc;
+      color: #cccccc;
       display: block;
       transition: 0.2s;
+      font-family: 'Courgette', cursive;
     }
 
     #drawer a:hover {
-      background: #333;
+      background: #1a2a44;
     }
 
     .menu-icon {
@@ -67,7 +72,7 @@
       left: 15px;
       font-size: 26px;
       cursor: pointer;
-      color: #ccc;
+      /*color: #90ee90;*/
     }
 
     /* Center Content */
@@ -85,36 +90,64 @@
     }
 
     .content h2 {
-      font-size: 32px;
-      color: mediumseagreen;
-      margin-bottom: 20px;
-      font-family: "Brush Script MT", cursive;
+      font-size: 38px;
+      color: #cccccc;
+      margin-bottom: 5px;
+      font-family: 'Pacifico', cursive;
+    }
+
+    .secondary-text {
+      font-size: 16px;
+      color: #b0c4de;
+      margin-top: 0;
+      margin-bottom: 5px; /* Reduced gap */
+      font-family: 'Courgette', cursive;
+    }
+    
+    .secondary-text:last-of-type {
+      margin-bottom: 25px; /* Increased gap before the vitamin-level text */
     }
 
     .vitamin-level {
-      background: mediumseagreen;
-      color: #000;
-      display: inline-block;
-      padding: 10px 20px;
-      border-radius: 10px;
+      color: #b33939; /* Changed to a more subtle dark red */
+      font-size: 20px;
       font-weight: bold;
       margin-bottom: 20px;
     }
 
     .vitamin-btn {
-      background: mediumseagreen;
+      background: MediumSeaGreen;
       border: none;
       padding: 12px 25px;
       border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
-      color: #000;
+      color: #0d1a2f;
       font-weight: bold;
       margin-bottom: 20px;
+      font-family: 'Courgette', cursive;
+      transition: transform 0.2s ease, box-shadow 0.4s ease;
+    }
+
+    .vitamin-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .vitamin-btn:hover {
+        box-shadow: 0 0 15px 5px rgba(60, 179, 113, 0.5);
     }
 
     #result-container {
       margin-top: 20px;
+      font-family: 'Courgette', cursive;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease-in, transform 0.5s ease-in;
+    }
+
+    #result-container.show {
+        opacity: 1;
+        transform: translateY(0);
     }
 
     #result-container p {
@@ -128,8 +161,22 @@
     }
 
     #result-container .expected-level {
-      color: mediumseagreen;
+      color: #90ee90;
       font-size: 16px;
+    }
+
+    /* Dynamic color classes for levels */
+    .level-low {
+      color: #4682b4 !important; /* Steel Blue */
+    }
+    .level-medium {
+      color: #90ee90 !important; /* Light Green */
+    }
+    .level-high {
+      color: #ffa500 !important; /* Orange */
+    }
+    .level-critical {
+      color: #ffd700 !important; /* Gold */
     }
 
     /* Waves Background */
@@ -142,19 +189,24 @@
       z-index: 0;
       overflow: hidden;
     }
-
-    .waves svg {
-      width: 200%;
-      height: 100%;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      animation: waveMove 10s linear infinite;
+    .wave {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 200%;
+        height: 100%;
+        animation: waveMove 10s linear infinite;
     }
-
-    .waves path {
-      fill: #0a0f1c;
-      opacity: 0.7;
+    .wave:nth-child(2) {
+        animation-duration: 15s; /* Different speed */
+        opacity: 0.5;
+        z-index: 1;
+        transform: translateX(10%);
+        fill: #0c1523; /* A different shade of blue/navy for the second wave */
+    }
+    .wave:nth-child(1) {
+        fill: #0a0f1c; /* A slightly different shade of blue for the front wave */
+        animation-duration: 10s;
     }
 
     @keyframes waveMove {
@@ -182,13 +234,18 @@
 
   <div class="content">
     <h2>Hey Injaa...</h2>
-    <div class="vitamin-level">Vitamin S level: 99%</div>
-    <button class="vitamin-btn" id="vitaminBtn">Add Vitamin S</button>
+    <p class="secondary-text">Akku is about to die because of the lack of Vitamin S</p>
+    <p class="secondary-text"> only Injan can help him</p>
+    <p class="vitamin-level">Critical Vitamin S level: 0%</p>
+    <button class="vitamin-btn" id="vitaminBtn">Give Vitamin S</button>
     <div id="result-container"></div>
   </div>
 
   <div class="waves">
-    <svg viewBox="0 0 1200 300" preserveAspectRatio="none">
+    <svg class="wave" viewBox="0 0 1200 300" preserveAspectRatio="none">
+      <path d="M0,200 C300,100 900,300 1200,200 L1200,300 L0,300 Z"></path>
+    </svg>
+    <svg class="wave" viewBox="0 0 1200 300" preserveAspectRatio="none">
       <path d="M0,200 C300,100 900,300 1200,200 L1200,300 L0,300 Z"></path>
     </svg>
   </div>
@@ -207,36 +264,83 @@
       }
     });
 
-    // Random Text Functionality
     const vitaminOptions = [
-      { text: "Text him hi", level: "Expected Vitamin S: 60%" },
-      { text: "Kiss him", level: "Expected Vitamin S level: 99%" },
-      { text: "Send a sticker", level: "Expected Vitamin S level: 45%" },
-      { text: "Call him", level: "Expected Vitamin S level: 85%" },
-      { text: "Tell him you love him", level: "Expected Vitamin S level: 100%" }
+      { text: "Text him", level: "60%" },
+      { text: "Kiss him", level: "999%" },
+      { text: "Send a sticker", level: "45%" },
+      { text: "Call him", level: "85%" },
+      { text: "Tell him you love him", level: "100%" },
+      { text: "Plan a date night", level: "80%" },
+      { text: "Cook his favorite meal", level: "1%" },
+      { text: "Leave a handwritten note", level: "10%" },
+      { text: "Watch a movie together", level: "30%" },
+      { text: "Give him a gift", level: "You are the gift😒" },
+      { text: "Send a cute selfie", level: "200%" },
+      { text: "Hug him for no reason", level: "600%" },
+      { text: "Go for a walk together", level: "150%" },
+      { text: "Sing his favorite song", level: "149%" },
+      { text: "Send a voice note telling him you miss him", level: "300%" },
+      { text: "Remind him of a funny memory you share", level: "80%" },
+      { text: "Ask him how his day was", level: "120%" },
+      { text: "Tell him a secret", level: "99%" },
+      { text: "Share a song that reminds you of him", level: "101%" },
+      { text: "Look at old photos together", level: "560%" },
+      { text: "Give him a back rub", level: "1%" },
+      { text: "Create a shared playlist for him", level: "40%" },
+      { text: "Draw a cute picture for him", level: "100%" },
+      { text: "Give him a big hug from behind", level: "10000%" },
+      { text: "Send a photo of you wearing his shirt", level: "69%" },
+      { text: "Give him a long, slow kiss", level: "999%" },
+      { text: "Cuddle on the couch and just talk", level: "700%" },
+      { text: "Rest your head on his shoulder", level: "404%" },
+      { text: "Snuggle up under a blanket together", level: "6969%" }
     ];
 
     document.getElementById("vitaminBtn").addEventListener("click", function() {
       const resultContainer = document.getElementById("result-container");
       
-      // Clear previous results
-      resultContainer.innerHTML = '';
+      // Clear previous results and hide for animation
+      resultContainer.classList.remove('show');
       
-      // Get a random option from the list
-      const randomIndex = Math.floor(Math.random() * vitaminOptions.length);
-      const selectedOption = vitaminOptions[randomIndex];
-      
-      // Create and append the text elements
-      const textElement = document.createElement('p');
-      textElement.className = 'result-text';
-      textElement.textContent = selectedOption.text;
-      
-      const levelElement = document.createElement('p');
-      levelElement.className = 'expected-level';
-      levelElement.textContent = selectedOption.level;
-      
-      resultContainer.appendChild(textElement);
-      resultContainer.appendChild(levelElement);
+      // Use a short delay to allow the hide animation to play
+      setTimeout(() => {
+        // Get a random option from the list
+        const randomIndex = Math.floor(Math.random() * vitaminOptions.length);
+        const selectedOption = vitaminOptions[randomIndex];
+        
+        // Create and append the text elements
+        const textElement = document.createElement('p');
+        textElement.className = 'result-text';
+        textElement.textContent = selectedOption.text;
+        
+        const levelElement = document.createElement('p');
+        levelElement.className = 'expected-level';
+        
+        // This is the key change to make the percentage a different color
+        if (selectedOption.text === "Give him a gift") {
+            levelElement.textContent = selectedOption.level;
+        } else {
+            const levelValue = parseInt(selectedOption.level);
+            let colorClass = '';
+            if (levelValue <= 50) {
+                colorClass = 'level-low';
+            } else if (levelValue <= 200) {
+                colorClass = 'level-medium';
+            } else if (levelValue <= 500) {
+                colorClass = 'level-high';
+            } else {
+                colorClass = 'level-critical';
+            }
+            levelElement.innerHTML = `Expected Vitamin S: <span class="${colorClass}">${selectedOption.level}</span>`;
+        }
+        
+        resultContainer.innerHTML = '';
+        resultContainer.appendChild(textElement);
+        resultContainer.appendChild(levelElement);
+        
+        // Show the container with the fade-in animation
+        resultContainer.classList.add('show');
+      }, 500);
     });
   </script>
 
