@@ -18,7 +18,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #0b1e3f; /* restored original */
+      background-color: #0b1e3f; /* original header color */
       padding: 15px;
       color: mediumseagreen;
       font-size: 22px;
@@ -34,7 +34,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      background-color: #0b1e3f; /* restored original */
+      background-color: #0b1e3f;
       overflow-x: hidden;
       transition: 0.3s;
       padding-top: 60px;
@@ -73,7 +73,7 @@
       font-size: 32px;
       color: mediumseagreen;
       margin-bottom: 20px;
-      font-family: "Brush Script MT", cursive; /* cursive restored */
+      font-family: "Brush Script MT", cursive; /* cursive style */
     }
 
     .vitamin-level {
@@ -118,7 +118,7 @@
     }
 
     .waves path {
-      fill: #0a0f1c; /* only dark navy shades */
+      fill: #0a0f1c; /* dark navy shades only */
       opacity: 0.7;
     }
 
@@ -132,6 +132,7 @@
 
   <!-- Drawer -->
   <div id="drawer">
+    <a href="javascript:void(0)" onclick="toggleDrawer()">❌ Close</a>
     <a href="#">Home</a>
     <a href="#">Cool shots</a>
     <a href="#">AI Music</a>
@@ -149,10 +150,8 @@
   <!-- Content -->
   <div class="content">
     <h2>Hey Injaa...</h2>
-    <div class="vitamin-level">Vitamin S level: 6%</div><br>
-    <button class="vitamin-btn" onclick="window.location.href='https://wa.me/+917034069250?text=Akkuuuu...'">
-      Add Vitamin S
-    </button>
+    <div class="vitamin-level">Vitamin S level: 99%</div><br>
+    <button class="vitamin-btn" id="vitaminBtn">Add Vitamin S</button>
   </div>
 
   <!-- Waves Background -->
@@ -175,6 +174,11 @@
       if (drawer.style.width === "250px" && !drawer.contains(e.target) && !menuIcon.contains(e.target)) {
         drawer.style.width = "0";
       }
+    });
+
+    // Fix WhatsApp button (open outside WebView)
+    document.getElementById("vitaminBtn").addEventListener("click", function() {
+      window.open("https://wa.me/917034069250?text=Akkuuuu", "_blank");
     });
   </script>
 
