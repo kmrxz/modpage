@@ -18,7 +18,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #0b1e3f; /* original header color */
+      background-color: #0b1e3f;
       padding: 15px;
       color: mediumseagreen;
       font-size: 22px;
@@ -60,20 +60,35 @@
       font-size: 26px;
       cursor: pointer;
     }
+    
+    .close-icon {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 26px;
+      cursor: pointer;
+      color: #ccc;
+    }
 
     /* Center Content */
     .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
       text-align: center;
       position: relative;
       z-index: 100;
-      margin-top: 80px;
+      padding: 0 20px;
+      box-sizing: border-box;
     }
 
     .content h2 {
       font-size: 32px;
       color: mediumseagreen;
       margin-bottom: 20px;
-      font-family: "Brush Script MT", cursive; /* cursive style */
+      font-family: "Brush Script MT", cursive;
     }
 
     .vitamin-level {
@@ -95,6 +110,26 @@
       cursor: pointer;
       color: #000;
       font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    #result-container {
+      margin-top: 20px;
+    }
+
+    #result-container p {
+      margin: 5px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #result-container .result-text {
+      color: #fff;
+    }
+
+    #result-container .expected-level {
+      color: mediumseagreen;
+      font-size: 16px;
     }
 
     /* Waves Background */
@@ -118,7 +153,7 @@
     }
 
     .waves path {
-      fill: #0a0f1c; /* dark navy shades only */
+      fill: #0a0f1c;
       opacity: 0.7;
     }
 
@@ -131,7 +166,7 @@
 <body>
 
   <div id="drawer">
-    <a href="javascript:void(0)" onclick="toggleDrawer()">❌ Close</a>
+    <span class="close-icon" onclick="toggleDrawer()">☰</span>
     <a href="#">Home</a>
     <a href="#">Cool shots</a>
     <a href="#">AI Music</a>
@@ -147,8 +182,9 @@
 
   <div class="content">
     <h2>Hey Injaa...</h2>
-    <div class="vitamin-level">Vitamin S level: 99%</div><br>
+    <div class="vitamin-level">Vitamin S level: 99%</div>
     <button class="vitamin-btn" id="vitaminBtn">Add Vitamin S</button>
+    <div id="result-container"></div>
   </div>
 
   <div class="waves">
@@ -163,7 +199,6 @@
       drawer.style.width = (drawer.style.width === "250px") ? "0" : "250px";
     }
 
-    // Close drawer if clicked outside
     window.addEventListener("click", function(e) {
       const drawer = document.getElementById("drawer");
       const menuIcon = document.querySelector(".menu-icon");
@@ -172,11 +207,36 @@
       }
     });
 
-    // Fix WhatsApp button (open outside WebView)
+    // Random Text Functionality
+    const vitaminOptions = [
+      { text: "Text him hi", level: "Expected Vitamin S: 60%" },
+      { text: "Kiss him", level: "Expected Vitamin S level: 99%" },
+      { text: "Send a sticker", level: "Expected Vitamin S level: 45%" },
+      { text: "Call him", level: "Expected Vitamin S level: 85%" },
+      { text: "Tell him you love him", level: "Expected Vitamin S level: 100%" }
+    ];
+
     document.getElementById("vitaminBtn").addEventListener("click", function() {
-      // Use window.location.href instead of window.open.
-      // Sometimes this is handled better by webviews.
-      window.location.href = "https://wa.me/917034069250?text=Akkuuuu";
+      const resultContainer = document.getElementById("result-container");
+      
+      // Clear previous results
+      resultContainer.innerHTML = '';
+      
+      // Get a random option from the list
+      const randomIndex = Math.floor(Math.random() * vitaminOptions.length);
+      const selectedOption = vitaminOptions[randomIndex];
+      
+      // Create and append the text elements
+      const textElement = document.createElement('p');
+      textElement.className = 'result-text';
+      textElement.textContent = selectedOption.text;
+      
+      const levelElement = document.createElement('p');
+      levelElement.className = 'expected-level';
+      levelElement.textContent = selectedOption.level;
+      
+      resultContainer.appendChild(textElement);
+      resultContainer.appendChild(levelElement);
     });
   </script>
 
