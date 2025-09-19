@@ -130,7 +130,6 @@
 </head>
 <body>
 
-  <!-- Drawer -->
   <div id="drawer">
     <a href="javascript:void(0)" onclick="toggleDrawer()">❌ Close</a>
     <a href="#">Home</a>
@@ -141,20 +140,17 @@
     <a href="#">About</a>
   </div>
 
-  <!-- Header -->
   <header>
     <span class="menu-icon" onclick="toggleDrawer()">☰</span>
     Akkuapp
   </header>
 
-  <!-- Content -->
   <div class="content">
     <h2>Hey Injaa...</h2>
     <div class="vitamin-level">Vitamin S level: 99%</div><br>
     <button class="vitamin-btn" id="vitaminBtn">Add Vitamin S</button>
   </div>
 
-  <!-- Waves Background -->
   <div class="waves">
     <svg viewBox="0 0 1200 300" preserveAspectRatio="none">
       <path d="M0,200 C300,100 900,300 1200,200 L1200,300 L0,300 Z"></path>
@@ -178,7 +174,9 @@
 
     // Fix WhatsApp button (open outside WebView)
     document.getElementById("vitaminBtn").addEventListener("click", function() {
-      window.open("https://wa.me/917034069250?text=Akkuuuu", "_blank");
+      // Use window.location.href instead of window.open.
+      // Sometimes this is handled better by webviews.
+      window.location.href = "https://wa.me/917034069250?text=Akkuuuu";
     });
   </script>
 
