@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Egg Timer</title>
+<style>
+  :root {
+    --bg: #0f1720;
+    --heading: #3cb3ff; /* Medium Sea Blue */
+    --text: #e6eef8; /* Original light color */
+    --accent: #3cb3ff;
+  }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 22px;
+    background: rgba(255,255,255,0.03);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 22px;
+    text-transform: uppercase;
+    color: var(--heading);
+  }
+  header a {
+    text-decoration: none;
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  main {
+    flex: 1;
+    padding: 24px;
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  p, label {
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+  .radio-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .radio {
+    background: rgba(255,255,255,0.08);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    color: var(--text);
+  }
+  .radio input { margin-right: 6px; }
+  .radio.active { border: 1px solid var(--accent); box-shadow:0 0 10px rgba(60,179,255,0.5) inset; }
+  .result {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: space-between;
+  }
+  .big { font-size: 20px; color: var(--heading); }
+  .sub { font-size: 13px; color: var(--text); }
+  button {
+    background: var(--accent);
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #0f1720;
+    margin-right: 10px;
+  }
+  footer {
+    padding: 12px 22px;
+    font-size: 12px;
+    color: var(--text);
+  }
+  @media (max-width:720px){
+    main { width: 95%; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Egg Timer</h1>
+  <a target="blank_" href="https://kmrxz.github.io/modpage/main.html">Home</a>
+</header>
+
+<main>
+  <p>Select your start time and desired doneness — it will tell you exactly when to remove your eggs!</p>
+
+  <label for="startTime">Start time (eggs + cold water on stove)</label>
+  <input id="startTime" type="time" value="">
+
+  <label>Water state</label>
+  <div class="radio-row" id="waterState">
+    <label class="radio active"><input type="radio" name="water" value="cold" checked>Cold water</label>
+    <label class="radio"><input type="radio" name="water" value="boil">Already boiling</label>
+  </div>
+
+  <label for="boilProfile">Boil-time profile</label>
+  <select id="boilProfile">
+    <option value="5">Fast — 5 min</option>
+    <option value="8" selected>Average — 8 min</option>
+    <option value="11">Slow — 11 min</option>
+    <option value="custom">Custom</option>
+  </select>
+  <input id="boilCustom" type="number" min="0" placeholder="minutes" style="display:none;">
+
+  <label for="eggSize">Egg size</label>
+  <select id="eggSize">
+    <option value="-1">Small (subtract 1 min)</option>
+    <option value="0" selected>Medium</option>
+    <option value="1">Large (add 1 min)</option>
+  </select>
+
+  <label>Doneness</label>
+  <div class="radio-row" id="doneness">
+    <label class="radio active" data-cook="5"><input type="radio" name="doneness" value="soft" checked>Soft</label>
+    <label class="radio" data-cook="7"><input type="radio" name="doneness" value="jammy">Jammy</label>
+    <label class="radio" data-cook="8"><input type="radio" name="doneness" value="medium">Medium</label>
+    <label class="radio" data-cook="11"><input type="radio" name="doneness" value="hard">Hard</label>
+    <label class="radio" data-cook="14"><input type="radio" name="doneness" value="grey">Grey-ring</label>
+  </div>
+
+  <div class="radio-row">
+    <label class="radio"><input type="checkbox" id="useIce"> Use ice bath</label>
+    <label class="radio"><input type="checkbox" id="playAlarm"> Play alarm</label>
+  </div>
+
+  <button id="calcBtn">Calculate</button>
+  <button id="startTimer">Start countdown</button>
+
+  <div class="result" id="result">
+    <div>
+      <div class="sub">Remove at</div>
+      <div class="big" id="removeTime">--:--</div>
+      <div class="sub" id="removeDate">today</div>
+    </div>
+    <div>
+      <div class="sub">Total minutes</div>
+      <div class="big" id="totalMins">--</div>
+    </div>
+    <div>
+      <div class="sub">Countdown</div>
+      <div class="big" id="countdown">--:--:--</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+Times are estimates. For grey-ring yolk, skip ice bath.
+</footer>
+
+<script>
+function pad(n){ return n.toString().padStart(2,'0'); }
+function timeToMinutes(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+function minutesToTime(m){ m=Math.round(m); m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60); }
+
+const startTimeInput = document.getElementById('startTime');
+const waterRadios = document.querySelectorAll('#waterState input[name="water"]');
+const boilProfile = document.getElementById('boilProfile');
+const boilCustom = document.getElementById('boilCustom');
+const eggSize = document.getElementById('eggSize');
+const donenessRadios = document.querySelectorAll('#doneness input[name="doneness"]');
+const useIce = document.getElementById('useIce');
+const playAlarm = document.getElementById('playAlarm');
+
+const removeTimeEl = document.getElementById('removeTime');
+const totalMinsEl = document.getElementById('totalMins');
+const removeDateEl = document.getElementById('removeDate');
+const countdownEl = document.getElementById('countdown');
+
+let countdownInterval=null;
+
+startTimeInput.value = pad(new Date().getHours())+':'+pad(new Date().getMinutes());
+
+boilProfile.addEventListener('change', ()=>{
+  boilCustom.style.display=(boilProfile.value==='custom')?'block':'none';
+});
+
+function compute(){
+  const start = timeToMinutes(startTimeInput.value);
+  const water = document.querySelector('#waterState input[name="water"]:checked').value;
+  let boilMin = 0;
+  if(water==='cold'){
+    if(boilProfile.value==='custom'){
+      const val = Number(boilCustom.value);
+      if(!Number.isFinite(val)||val<0){ alert('Enter valid boil minutes'); return; }
+      boilMin=val;
+    } else boilMin = Number(boilProfile.value);
+  }
+  const doneness = Array.from(donenessRadios).find(r=>r.checked).parentElement;
+  const cook = Number(doneness.dataset.cook);
+  const sizeAdj = Number(eggSize.value);
+  const totalMins = boilMin + cook + sizeAdj;
+  const removeAt = start + totalMins;
+  removeTimeEl.textContent = minutesToTime(removeAt);
+  totalMinsEl.textContent = totalMins + ' min';
+  removeDateEl.textContent = (removeAt>=1440)?'tomorrow':'today';
+
+  const now = new Date();
+  let nowMins = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
+  let deltaMin = removeAt - nowMins;
+  if(deltaMin<-720) deltaMin+=1440;
+  if(deltaMin>720) deltaMin-=1440;
+  return Math.round(deltaMin*60);
+}
+
+function startCountdown(seconds){
+  if(countdownInterval){ clearInterval(countdownInterval); countdownInterval=null; }
+  let remaining=seconds; if(remaining<0) remaining=0;
+  countdownEl.textContent=formatHMS(remaining);
+  countdownInterval=setInterval(()=>{
+    remaining--;
+    countdownEl.textContent=formatHMS(remaining);
+    if(remaining<=0){
+      clearInterval(countdownInterval); countdownInterval=null;
+      countdownEl.textContent='00:00:00';
+      if(playAlarm.checked){
+        try{
+          const ctx=new (window.AudioContext||window.webkitAudioContext)();
+          const o=ctx.createOscillator();
+          const g=ctx.createGain();
+          o.frequency.value=880;
+          o.type='sine';
+          g.gain.value=0.0001;
+          o.connect(g); g.connect(ctx.destination);
+          o.start();
+          g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+1.1);
+          setTimeout(()=>o.stop(),1200);
+        }catch(e){}
+      }
+      alert(useIce.checked?'Time to remove eggs — dunk in ice bath.':'Time to remove eggs.');
+    }
+  },1000);
+}
+
+document.getElementById('calcBtn').addEventListener('click', ()=>{
+  const secs = compute();
+  if(secs!=null) countdownEl.textContent=formatHMS(secs);
+});
+
+document.getElementById('startTimer').addEventListener('click', ()=>{
+  const secs = compute();
+  if(secs!=null) startCountdown(secs);
+});
+
+function formatHMS(s){
+  if(s<0) s=0;
+  const h=Math.floor(s/3600); s%=3600;
+  const m=Math.floor(s/60); const sec=s%60;
+  return (h? h+':' :'')+pad(m)+':'+pad(sec);
+}
+
+document.querySelectorAll('.radio-row .radio').forEach(lbl=>{
+  lbl.addEventListener('click', ()=>{
+    const row = lbl.parentElement.querySelectorAll('.radio');
+    row.forEach(l=>l.classList.remove('active'));
+    lbl.classList.add('active');
+    const input = lbl.querySelector('input');
+    if(input) input.checked=true;
+  });
+});
+</script>
+</body>
+  </html>
