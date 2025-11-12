@@ -4,234 +4,325 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <title>kmrXz Mods</title> 
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
+        :root{
+            --bg: #081025; /* deep navy */
+            --muted: #bfcbdc;
+            --accent: #7c3aed; /* purple */
+            --button-text: #fff;
+            --h2-color: #cfe0ff;
+            /* modal / panel colors (use theme to override for readability) */
+            --modal-bg: linear-gradient(180deg, rgba(10,12,30,0.65), rgba(10,12,30,0.5));
+            --modal-text: var(--muted);
+            --card-bg: rgba(255,255,255,0.03);
+            --btn-grad-start: #4f46e5;
+            --btn-grad-end: #3b82f6;
+            --select-bg: rgba(255,255,255,0.02);
+            --select-color: var(--muted);
+        }
+
+        *{box-sizing:border-box}
+
         body {
-            background-color: #04151f;
-            color: #ccc;
-            font-family: monospace;
+            background: var(--bg);
+            color: var(--muted);
+            font-family: var(--base-font, 'Poppins'), system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
             min-height: 100vh;
             scroll-behavior: smooth;
             transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden; /* prevent horizontal overflow */
         }
-        
+
+        /* wrapper for large-screen two-column layout */
+        .main-wrapper{
+            width: 100%;
+            max-width: 1300px;
+            display: block;
+        }
+
         .snowflake {
             position: absolute;
-            color: #fff; 
-            font-size: 10px; 
-            opacity: 0.7; 
-            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black; 
+            color: #fff;
+            font-size: 18px;
+            opacity: 0.85;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            pointer-events: none;
         }
 
      .top-bar {
   width: 100%;
-  background-color: #000;
-  color: MediumSeaGreen;
-  padding: 10px 0;
+  background: rgba(10,10,30,0.6);
+  color: var(--button-text);
+  padding: 12px 0;
   text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  position: fixed; 
-  top: -100px; 
-  z-index: 1000;
-  transition: top 0.5s ease-in-out; 
+  font-size: 20px;
+  font-weight: 600;
+  position: fixed;
+  top: -100px;
+  z-index: 1100;
+  transition: top 0.5s ease-in-out, background 0.3s;
 }
 
-#musicToggle {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-}
+/* #musicToggle styles removed (music button removed) */
 
         .header-image-container {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            height: 60vh; /* Increased height */
+            height: 60vh;
             width: 100%;
             position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        /* header widgets that appear on larger screens */
+        .header-widgets{
+            position: absolute;
+            right: 28px;
+            top: 22px;
+            z-index: 3;
+            width: 36%;
+            min-width: 220px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--muted);
+            box-shadow: 0 6px 18px rgba(10,10,30,0.6);
+            display: none; /* shown on large screens only */
+        }
+
+        .widget-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .widget-time{ font-size:20px; font-weight:600; color:var(--button-text); }
+        .widget-date{ font-size:13px; opacity:0.9 }
+
+        .stat-box{ margin-top:12px }
+        .stat-label{ font-size:13px; color:#9fbefc; margin-bottom:6px }
+        .stat-value{ font-weight:700; color:var(--button-text); font-size:18px }
+        .stat-line{ height:6px; background: rgba(255,255,255,0.08); border-radius:4px; position:relative; overflow:hidden; margin-top:8px }
+        .stat-line .fill{ position:absolute; left:0; top:0; height:100%; width:0%; background: linear-gradient(90deg,#60a5fa,#8b5cf6); border-radius:4px }
+
+        @media (min-width: 1000px){
+            .header-widgets{ display:block }
         }
 
         .header-image {
-            height: 200px;
-            width: 50%;
-            animation: upDown 4s infinite;
+            height: 260px;
+            width: auto;
+            max-width: 90%;
+            animation: upDown 5s infinite;
             object-fit: contain;
-            z-index: 1;
+            z-index: 2;
         }
 
         .flower-image {
             position: absolute;
-            top: 180px; /* Adjusted position */
-            height: 80%; /* Adjusted height */
+            left: 0;
+            top: 0;
+            height: 100%;
             width: 100%;
             object-fit: cover;
-            z-index: 0;
-            opacity: 0.8;
+            z-index: -1; /* ensure it sits behind navigation and content */
+            opacity: 0.65;
+            filter: none; /* keep raw image colors across themes */
+            pointer-events: none;
         }
 
         @keyframes upDown {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-30px);
-            }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-18px); }
         }
 
         .content-container {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: stretch;
             width: 100%;
-            padding-bottom: 20px;
+            padding: 20px 12px 60px;
+            box-sizing: border-box;
         }
 
         header {
-            text-align: center;
-            font-size: 40px; /* Increased size */
+            text-align: left;
+            font-size: 32px;
+            margin: 6px 0 18px;
+            color: var(--button-text);
         }
 
         .drawer {
-            margin: 20px 0;
-            text-align: center;
+            margin: 10px 0 18px;
+            text-align: left;
         }
 
         .drawer a {
             display: inline-block;
-            margin: 0 10px;
-            color: MediumSeaGreen;
+            margin: 0 10px 6px 0;
+            color: #9fbefc;
             text-decoration: none;
             cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: background 0.2s;
         }
 
+        .drawer a:hover{ background: rgba(255,255,255,0.03) }
+
         .content {
-            text-align: center;
-            width: 80%;
-            margin: 20px auto;
+            text-align: left;
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+            gap: 18px;
         }
 
         h2 {
-            margin: 40px 0 20px 0;
-            font-size: 24px;
-            text-transform: uppercase;
-            text-align: left;
-            position: relative;
-        }
-
-        h2::after {
-            content: "v:1.0";
-            font-size: 14px;
-            color: #ff6347;
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        img {
-            width: 70%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .description {
-            margin: 20px 0;
+            margin: 10px 0 12px 0;
             font-size: 18px;
+            text-transform: uppercase;
+            color: var(--h2-color, #cfe0ff);
         }
+
+        img { display: block; max-width: 100%; height: auto; }
+
+        .mod { background: var(--card-bg); padding: 12px; border-radius: 8px; }
+
+        .description { margin: 10px 0; font-size: 15px; color: var(--muted); }
 
         .download-button {
-            background-color: MediumSeaGreen;
-            color: #252525;
+            background: linear-gradient(90deg,var(--btn-grad-start),var(--btn-grad-end));
+            color: var(--button-text);
             border: none;
-            width: 96%;
-            padding: 10px 20px;
+            width: 100%;
+            padding: 10px 16px;
             text-transform: uppercase;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
-            border-radius: 2px;
+            border-radius: 8px;
             position: relative;
-            overflow: hidden;
+            /* animation/interaction hints for smooth, high-FPS motion */
+            will-change: transform, box-shadow, opacity;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms cubic-bezier(.2,.9,.2,1), opacity 180ms linear, filter 220ms linear;
         }
 
-        .download-button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 300%;
-            height: 300%;
-            background: gray;
-            transition: width 0.5s, height 0.5s, top 0.5s, left 0.5s;
-            z-index: 0;
-            border-radius: 50%;
-            opacity: 0;
-            transform: translate(-50%, -50%);
+        /* Shared animated button styles: hover lifts and subtle scale, active compresses quickly */
+        .download-button:hover,
+        .controls-toggle:hover,
+        .scroll-to-top:hover,
+        .modal-panel .close-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 18px 36px rgba(11,12,30,0.32);
+            opacity: 0.99;
         }
 
-        .download-button:hover::after {
-            width: 0;
-            height: 0;
-            top: 50%;
-            left: 50%;
-            opacity: 1;
+        .download-button:active,
+        .controls-toggle:active,
+        .scroll-to-top:active,
+        .modal-panel .close-btn:active {
+            transform: translateY(0) scale(0.985);
+            transition-duration: 90ms;
+            box-shadow: 0 6px 14px rgba(11,12,30,0.28);
         }
 
-        .download-button span {
-            position: relative;
-            z-index: 1;
+        /* Controls-toggle and top button share the same responsive animated feel */
+        .controls-toggle, .scroll-to-top, .modal-panel .close-btn {
+            will-change: transform, box-shadow, opacity;
+            transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms cubic-bezier(.2,.9,.2,1), opacity 180ms linear;
+            transform: translateZ(0);
+        }
+
+        /* focus-visible accessibility styling */
+        .download-button:focus-visible, .controls-toggle:focus-visible, .scroll-to-top:focus-visible, .modal-panel .close-btn:focus-visible {
+            outline: 3px solid rgba(124,58,237,0.18);
+            outline-offset: 3px;
+        }
+
+        /* Reduce motion for users who prefer that */
+        @media (prefers-reduced-motion: reduce) {
+            .download-button,
+            .controls-toggle,
+            .scroll-to-top,
+            .modal-panel .close-btn {
+                transition: none !important;
+            }
+            .download-button:hover, .controls-toggle:hover, .scroll-to-top:hover, .modal-panel .close-btn:hover,
+            .download-button:active, .controls-toggle:active, .scroll-to-top:active, .modal-panel .close-btn:active {
+                transform: none !important;
+                box-shadow: none !important;
+            }
         }
 
         footer {
-            background-color: #000;
+            background: rgba(0,0,0,0.45);
             width: 100%;
             text-align: center;
-            padding: 10px 0;
+            padding: 14px 0;
             position: relative;
+            margin-top: 24px;
         }
 
-        footer a {
-            color: MediumSeaGreen;
-            text-decoration: none;
+        footer a { color: #9fbefc; text-decoration: none; }
+
+    /* Top button - inline (left controls) and a fixed right-side Top button for quick access */
+    .scroll-to-top { background: linear-gradient(90deg,var(--btn-grad-start),var(--btn-grad-end)); color: var(--button-text); border: none; padding: 8px 12px; cursor: pointer; border-radius: 8px; font-size: 14px; display: none; box-shadow: 0 6px 16px rgba(11,12,30,0.6); z-index:1200 }
+    .controls-fixed .scroll-to-top.visible { display: inline-block; }
+
+    /* controls toggle (opens dialog) */
+    .controls-toggle{ background: linear-gradient(90deg,var(--btn-grad-start),var(--btn-grad-end)); color:var(--button-text); border:none; padding:8px 12px; border-radius:8px; cursor:pointer; box-shadow:0 6px 16px rgba(11,12,30,0.6) }
+    .controls-fixed .scroll-to-top{ display:none }
+    .controls-fixed .scroll-to-top.visible{ display:inline-block }
+
+    /* right fixed top button removed - only left controls Top remains */
+
+    /* modal / dialog for controls */
+    .modal-overlay{ position:fixed; inset:0; background: rgba(0,0,0,0.45); display:none; align-items:center; justify-content:center; z-index:1300 }
+    .modal-overlay.show{ display:flex }
+    .modal-panel{ background: var(--modal-bg); width:50vw; max-width:900px; border-radius:12px; padding:18px; box-shadow:0 12px 30px rgba(5,6,20,0.7); color:var(--modal-text); position:relative; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.04) }
+    .modal-panel .close-btn{ position:absolute; right:12px; top:12px; background:transparent; border:none; color:var(--muted); font-size:20px; cursor:pointer }
+    .modal-body{ display:flex; flex-direction:column; gap:12px; }
+    .modal-row{ display:flex; gap:12px; align-items:center; }
+    select{ background:var(--select-bg); color:var(--select-color); }
+    /* ensure dropdown background and text update with theme */
+    select.theme-aware{ border:1px solid rgba(255,255,255,0.04); padding:8px; border-radius:8px; -webkit-appearance:none; appearance:none }
+    /* try to style options (browser-dependent) */
+    select.theme-aware option{ background:var(--select-bg); color:var(--select-color); }
+    .modal-actions{ display:flex; gap:12px; margin-top:6px; flex-wrap:wrap }
+    @media (max-width:720px){ .modal-panel{ width:80vw } }
+
+        /* larger screen two-column layout - reduced gaps and narrower header to avoid large empty areas */
+        @media (min-width: 1000px){
+            .main-wrapper{ display: grid; grid-template-columns: 36% 64%; gap: 20px; align-items:start; }
+            .header-image-container{ height: 48vh; border-radius: 12px; }
+            .content-container{ padding: 28px 0 80px; }
+            .main-wrapper{ max-width: 1200px; margin: 0 auto; }
+            .header-widgets{ right:32px; top:24px; width:34%; }
         }
 
-        .scroll-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: MediumSeaGreen;
-            color: #252525;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 50%;
-            font-size: 20px;
-            display: none;
-        }
+            /* Prevent elements from creating horizontal scroll on smaller screens */
+            @media (max-width: 999px){
+                .header-widgets{ right:12px; left:auto; width:calc(100% - 40px); max-width: 360px; }
+                .main-wrapper{ padding: 0 12px; }
+                .controls-fixed{ left:12px; right:12px; }
+                .modal-panel{ width:90vw }
+            }
 
-        .scroll-to-top.visible {
-            display: block;
-        }
+            /* Generic safe rules */
+            p, a, h2 { overflow-wrap: break-word; }
+            img { max-width:100%; height:auto; display:block }
 
         @media (max-width: 768px) {
-            .header-image {
-                height: 150px;
-            }
-
-            .flower-image {
-                height: 50%;
-            }
-
-            .content {
-                width: 95%;
-            }
+            .header-image { height: 150px; }
+            .flower-image { height: 50%; }
+            .content { width: 100%; }
         }
     </style> 
  </head> 
@@ -239,11 +330,28 @@
   <div class="top-bar">
     <span>>_ kmrXz on code</span> 
   </div> 
-  <div class="header-image-container"> 
-   <img src="images/bee.png" alt="Bee Image" class="header-image"> 
-   <img src="images/flower.png" alt="Flowers Image" class="flower-image"> 
+    <div class="main-wrapper">
+    <div class="header-image-container"> 
+   <img src="bee.png" alt="Bee Image" class="header-image"> 
+    <img src="flower.png" alt="Flowers Image" class="flower-image"> 
+   <div class="header-widgets" aria-hidden="false">
+       <div class="widget-row">
+           <div>
+               <div id="widget-time" class="widget-time">00:00:00</div>
+               <div id="widget-date" class="widget-date">--/--/----</div>
+           </div>
+           <div style="text-align:right">
+               <div style="font-size:12px;color:#9fbefc">Visitors</div>
+               <div class="stat-value" id="visits-value">10</div>
+           </div>
+       </div>
+       <div class="stat-box">
+           <div class="stat-label">Daily visits (progress)</div>
+           <div class="stat-line"><div class="fill" style="width:10%"></div></div>
+       </div>
+   </div>
   </div> 
-  <div class="content-container"> 
+    <div class="content-container"> 
    <header>
      kmrXz mods 
    </header> 
@@ -307,20 +415,45 @@
      <img src="images/image1.jpg" alt="Mini Militia Pro Pack Unlocked"> 
      <p class="description">Pro Pack Unlocked</p> <a href="files/download.html"> <button class="download-button"><span>Download</span></button> </a> 
     </div> 
-   </div> 
-  </div> 
+   </div>
+    </div>
+    </div>
 
 
+        <footer> <a href="https://play.google.com/store/apps/details?id=com.openai.chatgpt">Made by @kmrXz and Chat GPT</a> </footer> 
 
-<button id="musicToggle">Play Music</button>
-<audio id="bgMusic">
-    <source src="malayali.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-</audio>
+        <!-- Fixed controls container (bottom-left): Controls + Top -->
+                <div class="controls-fixed" style="position:fixed;left:20px;bottom:20px;display:flex;gap:12px;z-index:1400">
+                    <button class="controls-toggle" id="open-controls" aria-haspopup="dialog">Controls</button>
+                    <button class="scroll-to-top" id="fixed-top" aria-label="Scroll to top">Top</button>
+                </div>
 
+                <!-- right-side fixed Top button removed; keep left controls Top only -->
 
-  <footer> <a href="https://play.google.com/store/apps/details?id=com.openai.chatgpt">Made by @kmrXz and Chat GPT</a> <button class="scroll-to-top" onclick="scrollToTop()">↑</button> 
-  </footer> 
+    <!-- Modal overlay for controls -->
+    <div class="modal-overlay" id="controls-modal" role="dialog" aria-modal="true" aria-hidden="true">
+            <div class="modal-panel">
+                <button class="close-btn" id="controls-close" aria-label="Close">✕</button>
+                <h3 style="margin:0 0 4px 0;color:var(--modal-text)">Controls</h3>
+                <div class="modal-body">
+                    <div class="modal-row">
+                        <label for="theme-select" style="min-width:140px;color:#9fbefc">Theme</label>
+                        <select id="theme-select" class="theme-aware" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);">
+                            <option value="default">Default (Blue / Purple)</option>
+                            <option value="green-black">Green + Black</option>
+                            <option value="bright">Bright (soft)</option>
+                            <option value="orange">Orange (warm)</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-row">
+                        <button id="toggle-snow" class="download-button">Pause Snowfall</button>
+                        <button id="apply-close" class="download-button">Apply & Close</button>
+                    </div>
+
+                </div>
+            </div>
+    </div>
   <script>
 //Top bar appear
 window.addEventListener('scroll', () => {
@@ -333,21 +466,8 @@ window.addEventListener('scroll', () => {
 });
 
 
-        // Scroll-to-top functionality
-        const scrollToTopButton = document.querySelector('.scroll-to-top');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                scrollToTopButton.classList.add('visible');
-            } else {
-                scrollToTopButton.classList.remove('visible');
-            }
-        });
-
         function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Theme toggle functionality
@@ -356,80 +476,4 @@ window.addEventListener('scroll', () => {
 
         themeToggleButton.addEventListener('click', () => {
             if (isDefaultTheme) {
-                document.body.style.backgroundColor = '#04151f';
-                document.body.style.color = 'MediumSeaGreen';
-            } else {
-                document.body.style.backgroundColor = '#04151f';
-                document.body.style.color = '#ccc';
-            }
-            isDefaultTheme = !isDefaultTheme;
-        });
-
-const snowflakeCount = 1; // Number of snowflakes
-
-        function createSnowflake() {
-            const snowflake = document.createElement('div');
-            snowflake.classList.add('snowflake');
-            snowflake.textContent = '😒'; 
-
-            const x = Math.random() * window.innerWidth;
-            const y = Math.random() * 10; // Start snowflakes from top
-
-            snowflake.style.left = `${x}px`;
-            snowflake.style.top = `-${y}px`; 
-
-            // Randomize size and fall speed
-            const size = Math.random() * 3 + 1; // Size between 1px and 4px
-            const speed = Math.random() * 3 + 2; // Fall speed (seconds)
-
-            snowflake.style.fontSize = `${size}px`;
-            snowflake.style.animation = `fall ${speed}s linear infinite`;
-
-            document.body.appendChild(snowflake);
-
-            // Remove snowflake after animation ends
-            snowflake.addEventListener('animationend', () => {
-                snowflake.remove();
-            });
-        }
-
-        // Simple CSS animation for falling snowflakes
-        const styleSheet = document.createElement('style');
-        styleSheet.innerHTML = `
-            @keyframes fall {
-                100% {
-                    transform: translateY(100vh);
-                    opacity: 0; 
-                }
-            }
-        `;
-        document.head.appendChild(styleSheet); 
-
-        // Create initial snowflakes
-        for (let i = 0; i < snowflakeCount; i++) {
-            createSnowflake();
-        }
-
-document.addEventListener('DOMContentLoaded', function () {
-    var music = document.getElementById('bgMusic');
-    var toggleButton = document.getElementById('musicToggle');
-
-    toggleButton.addEventListener('click', function () {
-        if (music.paused) {
-            music.play();
-            toggleButton.textContent = 'Pause Music';
-        } else {
-            music.pause();
-            toggleButton.textContent = 'Play Music';
-        }
-    });
-});
-
-        // Continuously create new snowflakes
-        setInterval(createSnowflake, 200);
-    function oomb(){
- open("https://kmrxz.gitHub.io/modpage/files/oomb.html");
-    }
-</script> 
- </body>
-</html>
+               
