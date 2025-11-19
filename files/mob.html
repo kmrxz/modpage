@@ -22,6 +22,19 @@
                     justify-content: center;
                     min-height: calc(100vh - 4.5rem);
                 }
+        /* Cleaned up duplicate CSS and set up variables for theme toggle */
+        :root {
+            --bg: #fffaf3;
+            --container-bg: #fff;
+            --text: #23283a;
+            --accent: orange;
+            --accent2: #ffd699;
+            --nav-bg: #fff;
+            --nav-text: #23283a;
+            --nav-hover: #ffe5b4;
+            --social-bg: #fff;
+            --social-border: orange;
+        }
         body {
             font-family: 'Inter', Arial, sans-serif;
             background: var(--bg);
@@ -71,16 +84,6 @@
             min-width: 90px;
             justify-content: center;
         }
-                @media (min-width: 1000px) {
-                    .navbar {
-                        grid-template-columns: 1fr auto auto auto;
-                        padding-right: 5vw;
-                        padding-left: 5vw;
-                    }
-                    .theme-switch {
-                        min-width: 120px;
-                    }
-                }
         .switch {
             position: relative;
             display: inline-block;
@@ -99,7 +102,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: var(--nav-hover);
+            background-color: rgb(238, 212, 163) !important;
             border-radius: 24px;
             transition: background 0.3s;
         }
@@ -110,16 +113,16 @@
             width: 20px;
             left: 2px;
             bottom: 2px;
-            background-color: var(--accent);
+            background-color: orange !important;
             border-radius: 50%;
             transition: transform 0.3s, background 0.3s;
         }
         input:checked + .slider {
-            background-color: var(--nav-hover);
+            background-color: rgb(48, 17, 224) !important;
         }
         input:checked + .slider:before {
             transform: translateX(24px);
-            background: var(--accent2);
+            background: rgb(20, 181, 221) !important;
         }
         .theme-icon {
             width: 22px;
@@ -128,60 +131,11 @@
             align-items: center;
             justify-content: center;
         }
-        .theme-icon svg {
-            display: block;
-            width: 22px;
-            height: 22px;
-        }
         .theme-icon.sun svg {
             fill: orange;
         }
         .theme-icon.moon svg {
-            fill: #ffd700;
-        }
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            justify-content: center;
-            align-items: center;
-        }
-        .hamburger span {
-            height: 4px;
-            width: 24px;
-            background: var(--nav-text);
-            margin: 3px 0;
-            border-radius: 2px;
-            transition: 0.3s;
-        }
-        .drawer {
-            position: fixed;
-            top: 0;
-            left: -250px;
-            width: 220px;
-            height: 100vh;
-            background: var(--nav-bg);
-            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-            padding-top: 3.5rem;
-            transition: left 0.3s;
-            z-index: 200;
-        }
-        .drawer.open {
-            left: 0;
-        }
-        .drawer a {
-            color: var(--nav-text);
-            text-decoration: none;
-            font-weight: bold;
-            padding: 1rem;
-            border-bottom: 1px solid var(--nav-hover);
-        }
-        .drawer a:hover {
-            background: var(--nav-hover);
+            fill: #00fff7;
         }
         :root {
             --bg: #181c24;
@@ -223,11 +177,11 @@
             transition: transform 0.3s, background 0.3s;
         }
         input:checked + .slider {
-            background-color: var(--accent2);
+            background-color: #00fff7;
         }
         input:checked + .slider:before {
             transform: translateX(24px);
-            background: var(--accent2);
+            background: #00fff7;
         }
         .theme-icon {
             width: 22px;
@@ -323,7 +277,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: #00fff7;
+            background: none;
             border: 2px solid var(--social-border);
             box-shadow: none;
             transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -409,13 +363,13 @@
         </div>
         <div class="social">
             <a href="https://wa.me/yourwhatsappnumber" target="_blank" title="WhatsApp">
-                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp">
+                <img src="img/wa.png" alt="WhatsApp">
             </a>
             <a href="https://instagram.com/yourinstagram" target="_blank" title="Instagram">
-                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram">
+                <img src="img/ig.png" alt="Instagram">
             </a>
             <a href="https://twitter.com/yourtwitter" target="_blank" title="Twitter">
-                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/twitter.svg" alt="Twitter">
+                <img src="img/x.png" alt="Twitter">
             </a>
                         <a href="tel:+yourphonenumber" title="Call" style="background:var(--accent); border-radius:50%; width:48px; height:48px; display:flex; align-items:center; justify-content:center;">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
@@ -423,7 +377,7 @@
                                 </svg>
                         </a>
             <a href="mailto:youremail@example.com" title="Email">
-                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg" alt="Email">
+                <img src="img/gm.png" alt="Email">
             </a>
         </div>
         </div>
