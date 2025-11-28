@@ -394,7 +394,147 @@
     </style> 
  </head> 
  <body> 
-  <div class="top-bar">
+    <!-- Interactive atomic background -->
+    <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;"></canvas>
+    <script>
+        // Atomic background from interactives/atomic.html
+        const canvas = document.getElementById("particleCanvas");
+        const ctx = canvas.getContext("2d");
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+        const particles = [];
+        const explosionParticles = [];
+        const rippleEffects = [];
+        const colors = ["#0000ff"];
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 5 + 2;
+                this.color = color || colors[Math.floor(Math.random() * colors.length)];
+                this.vx = Math.random() * 6 - 3;
+                this.vy = Math.random() * 6 - 3;
+            }
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+        }
+        class Ripple {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 0;
+                this.alpha = 0.1;
+                this.maxRadius = Math.max(canvas.width, canvas.height) / 2;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = "#0000ff";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+            update() {
+                this.radius += 5;
+                this.alpha -= 0.02;
+                if (this.alpha <= 0) this.alpha = 0;
+            }
+        }
+        function createParticles() {
+            // No longer used; replaced by updateParticles()
+        }
+        function triggerExplosion(x, y) {
+            const numParticles = 2;
+            for (let i = 0; i < numParticles; i++) {
+                const particle = new Particle(x, y, "#0000ff");
+                particle.vx = Math.random() * 6 - 3;
+                particle.vy = Math.random() * 6 - 3;
+                explosionParticles.push(particle);
+            }
+            const ripple = new Ripple(x, y);
+            rippleEffects.push(ripple);
+            setTimeout(() => {
+                explosionParticles.length = 0;
+                rippleEffects.length = 0;
+            }, 1000);
+        }
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updateParticles();
+            particles.forEach((particle) => { particle.draw(); particle.update(); });
+            explosionParticles.forEach((particle) => { particle.draw(); particle.update(); });
+            rippleEffects.forEach((ripple) => { ripple.draw(); ripple.update(); });
+            if (explosionParticles.length > 0) {
+                particles.push(...explosionParticles);
+                explosionParticles.length = 0;
+            }
+            connectParticles();
+            requestAnimationFrame(animate);
+        }
+        function connectParticles() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.save();
+                        ctx.globalAlpha = 1 - distance / 100;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = "#ff00ff";
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }
+        }
+        // Only allow click interaction if not covered by modal or overlay
+        // Dynamic particle count based on scroll position
+        function getTargetParticleCount() {
+            const scrollY = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            if (docHeight <= 0) return 0;
+            const percent = Math.max(0, Math.min(1, scrollY / docHeight));
+            return Math.round(percent * 60); // 0 at top, 60 at bottom
+        }
+        function updateParticles() {
+            const targetCount = getTargetParticleCount();
+            // Remove excess particles
+            while (particles.length > targetCount) particles.pop();
+            // Add new particles if needed
+            while (particles.length < targetCount) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                particles.push(new Particle(x, y));
+            }
+        }
+        window.addEventListener('scroll', updateParticles);
+        window.addEventListener('resize', updateParticles);
+        updateParticles();
+        animate();
+    </script>
+    <div class="top-bar">
     <span>>_ kmrXz on code</span> 
   </div> 
     <div class="main-wrapper">
