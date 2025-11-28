@@ -563,10 +563,22 @@
      kmrXz mods 
    </header> 
    <div class="drawer">
-     <a href="files/surprise.html">Don't click</a>
-     <a id="theme-toggle">Theme</a>
-     <a href="about.html">About</a>
-     <a href="https://instagram.com/echo_rapt0r">Connect</a> 
+    <a href="files/surprise.html">Don't click</a>
+    <a href="#" id="secret-page-link">SECRET PAGE!!!</a>
+    <a href="about.html">About</a>
+    <a href="https://instagram.com/echo_rapt0r">Connect</a> 
+    <!-- Modal overlay for SECRET PAGE passcode -->
+    <div class="modal-overlay" id="secret-modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
+        <div class="modal-panel">
+            <button class="close-btn" id="secret-close" aria-label="Close">✕</button>
+            <h3 style="margin:0 0 8px 0;color:var(--modal-text)">Enter Passcode</h3>
+            <div class="modal-body">
+                <input id="secret-passcode" type="password" placeholder="Enter passcode" style="width:100%;padding:10px 8px;font-size:16px;border-radius:8px;border:1px solid #bbb;margin-bottom:12px;">
+                <button id="secret-submit" class="download-button" style="width:100%;">Submit</button>
+                <div id="secret-error" style="color:#e53e3e;font-size:14px;margin-top:8px;display:none;">Wrong password. Try again.</div>
+            </div>
+        </div>
+    </div>
    </div> 
                     <div class="modal-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;">
                         <div style="grid-column:1/3;display:flex;align-items:center;gap:12px;">
@@ -725,6 +737,52 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // SECRET PAGE modal logic
+    var secretPageLink = document.getElementById('secret-page-link');
+    var secretModal = document.getElementById('secret-modal');
+    var secretCloseBtn = document.getElementById('secret-close');
+    var secretSubmitBtn = document.getElementById('secret-submit');
+    var secretPasscode = document.getElementById('secret-passcode');
+    var secretError = document.getElementById('secret-error');
+    var secretHref = 'sec.html';
+    if (secretPageLink && secretModal && secretCloseBtn && secretSubmitBtn && secretPasscode && secretError) {
+        secretPageLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            secretModal.style.display = 'flex';
+            secretModal.setAttribute('aria-hidden', 'false');
+            secretPasscode.value = '';
+            secretError.style.display = 'none';
+            setTimeout(function(){ secretPasscode.focus(); }, 100);
+        });
+        secretCloseBtn.addEventListener('click', function() {
+            secretModal.style.display = 'none';
+            secretModal.setAttribute('aria-hidden', 'true');
+            secretPasscode.value = '';
+            secretError.style.display = 'none';
+        });
+        secretModal.addEventListener('click', function(e) {
+            if (e.target === secretModal) {
+                secretModal.style.display = 'none';
+                secretModal.setAttribute('aria-hidden', 'true');
+                secretPasscode.value = '';
+                secretError.style.display = 'none';
+            }
+        });
+        function handleSecretSubmit() {
+            if (secretPasscode.value === '888aac') {
+                window.location.href = secretHref;
+            } else {
+                secretError.style.display = 'block';
+                secretPasscode.value = '';
+                secretPasscode.focus();
+            }
+        }
+        secretSubmitBtn.addEventListener('click', handleSecretSubmit);
+        secretPasscode.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleSecretSubmit();
+        });
+    }
 });
 </script>
   <script>
@@ -743,20 +801,7 @@ window.addEventListener('scroll', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Theme toggle functionality
-        const themeToggleButton = document.getElementById('theme-toggle');
-        let isDefaultTheme = true;
 
-        themeToggleButton.addEventListener('click', () => {
-            if (isDefaultTheme) {
-                document.body.style.backgroundColor = '#04151f';
-                document.body.style.color = 'MediumSeaGreen';
-            } else {
-                document.body.style.backgroundColor = '#04151f';
-                document.body.style.color = '#ccc';
-            }
-            isDefaultTheme = !isDefaultTheme;
-        });
 
 const snowflakeCount = 6; // Number of snowflakes to start with
 
