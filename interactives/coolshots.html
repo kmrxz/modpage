@@ -1,181 +1,278 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cool Shots</title>
+
+<!doctype html>
+<html lang="en"> 
+<head> 
+    <!-- Font Awesome for open source icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKB4Imkb9h6Y5Q5Q0siJmq9ki3W1QK6Q5Q0siJmq9ki3W1QK6Q5Q0siJmq9ki3W1QK6Q5Q0siJmq9ki3W1QK6Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Cool Shots</title> 
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
+    :root{
+      --bg: #081025;
+      --muted: #bfcbdc;
+      --accent: #7c3aed;
+      --button-text: #fff;
+      --h2-color: #cfe0ff;
+      --modal-bg: linear-gradient(180deg, rgba(10,12,30,0.65), rgba(10,12,30,0.5));
+      --modal-text: var(--muted);
+      --card-bg: rgba(255,255,255,0.03);
+      --btn-grad-start: #4f46e5;
+      --btn-grad-end: #3b82f6;
+    }
+    *{box-sizing:border-box}
     body {
-      background-color: #0000cc;
-      color: mediumseagreen;
-      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--muted);
+      font-family: 'Poppins', Arial, sans-serif;
       margin: 0;
       padding: 0;
-    }
-
-    header {
-      background-color: #252524;
-      color: #0000cc;
-      padding: 10px 20px;
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    /* Animating each letter in header */
-header span {
-  display: inline-block;
-  animation: jump 1s ease-in-out infinite;
-}
-
-header span:nth-child(1) {
-  animation-delay: 0s;
-}
-header span:nth-child(2) {
-  animation-delay: 0.1s;
-}
-header span:nth-child(3) {
-  animation-delay: 0.2s;
-}
-header span:nth-child(4) {
-  animation-delay: 0.3s;
-}
-/* Add more nth-child rules if your text has more letters */
-
-/* Jump animation */
-@keyframes jump {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
-}
-    .container {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 20px;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
     }
-
-    .card {
-      background-color: #0066cc;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      margin: 15px;
-      width: 250px;
-      padding: 15px;
+    .top-bar {
+      width: 100%;
+      background: rgba(10,10,30,0.6);
+      color: var(--button-text);
+      padding: 12px 0;
       text-align: center;
-      color: mediumseagreen;
+      font-size: 20px;
+      font-weight: 600;
+      position: fixed;
+      top: -100px;
+      z-index: 1100;
+      transition: top 0.5s ease-in-out, background 0.3s;
     }
-
-    .card img {
-      width: 100px;
-      height: 100px;
+    .main-wrapper{
+      width: 100%;
+      max-width: 1200px;
+      display: block;
+    }
+    .content-container {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      padding: 20px 12px 60px;
+      box-sizing: border-box;
+    }
+    header {
+      text-align: left;
+      font-size: 32px;
+      margin: 6px 0 18px;
+      color: var(--button-text);
+    }
+    .content {
+      text-align: left;
+      width: 85v;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 18px;
+    }
+    .mod {
+      background: var(--card-bg);
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+      text-align: center;
+    }
+    .mod img {
+      width: 300px;
+      height: 300px;
       border-radius: 10px;
       margin-bottom: 10px;
+      object-fit: cover;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
-
-    .card h3 {
+    .mod .icon-fa {
+      font-size: 48px;
+      margin-bottom: 10px;
+      color: var(--accent);
+      display: block;
+      text-align: center;
+      width: 100%;
+      transition: color 0.2s;
+    }
+    .mod .icon-fa:hover {
+      color: #3b82f6;
+    }
+    .mod h3 {
       color: #cccccc;
       font-size: 20px;
       margin: 10px 0;
     }
-
-    .card p {
+    .mod p {
       font-size: 14px;
       margin: 10px 0;
     }
-
-    .card button {
-      background-color: #0099cc;
+    .download-button {
+      background: linear-gradient(90deg,var(--btn-grad-start),var(--btn-grad-end));
+      color: var(--button-text);
       border: none;
       width: 90%;
-      color: #252525;
       padding: 10px 15px;
       font-size: 14px;
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 8px;
+      margin: 8px 0;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    .card button:hover {
-      background-color: #00cccc;
+    .download-button:hover {
+      background: linear-gradient(90deg,#7c3aed,#3b82f6);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 8px 24px rgba(11,12,30,0.18);
     }
-
-    .footer-buttons {
-      background-color: #0099cc;
+    .controls-fixed {
       position: fixed;
+      left: 20px;
       bottom: 20px;
-      right: 20px;
       display: flex;
+      gap: 12px;
+      z-index: 1400;
       flex-direction: column;
+      align-items: flex-start;
+      background: none;
+      min-width: 110px;
     }
-
-    .footer-buttons button {
-      background-color: mediumseagreen;
-      border: none;
-      color: #252525;
-      padding: 10px 15px;
-      margin: 5px 0;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 5px;
+    .scroll-to-top { background: linear-gradient(90deg,var(--btn-grad-start),var(--btn-grad-end)); color: var(--button-text); border: none; padding: 8px 12px; cursor: pointer; border-radius: 8px; font-size: 14px; display: none; box-shadow: 0 6px 16px rgba(11,12,30,0.6); z-index:1200 }
+    .controls-fixed .scroll-to-top.visible { display: inline-block; }
+    footer {
+      background: rgba(0,0,0,0.45);
+      width: 100%;
+      text-align: center;
+      padding: 14px 0;
+      position: relative;
+      margin-top: 24px;
+      color: #9fbefc;
     }
-
-    .footer-buttons button:hover {
-      background-color: #1e7a56;
+    @media (min-width: 1000px) {
+      .main-wrapper {
+        display: grid !important;
+        grid-template-columns: 240px 1fr;
+        gap: 32px;
+        align-items: flex-start;
+      }
+      .controls-fixed {
+        position: static !important;
+        left: 0 !important;
+        bottom: auto !important;
+        top: 0;
+        z-index: 1;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        background: none;
+        min-width: 180px;
+        margin-top: 32px;
+        margin-left: 0;
+        gap: 16px;
+        width: 100%;
+        max-width: 240px;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-  <span>C</span><span>o</span><span>o</span><span>l</span> 
-  Sh!ts
-</header>
-  <H3>This page is currently under process and i have no idea how to finish it</H3>
-  <div class="container">
-    <!-- Card Example -->
-    <div class="card">
-      <img src="../images/default.jpg" alt="Icon">
-      <h3>Bubble pop</h3>
-      <p>A cool interactive screensaver</p>
-      <button onclick="window.location.href='bubble.html';">Pop up</button>
-    </div>
-
-    <div class="card">
-      <img src="../images/default.jpg" alt="Icon">
-      <h3>Splash</h3>
-      <p>Interactive javascript project which makes screen splashes</p>
-      <button onclick="window.location.href='splash.html';">Splash</button>
-    </div>
-    <!-- Add more cards as needed -->
-      <div class="card">
-      <img src="images/default.jpg" alt="Icon">
-      <h3>Atomic bond</h3>
-      <p>Create bond between quantum particles</p>
-      <button onclick="window.location.href='atomic.html';">Collide</button>
-    </div>
-    <!--more-->
-    <div class="card">
-      <img src="images/default.jpg" alt="Icon">
-      <h3>Coming soon!</h3>
-      <p>I missed a } somewhere</p>
-      <button>I'm sad </button>
+  <div class="top-bar">
+    <span>>_ Cool Shots</span> 
+  </div>
+  <div class="main-wrapper">
+    <div class="content-container">
+      <header>Cool Shots</header>
+      <div class="content">
+        <div class="mod">
+          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Bubble pop">
+          <h3>Bubble pop</h3>
+          <p>A cool interactive screensaver</p>
+          <button class="download-button" onclick="window.location.href='bubble.html';">Pop up</button>
+        </div>
+        <div class="mod">
+          <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Splash">
+          <h3>Splash</h3>
+          <p>Interactive javascript project which makes screen splashes</p>
+          <button class="download-button" onclick="window.location.href='splash.html';">Splash</button>
+        </div>
+        <div class="mod">
+          <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80" alt="Atomic bond">
+          <h3>Atomic bond</h3>
+          <p>Create bond between quantum particles</p>
+          <button class="download-button" onclick="window.location.href='atomic.html';">Collide</button>
+        </div>
+        <div class="mod">
+          <img src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80" alt="Coming soon">
+          <h3>Coming soon!</h3>
+          <p>I missed a } somewhere</p>
+          <button class="download-button">I'm sad </button>
+        </div>
+      </div>
     </div>
   </div>
-
-  <div class="footer-buttons">
-    <button onclick="goHome()">Home</button>
-    <button onclick="scrollToTop()">To Top</button>
+  <footer>
+    <a href="../main.html" style="color:#ffb347;font-weight:600;text-decoration:underline;"><i class="fa-solid fa-house"></i> Home</a> <span style="color:#9fbefc">| <i class="fa-brands fa-github"></i> kmrXz &copy; 2025</span>
+  </footer>
+  <div class="controls-fixed">
+    <button class="download-button" id="open-readme" aria-haspopup="dialog" style="width:110px;min-width:110px;max-width:110px;padding:6px 0;font-size:13px;">README</button>
+    <button class="scroll-to-top" id="fixed-top" aria-label="Scroll to top">Top</button>
   </div>
-
+  <div class="modal-overlay" id="readme-modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:1500;">
+    <div class="modal-panel" style="background:var(--modal-bg);color:var(--modal-text);width:90vw;max-width:400px;border-radius:12px;padding:18px;box-shadow:0 12px 30px rgba(5,6,20,0.7);position:relative;z-index:1510;backdrop-filter: blur(8px);-webkit-backdrop-filter: blur(8px);border:1px solid rgba(255,255,255,0.04)">
+      <button class="close-btn" id="readme-close" aria-label="Close" style="position:absolute;right:12px;top:12px;background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+      <h3 style="margin:0 0 4px 0;color:var(--modal-text)">Thank You</h3>
+      <div class="modal-body">
+        <p style="font-size:15px;color:var(--modal-text);margin:12px 0 0 0;">Thanks for visiting Cool Shots!</p>
+        <p style="font-size:15px;color:var(--modal-text);margin:12px 0 0 0;">This page is a collection of interactive JavaScript projects. More coming soon!</p>
+        <p style="font-size:15px;color:var(--modal-text);margin:12px 0 0 0;">If you have any questions or feedback, you can reach me on Instagram at <a href="https://instagram.com/echo_rapt0r" target="_blank" style="color:#5574ff;">@echo_rapt0r</a>.</p>
+      </div>
+    </div>
+  </div>
   <script>
-    function goHome() {
-      window.location.href = "../main.html"; // Change this to your home page URL
-    }
-
-    function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    // Top bar appear
+    window.addEventListener('scroll', () => {
+      const scrollPosition = window.scrollY; 
+      if (scrollPosition > 50) { 
+        document.querySelector('.top-bar').style.top = '0'; 
+      } else {
+        document.querySelector('.top-bar').style.top = '-100px'; 
+      }
+    });
+    // README modal logic
+    document.addEventListener('DOMContentLoaded', function() {
+      var openReadmeBtn = document.getElementById('open-readme');
+      var readmeModal = document.getElementById('readme-modal');
+      var readmeCloseBtn = document.getElementById('readme-close');
+      if (openReadmeBtn && readmeModal && readmeCloseBtn) {
+        openReadmeBtn.addEventListener('click', function() {
+          readmeModal.style.display = 'flex';
+          readmeModal.setAttribute('aria-hidden', 'false');
+        });
+        readmeCloseBtn.addEventListener('click', function() {
+          readmeModal.style.display = 'none';
+          readmeModal.setAttribute('aria-hidden', 'true');
+        });
+        readmeModal.addEventListener('click', function(e) {
+          if (e.target === readmeModal) {
+            readmeModal.style.display = 'none';
+            readmeModal.setAttribute('aria-hidden', 'true');
+          }
+        });
+      }
+      // Top button logic
+      const fixedTopBtn = document.getElementById('fixed-top');
+      function updateFixedTopVisibility(){
+        const show = window.scrollY > 300;
+        if (fixedTopBtn) { if (show) fixedTopBtn.classList.add('visible'); else fixedTopBtn.classList.remove('visible'); }
+      }
+      updateFixedTopVisibility();
+      window.addEventListener('scroll', updateFixedTopVisibility);
+      if (fixedTopBtn) fixedTopBtn.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    });
   </script>
 </body>
 </html>
