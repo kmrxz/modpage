@@ -262,134 +262,160 @@
         flex-wrap: wrap;
         box-shadow: none !important;
     }
+
+    .fixed-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        z-index: 100;
+        background: #04151f;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .header-spacer {
+        height: 260px; /* Increased to match fixed header height */
+        width: 100%;
+    }
+    #contacts {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
   </style> 
 </head> 
 <body> 
   <!-- Atomic background (non-interactive) -->
   <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;"></canvas>
   <script>
-  // Atomic background with green particles and thick, gradient bonds
-  const canvas = document.getElementById("particleCanvas");
-  const ctx = canvas.getContext("2d");
-  function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
-  const particles = [];
-  const colors = ["#00ff00"];
-  class Particle {
-      constructor(x, y, color) {
-          this.x = x;
-          this.y = y;
-          this.radius = Math.random() * 5 + 2;
-          this.color = color || colors[Math.floor(Math.random() * colors.length)];
-          this.vx = Math.random() * 6 - 3;
-          this.vy = Math.random() * 6 - 3;
-          this.alpha = 1;
-          this.life = Math.random() * 120 + 80; // frames
-      }
-      draw() {
-          ctx.save();
-          ctx.globalAlpha = this.alpha;
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-          ctx.fillStyle = this.color;
-          ctx.fill();
-          ctx.restore();
-      }
-      update() {
-          this.x += this.vx;
-          this.y += this.vy;
-          this.life--;
-          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-          if (this.life < 30) this.alpha = Math.max(0, this.life / 30);
-      }
-      isDead() {
-          return this.life <= 0 || this.alpha <= 0.01;
-      }
-  }
-  function addParticle() {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      particles.push(new Particle(x, y));
-  }
-  function connectParticles() {
-      for (let i = 0; i < particles.length; i++) {
-          for (let j = i + 1; j < particles.length; j++) {
-              const dx = particles[i].x - particles[j].x;
-              const dy = particles[i].y - particles[j].y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              if (distance < 100) {
-                  // Draw a thick line that is thickest at the dots, thinnest at the midpoint
-                  const steps = 16;
-                  for (let s = 0; s < steps; s++) {
-                      const t = s / (steps - 1);
-                      // Thickness: max at ends, min at center
-                      const thickness = 5 - 4 * Math.abs(0.5 - t) * 2; // 5px at ends, 1px at center
-                      const x = particles[i].x + (particles[j].x - particles[i].x) * t;
-                      const y = particles[i].y + (particles[j].y - particles[i].y) * t;
-                      ctx.save();
-                      ctx.globalAlpha = 0.18 * (1 - distance / 100);
-                      ctx.beginPath();
-                      ctx.arc(x, y, thickness / 2, 0, Math.PI * 2);
-                      ctx.fillStyle = "#00ff00";
-                      ctx.fill();
-                      ctx.restore();
-                  }
-              }
-          }
-      }
-  }
-  function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = particles.length - 1; i >= 0; i--) {
-          const p = particles[i];
-          p.draw();
-          p.update();
-          if (p.isDead()) {
-              particles.splice(i, 1);
-          }
-      }
-      // Draw linking bonds
-      connectParticles();
-      // Always keep 55 particles
-      while (particles.length < 55) addParticle();
-      requestAnimationFrame(animateParticles);
-  }
-  while (particles.length < 55) addParticle();
-  animateParticles();
-  </script>
-
-  <h1>Mobile Puncture Ekm</h1>
-
-  <!-- Top bar with search + dropdown -->
-  <nav class="top-nav" style="width:100%;background:#23283a;padding:0.7rem 0.5rem 0.7rem 0.5rem;display:flex;justify-content:center;align-items:center;gap:2rem;margin-bottom:2rem;border-radius:10px;flex-wrap:wrap;">
+// Atomic background with green particles and thick, gradient bonds
+const canvas = document.getElementById("particleCanvas");
+const ctx = canvas.getContext("2d");
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+const particles = [];
+const colors = ["#00ff00"];
+class Particle {
+    constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * 5 + 2;
+        this.color = color || colors[Math.floor(Math.random() * colors.length)];
+        this.vx = Math.random() * 6 - 3;
+        this.vy = Math.random() * 6 - 3;
+        this.alpha = 1;
+        this.life = Math.random() * 120 + 80; // frames
+    }
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+    }
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        if (this.life < 30) this.alpha = Math.max(0, this.life / 30);
+    }
+    isDead() {
+        return this.life <= 0 || this.alpha <= 0.01;
+    }
+}
+function addParticle() {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    particles.push(new Particle(x, y));
+}
+function connectParticles() {
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 100) {
+                // Draw a thick line that is thickest at the dots, thinnest at the midpoint
+                const steps = 16;
+                for (let s = 0; s < steps; s++) {
+                    const t = s / (steps - 1);
+                    // Thickness: max at ends, min at center
+                    const thickness = 5 - 4 * Math.abs(0.5 - t) * 2; // 5px at ends, 1px at center
+                    const x = particles[i].x + (particles[j].x - particles[i].x) * t;
+                    const y = particles[i].y + (particles[j].y - particles[i].y) * t;
+                    ctx.save();
+                    ctx.globalAlpha = 0.18 * (1 - distance / 100);
+                    ctx.beginPath();
+                    ctx.arc(x, y, thickness / 2, 0, Math.PI * 2);
+                    ctx.fillStyle = "#00ff00";
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+        }
+    }
+}
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.draw();
+        p.update();
+        if (p.isDead()) {
+            particles.splice(i, 1);
+        }
+    }
+    // Draw linking bonds
+    connectParticles();
+    // Always keep 55 particles
+    while (particles.length < 55) addParticle();
+    requestAnimationFrame(animateParticles);
+}
+while (particles.length < 55) addParticle();
+animateParticles();
+</script>
+  <div class="fixed-header">
+    <h1>Mobile Puncture Ekm</h1>
+    <nav class="top-nav">
       <a href="https://kmrxz.github.io/modpage/main.html" style="color:mediumseagreen;font-weight:600;text-decoration:none;font-size:1rem;">Home</a>
       <a href="apps.html" style="color:mediumseagreen;font-weight:600;text-decoration:none;font-size:1rem;">Apps</a>
       <a href="files/settings.html" style="color:mediumseagreen;font-weight:600;text-decoration:none;font-size:1rem;">Settings</a>
       <a href="about.html" style="color:mediumseagreen;font-weight:600;text-decoration:none;font-size:1rem;">About</a>
     </nav>
     <div class="top-bar" style="margin-top:0;">
-        <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                <input type="text" id="searchBar" placeholder="Search..." style="flex: 1; min-width: 120px;">
-                <button id="searchBtn" class="btn" style="padding: 10px 14px; min-width: 44px; display: flex; align-items: center; justify-content: center;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="white" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="white" stroke-width="2"/></svg>
-                </button>
-                <select id="locationDropdown" class="btn" style="padding: 10px 18px; min-width: 80px; background: #23283a; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;">
-                        <option value="">Locations</option>
-                </select>
-        </div>
+      <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+        <input type="text" id="searchBar" placeholder="Search..." style="flex: 1; min-width: 120px;">
+        <button id="searchBtn" class="btn" style="padding: 10px 14px; min-width: 44px; display: flex; align-items: center; justify-content: center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="white" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="white" stroke-width="2"/></svg>
+        </button>
+        <select id="locationDropdown" class="btn" style="padding: 10px 18px; min-width: 80px; background: #23283a; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;">
+          <option value="">Full list</option>
+        </select>
+      </div>
     </div>
-
+  </div>
+  <div class="header-spacer"></div>
   <div id="contacts"></div> 
   <div id="toast">Number copied!</div> 
 
   <footer> 
     <a href="https://wa.me/+919895700438?text=Hii,i+would+like+to+add+this+number+to+your+webpage">
-      <button class="btn">Add NUMBER</button>
+      <button class="btn">ADD A NUMBER</button>
     </a>
     <div class="footer-content"> 
       <p>Sibichan ee pageinte ishwaryam</p> 
@@ -466,10 +492,6 @@ function getFilteredContacts() {
             c.phone.toLowerCase().includes(searchTerm)
         );
     }
-    // Sort by location if selected
-    if (selectedLocation) {
-        filtered = filtered.sort((a, b) => a.name.localeCompare(b.name));
-    }
     return filtered;
 }
 
@@ -498,7 +520,17 @@ function runSearchHighlight() {
 
 document.getElementById("searchBar").addEventListener("input", runSearchHighlight);
 document.getElementById("searchBtn").addEventListener("click", runSearchHighlight);
-locationDropdown.addEventListener("change", runSearchHighlight);
+locationDropdown.addEventListener("change", function() {
+    const selectedLocation = locationDropdown.value;
+    if (selectedLocation) {
+        // Only show contacts from the selected location
+        const filtered = contacts.filter(c => c.location === selectedLocation);
+        renderContacts(filtered);
+    } else {
+        // Show all contacts if no location selected
+        renderContacts(contacts);
+    }
+});
 
 // Initial render
 renderContacts(contacts);
