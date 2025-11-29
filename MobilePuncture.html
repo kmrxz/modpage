@@ -100,16 +100,27 @@
     }
 
     /* ---- Contact cards ---- */
+    #contacts {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
     .contact-card {
         background-color: #23283a;
         border-radius: 16px;
         padding: 20px;
-        margin: 16px 0;
         box-shadow: 0 2px 12px rgba(0,0,0,0.10);
         transition: box-shadow 0.2s, transform 0.2s;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 4px;
+        min-width: 0;
+        min-height: 0;
     }
     .contact-card:hover {
         box-shadow: 0 6px 24px rgba(40,167,69,0.18);
@@ -237,6 +248,104 @@
   </style> 
 </head> 
 <body> 
+  <!-- Atomic background (non-interactive) -->
+  <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;"></canvas>
+  <script>
+  // Atomic background with green particles and thick, gradient bonds
+  const canvas = document.getElementById("particleCanvas");
+  const ctx = canvas.getContext("2d");
+  function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+  const particles = [];
+  const colors = ["#00ff00"];
+  class Particle {
+      constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.radius = Math.random() * 5 + 2;
+          this.color = color || colors[Math.floor(Math.random() * colors.length)];
+          this.vx = Math.random() * 6 - 3;
+          this.vy = Math.random() * 6 - 3;
+          this.alpha = 1;
+          this.life = Math.random() * 120 + 80; // frames
+      }
+      draw() {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.restore();
+      }
+      update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life--;
+          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+          if (this.life < 30) this.alpha = Math.max(0, this.life / 30);
+      }
+      isDead() {
+          return this.life <= 0 || this.alpha <= 0.01;
+      }
+  }
+  function addParticle() {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      particles.push(new Particle(x, y));
+  }
+  function connectParticles() {
+      for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+              const dx = particles[i].x - particles[j].x;
+              const dy = particles[i].y - particles[j].y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              if (distance < 100) {
+                  // Draw a thick line that is thickest at the dots, thinnest at the midpoint
+                  const steps = 16;
+                  for (let s = 0; s < steps; s++) {
+                      const t = s / (steps - 1);
+                      // Thickness: max at ends, min at center
+                      const thickness = 5 - 4 * Math.abs(0.5 - t) * 2; // 5px at ends, 1px at center
+                      const x = particles[i].x + (particles[j].x - particles[i].x) * t;
+                      const y = particles[i].y + (particles[j].y - particles[i].y) * t;
+                      ctx.save();
+                      ctx.globalAlpha = 0.18 * (1 - distance / 100);
+                      ctx.beginPath();
+                      ctx.arc(x, y, thickness / 2, 0, Math.PI * 2);
+                      ctx.fillStyle = "#00ff00";
+                      ctx.fill();
+                      ctx.restore();
+                  }
+              }
+          }
+      }
+  }
+  function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.draw();
+          p.update();
+          if (p.isDead()) {
+              particles.splice(i, 1);
+          }
+      }
+      // Draw linking bonds
+      connectParticles();
+      // Always keep 55 particles
+      while (particles.length < 55) addParticle();
+      requestAnimationFrame(animateParticles);
+  }
+  while (particles.length < 55) addParticle();
+  animateParticles();
+  </script>
+
   <h1>Mobile Puncture Ekm</h1>
 
   <!-- Top bar with search + dropdown -->
