@@ -4,150 +4,416 @@
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <title>Binary Converter</title> 
-  <link rel="stylesheet" href="styles.css"> 
- <style type="text/css" id="dcoder_stylesheet">body {
-    font-family: 'Courier New', Courier, monospace; /* Monospace font */
-    background-color: #04151f; /* Dark background */
-    color: #cccccc; /* Light text color */
-    text-align: center;
-    padding: 0; /* No padding for body */
-    margin: 0; /* Remove default margins */
-    scroll-behavior: smooth; /*Enables smooth scrolling*/
-}
-
-header, footer {
-    background-color: #000000; /* Header and footer background */
-    color: #cccccc; /* Light text color */
-    padding: 10px 0; /* Padding for header and footer */
-    width: 100%; /* Full width */
-    position: relative; /* Ensure positioning */
-    box-sizing: border-box; /* Include padding in width */
-}
-footer{
-  height: 100%;
-}
-
-.container {
-    max-width: 600px;
-    margin: 0 auto; /* Center container */
-    padding: 20px;
-}
-
-h1 {
-    color: #ff9800; /* Orange color for the main heading */
-}
-
-h2 {
-    text-transform: uppercase;
-    color: MediumSeaGreen; /* Green color for subheadings */
-}
-
-.kmrxz{
-  color: MediumSeaGreen;
-}
-
-textarea {
-    width: 97%;
-    height: 100px;
-    margin-bottom: 10px;
-    padding: -10px;
-    font-size: 16px;
-    border: 1px solid #444; /* Darker border for text areas */
-    border-radius: 4px;
-    background-color: #1c1c1c; /* Dark background for text areas */
-    color: #f1f1f1; /* Light text color */
-}
-
-.button-group {
-    display: flex;
-    justify-content: center;
-    gap: 10px; /* Space between buttons */
-    margin-bottom: 20px;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #3a3a3a; /* Dark button background */
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: MediumSeaGreen; /* Color on hover */
-}
-
-p {
-    margin: 0; /* Remove margin for the p tag */
-    color: #f1f1f1; /* Light text color */
-    font-size: 16px;
-    /* No background or border */
-    background: none; /* Ensure no background */
-}</style></head> 
- <body> 
-  <header> 
-   <h1>&gt;_kmrXz.git</h1> 
-  </header> 
-  <div class="container"> 
-   <h2>Convert to Binary</h2> <textarea id="textInput" placeholder="Enter text here..."></textarea> 
-   <div class="button-group"> <button onclick="textToBinary()">Encode</button> <button onclick="copyToClipboard('binaryOutput')">Copy</button> <button onclick="clearInputAndOutput('textInput', 'binaryOutput')">Clear</button> 
-   </div> 
-   <p id="binaryOutput">Waiting for text input...</p> 
-   <h2>Convert to Text</h2> <textarea id="binaryInput" placeholder="Enter binary here..."></textarea> 
-   <div class="button-group"> <button onclick="binaryToText()">Decode</button> <button onclick="copyToClipboard('textOutput')">Copy</button> <button onclick="clearInputAndOutput('binaryInput', 'textOutput')">Clear</button> 
-   </div> 
-   <p id="textOutput">Waiting for binary input...</p> 
-  </div> 
-  <footer> 
-   <p>Made by <span onclick="ope()" class="kmrxz">kmrXz</span> and ChatGPT</p> 
-  </footer> 
-  <script src="script.js"></script> 
- 
-<script type="text/javascript" id="dcoder_script">// Function to convert text to binary
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+            /* Toast notification styles */
+            .toast {
+              visibility: hidden;
+              min-width: 220px;
+              background: #232b45ee;
+              color: #fff;
+              text-align: center;
+              border-radius: 8px;
+              padding: 14px 24px;
+              position: fixed;
+              z-index: 9999;
+              left: 50%;
+              bottom: 48px;
+              font-size: 1.08rem;
+              transform: translateX(-50%) scale(0.98);
+              opacity: 0;
+              transition: opacity 0.35s, visibility 0.35s, transform 0.35s;
+              box-shadow: 0 4px 24px #0005;
+              pointer-events: none;
+            }
+            .toast.show {
+              visibility: visible;
+              opacity: 1;
+              transform: translateX(-50%) scale(1.03);
+              pointer-events: auto;
+            }
+        @keyframes headingSweep {
+          0% {
+            background-position: -200% 0;
+          }
+          80% {
+            background-position: -200% 0;
+          }
+          90% {
+            background-position: 200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
+        .animated-heading {
+          background: linear-gradient(90deg, var(--accent) 0%, #fff 50%, var(--accent) 100%);
+          background-size: 200% 100%;
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          animation: headingSweep 10s linear infinite;
+          animation-delay: 0s;
+          font-size: 2.5rem;
+          font-weight: 800;
+          text-align: center;
+          margin-top: 32px;
+          margin-bottom: 0;
+          letter-spacing: 1.2px;
+          text-shadow: 0 2px 12px #0008;
+        }
+    :root{
+      --bg: #081025;
+      --muted: #bfcbdc;
+      --accent: #7c3aed;
+      --button-text: #fff;
+      --h2-color: #cfe0ff;
+      --card-bg: rgba(255,255,255,0.03);
+      --btn-grad-start: #4f46e5;
+      --btn-grad-end: #3b82f6;
+    }
+    *{box-sizing:border-box}
+    body {
+      background: var(--bg);
+      color: var(--muted);
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+    }
+    .main-wrapper {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 10px 32px 0 rgba(20,30,60,0.22), 0 1.5px 8px 0 rgba(60,60,90,0.10);
+      padding: 38px 24px 38px 24px;
+      margin-top: 38px;
+      margin-bottom: 0;
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+    }
+    header {
+      text-align: center;
+      font-size: 2.2rem;
+      color: var(--button-text);
+      margin-bottom: 8px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-shadow: 0 2px 12px #0008;
+    }
+    h2 {
+      margin: 28px 0 10px 0;
+      font-size: 1.18rem;
+      text-transform: uppercase;
+      color: var(--h2-color);
+      letter-spacing: 1px;
+      font-weight: 600;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .info {
+      display: inline-block;
+      width: 1.1em;
+      height: 1.1em;
+      border-radius: 50%;
+      background: #222b;
+      color: #8ab4ff;
+      text-align: center;
+      font-size: 0.95em;
+      line-height: 1.1em;
+      cursor: pointer;
+      position: relative;
+    }
+    .info:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 120%;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #222e;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.95em;
+      white-space: nowrap;
+      z-index: 10;
+      box-shadow: 0 2px 8px #0005;
+    }
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      margin-bottom: 10px;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #10192b;
+      color: #e3e3e3;
+      font-family: 'Poppins', 'Courier New', Courier, monospace;
+      resize: vertical;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: linear-gradient(90deg,var(--btn-grad-start),var(--btn-grad-end));
+      color: var(--button-text);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-family: 'Poppins', Arial, sans-serif;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(11,12,30,0.18);
+      transition: transform 0.18s, box-shadow 0.18s, background 0.18s, letter-spacing 0.18s;
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
+    button:active {
+      letter-spacing: 1.5px;
+    }
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    button::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(124,58,237,0.18);
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+      transition: width 0.3s, height 0.3s;
+      z-index: 0;
+    }
+    button:active::after {
+      width: 180%;
+      height: 400%;
+    }
+    p {
+      color: #e3e3e3;
+      font-size: 1rem;
+      background: none;
+      margin: 0 0 10px 0;
+      word-break: break-word;
+    }
+    .kmrxz{
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    footer {
+      background: rgba(0,0,0,0.45);
+      width: 100%;
+      text-align: center;
+      padding: 16px 0 10px 0;
+      color: var(--muted);
+      font-size: 1rem;
+      border-radius: 0 0 14px 14px;
+      margin-top: 18px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    @media (max-width: 700px) {
+      .main-wrapper { padding: 16px 4px; margin-top: 18px; }
+      header { font-size: 1.3rem; }
+      h2 { font-size: 1rem; }
+      button { font-size: 0.95rem; padding: 8px 12px; }
+    }
+  </style>
+ </head>
+ <body>
+  <!-- Interactive atomic background -->
+  <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;"></canvas>
+  <script>
+  // Atomic background from main.html (non-interactive, 55 particles)
+  const canvas = document.getElementById("particleCanvas");
+  const ctx = canvas.getContext("2d");
+  function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+  const particles = [];
+  const colors = ["#7c3aed"];
+  class Particle {
+      constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.radius = Math.random() * 5 + 2;
+          this.color = color || colors[Math.floor(Math.random() * colors.length)];
+          this.vx = Math.random() * 6 - 3;
+          this.vy = Math.random() * 6 - 3;
+          this.alpha = 1;
+          this.life = Math.random() * 120 + 80; // frames
+      }
+      draw() {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.restore();
+      }
+      update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life--;
+          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+          if (this.life < 30) this.alpha = Math.max(0, this.life / 30);
+      }
+      isDead() {
+          return this.life <= 0 || this.alpha <= 0.01;
+      }
+  }
+  function addParticle() {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      particles.push(new Particle(x, y));
+  }
+  function connectParticles() {
+      for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+              const dx = particles[i].x - particles[j].x;
+              const dy = particles[i].y - particles[j].y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              if (distance < 100) {
+                  ctx.save();
+                  ctx.globalAlpha = 0.18 * (1 - distance / 100);
+                  ctx.beginPath();
+                  ctx.moveTo(particles[i].x, particles[i].y);
+                  ctx.lineTo(particles[j].x, particles[j].y);
+                  ctx.strokeStyle = "#8ab4ff";
+                  ctx.lineWidth = 1.2;
+                  ctx.stroke();
+                  ctx.restore();
+              }
+          }
+      }
+  }
+  function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.draw();
+          p.update();
+          if (p.isDead()) {
+              particles.splice(i, 1);
+          }
+      }
+      connectParticles();
+      while (particles.length < 55) addParticle();
+      requestAnimationFrame(animateParticles);
+  }
+  while (particles.length < 55) addParticle();
+  animateParticles();
+  </script>
+  <h1 class="animated-heading">Binary to Text Converter</h1>
+  <div id="toast" class="toast"></div>
+  <div style="width:100%;max-width:700px;margin:0 auto 18px auto;">
+    <hr style="border:0;border-top:1.5px solid #2a3350;box-shadow:0 1px 6px #0003;">
+  </div>
+  <div class="main-wrapper">
+    <header>&gt;_kmrXz.git bin to str</header>
+    <h2>Convert to Binary <span class="info" data-tip="Type text and get its binary representation">i</span></h2>
+    <textarea id="textInput" placeholder="Enter text here..."></textarea>
+    <div class="button-group">
+      <button onclick="textToBinary()">Encode</button>
+      <button onclick="copyToClipboard('binaryOutput')">Copy</button>
+      <button onclick="clearInputAndOutput('textInput', 'binaryOutput')">Clear</button>
+    </div>
+    <p id="binaryOutput">Your binary output will appear here.</p>
+    <h2>Convert to Text <span class="info" data-tip="Paste binary (8 bits per char, space-separated) to decode">i</span></h2>
+    <textarea id="binaryInput" placeholder="Enter binary here..."></textarea>
+    <div class="button-group">
+      <button onclick="binaryToText()">Decode</button>
+      <button onclick="copyToClipboard('textOutput')">Copy</button>
+      <button onclick="clearInputAndOutput('binaryInput', 'textOutput')">Clear</button>
+    </div>
+    <p id="textOutput">Your decoded text will appear here.</p>
+  </div>
+  <footer>
+    <p>Made by <span onclick="ope()" class="kmrxz">kmrXz</span> and ChatGPT</p>
+  </footer>
+  <script>
+// Function to convert text to binary
 function textToBinary() {
-    const text = document.getElementById('textInput').value;
-    if (!text) {
-        alert('Please enter text to convert.');
-        return;
-    }
-
-    let binaryResult = '';
-    for (let i = 0; i < text.length; i++) {
-        binaryResult += text[i].charCodeAt(0).toString(2).padStart(8, '0') + ' ';
-    }
-    document.getElementById('binaryOutput').innerText = binaryResult.trim();
+  const text = document.getElementById('textInput').value;
+  if (!text) {
+    showToast('Blank input');
+    return;
+  }
+  let binaryResult = '';
+  for (let i = 0; i < text.length; i++) {
+    binaryResult += text[i].charCodeAt(0).toString(2).padStart(8, '0') + ' ';
+  }
+  document.getElementById('binaryOutput').innerText = binaryResult.trim();
+  showToast('Text encoded to binary!');
 }
 
 // Function to convert binary to text
 function binaryToText() {
-    const binary = document.getElementById('binaryInput').value.trim();
-    if (!binary) {
-        alert('Please enter binary to convert.');
-        return;
-    }
-
-    if (!/^[01\s]+$/.test(binary)) {
-        alert('Please enter valid binary values.');
-        return;
-    }
-
-    let textResult = '';
-    const binaryArray = binary.split(' ');
-    for (let i = 0; i < binaryArray.length; i++) {
-        textResult += String.fromCharCode(parseInt(binaryArray[i], 2));
-    }
-    document.getElementById('textOutput').innerText = textResult;
+  const binary = document.getElementById('binaryInput').value.trim();
+  if (!binary) {
+    showToast('Blank input');
+    return;
+  }
+  if (!/^[01\s]+$/.test(binary)) {
+    showToast('Please enter valid binary values.');
+    return;
+  }
+  let textResult = '';
+  const binaryArray = binary.split(' ');
+  for (let i = 0; i < binaryArray.length; i++) {
+    textResult += String.fromCharCode(parseInt(binaryArray[i], 2));
+  }
+  document.getElementById('textOutput').innerText = textResult;
+  showToast('Binary decoded to text!');
 }
 
 // Function to copy output to clipboard
 function copyToClipboard(id) {
-    const textToCopy = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('Copied to clipboard!');
-    });
+  const textToCopy = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    showToast('Copied to clipboard!');
+  });
+}
+// Toast notification function
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimeout);
+  window._toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2200);
 }
 //Function to open social profile
 function ope(){
@@ -156,6 +422,10 @@ function ope(){
 
 // Function to clear input and output
 function clearInputAndOutput(inputId, outputId) {
-    document.getElementById(inputId).value = ''; // Clear input
-    document.getElementById(outputId).innerText = 'Cleared! Waiting for input'; // Clear output
-}</script></body></html>
+  document.getElementById(inputId).value = '';
+  document.getElementById(outputId).innerText = outputId === 'binaryOutput' ? 'Your binary output will appear here.' : 'Your decoded text will appear here.';
+  showToast('Cleared!');
+}
+  </script>
+ </body>
+</html>
