@@ -4,69 +4,339 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChatGPT Prompt</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
+    :root{
+      --bg: #081025;
+      --muted: #bfcbdc;
+      --accent: #7c3aed;
+      --button-text: #fff;
+      --h2-color: #cfe0ff;
+      --card-bg: rgba(255,255,255,0.03);
+      --btn-grad-start: #4f46e5;
+      --btn-grad-end: #3b82f6;
+    }
     body {
-      background-color: #04151f;
-      color: #ccc;
-      font-family: monospace;
+      background: var(--bg);
+      color: var(--muted);
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
       margin: 0;
-      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+    }
+    .main-wrapper {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 10px 32px 0 rgba(20,30,60,0.22), 0 1.5px 8px 0 rgba(60,60,90,0.10);
+      padding: 38px 24px 38px 24px;
+      margin-top: 38px;
+      margin-bottom: 0;
+      flex: 1 0 auto;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      align-items: center;
-      text-align: center;
+      position: relative;
     }
     h1 {
-      margin-bottom: 20px;
+      text-align:center;
+      font-size:2.3rem;
+      font-weight:800;
+      color:var(--accent);
+      margin-top:32px;
+      margin-bottom:0;
+      letter-spacing:1.2px;
+      text-shadow:0 2px 12px #0008;
+    }
+    .description {
+      margin: 18px 0 18px 0;
+      font-size: 1.08rem;
+      color: var(--muted);
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
     }
     img {
       width: 80%;
       height: auto;
       margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #0005;
     }
     textarea {
-      width: 90%;
+      width: 100%;
       max-width: 600px;
-      height: 250px;
-      background-color: #1a1a1a;
-      color: #ccc;
+      height: 220px;
+      background: #10192b;
+      color: #e3e3e3;
       border: 1px solid #444;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 14px;
-      resize: none;
+      padding: 14px;
+      font-family: 'Poppins', 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      border-radius: 10px;
+      resize: vertical;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 10px;
+    }
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
     }
     button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      background-color: MediumSeaGreen;
-      color: #252525;
+      background: linear-gradient(90deg,var(--btn-grad-start),var(--btn-grad-end));
+      color: var(--button-text);
       border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-family: 'Poppins', Arial, sans-serif;
       cursor: pointer;
-      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(11,12,30,0.18);
+      transition: transform 0.18s, box-shadow 0.18s, background 0.18s, letter-spacing 0.18s;
+      outline: none;
+      position: relative;
+      overflow: hidden;
     }
-    button:hover {
-      opacity: 0.9;
+    button:active {
+      letter-spacing: 1.5px;
+    }
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    button::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(124,58,237,0.18);
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+      transition: width 0.3s, height 0.3s;
+      z-index: 0;
+    }
+    button:active::after {
+      width: 180%;
+      height: 400%;
+    }
+    .author-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+    .author-label {
+      font-weight: 600;
+      color: var(--accent);
+      margin-right: 6px;
+    }
+    /* Toast notification styles */
+    .toast {
+      visibility: hidden;
+      min-width: 220px;
+      background: #232b45ee;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 14px 24px;
+      position: fixed;
+      z-index: 9999;
+      left: 50%;
+      bottom: 48px;
+      font-size: 1.08rem;
+      transform: translateX(-50%) scale(0.98);
+      opacity: 0;
+      transition: opacity 0.35s, visibility 0.35s, transform 0.35s;
+      box-shadow: 0 4px 24px #0005;
+      pointer-events: none;
+    }
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) scale(1.03);
+      pointer-events: auto;
+    }
+    @media (max-width: 700px) {
+      .main-wrapper { padding: 16px 4px; margin-top: 18px; }
+      h1 { font-size: 1.3rem; }
+      button { font-size: 0.95rem; padding: 8px 12px; }
     }
   </style>
 </head>
 <body>
-  <h1>Chat GPT Prompt</h1>
-  <img src="images/alven.jpg" alt="Prompt Illustration" />
-  <textarea id="promptText" readonly>
-Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-body boy peeking out of an Instagram post frame, as if he's a social media character. He is sitting on the bottom bar of the frame with his legs hanging down. He is holding a smartphone in his hands. His outfit and hairstyle should match the ones shown in the reference photos. The background is neutral. The boy looks joyful and cute, with big wide eyes and a bright smile. The frame includes the profile name. Add Instagram-style icons for "like," "comment," and "share." The entire frame is held by a large hand. Use a 9:16 vertical format. 📱✨
-  </textarea>
-  <button onclick="copyPrompt()">Copy Prompt</button>
+  <!-- Particle background from particul.html (touch & scroll responsive) -->
+  <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:auto;"></canvas>
+  <div id="toast" class="toast"></div>
+  <div class="main-wrapper">
+    <h1>ChatGPT Prompts</h1>
+    <div class="description">
+      These prompts are shared for educational and creative use only. I do not claim ownership or authorship of any prompt listed here. All credits belong to the original creators. If you are the author and want credit or removal, please contact me via <a href="https://instagram.com/echo_rapt0r" target="_blank" style="color:var(--accent);text-decoration:underline;">Instagram</a>.
+    </div>
+    <div class="prompt-flex">
+      <img src="images/alven.jpg" alt="Prompt Illustration" class="prompt-img" />
+      <div class="prompt-content">
+        <textarea id="promptText" readonly>
+Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-body boy peeking out of an Instagram post frame, as if he's a social media character. He is sitting on the bottom bar of the frame with his legs hanging down. He is holding a smartphone in his hands. His outfit and hairstyle should match the ones shown in the reference photos. The background is neutral. The boy looks joyful and cute, with big wide eyes and a bright smile. The frame includes the profile name. Add Instagram-style icons for "like," "comment," and "share." The entire frame is held by a large hand. Use a 9:16 vertical format.
+        </textarea>
+        <div class="author-row" style="margin-bottom:0;">
+          <span class="author-label">Author:</span> unclaimed (shared by kmrXz)
+        </div>
+        <div class="button-group" style="margin-top:8px;">
+          <button onclick="copyPrompt()">Copy</button>
+          <button onclick="clearPrompt()">Clear</button>
+          <button onclick="window.open('https://instagram.com/echo_rapt0r', '_blank'); showToast('Contact via Instagram to claim ownership!');">Claim Ownership</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>
+    .prompt-flex {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+    .prompt-img {
+      width: 180px;
+      min-width: 120px;
+      max-width: 220px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #0005;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+    .prompt-content {
+      flex: 1 1 320px;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .prompt-content textarea {
+      width: 100%;
+      max-width: 100%;
+      min-width: 180px;
+      height: 220px;
+      margin-bottom: 8px;
+      overflow-y: auto;
+      resize: vertical;
+    }
+    @media (max-width: 700px) {
+      .prompt-flex {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+      .prompt-img {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0;
+      }
+    }
+  </style>
 
+  <script type="module">
+    // Particle background from particul.html (touch & scroll responsive)
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+    const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('particleCanvas'), alpha: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    // Particle system
+    const particleCount = 400;
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesMaterial = new THREE.PointsMaterial({ color: 0xA259FF, size: 0.04 });
+    const particlePositions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i++) {
+      particlePositions[i] = (Math.random() - 0.5) * 10;
+    }
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particleSystem);
+    // Responsive
+    function resize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    window.addEventListener('resize', resize);
+    // Touch/scroll interaction
+    window.addEventListener('touchmove', e => {
+      camera.position.x = (e.touches[0].clientX/window.innerWidth-0.5)*2;
+      camera.position.y = -(e.touches[0].clientY/window.innerHeight-0.5)*2;
+    });
+    window.addEventListener('mousemove', e => {
+      camera.position.x = (e.clientX/window.innerWidth-0.5)*2;
+      camera.position.y = -(e.clientY/window.innerHeight-0.5)*2;
+    });
+    window.addEventListener('scroll', () => {
+      camera.position.z = 5 + window.scrollY/400;
+    });
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
   <script>
+    // Toast notification function
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window._toastTimeout);
+      window._toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2200);
+    }
     function copyPrompt() {
       const textArea = document.getElementById("promptText");
-      textArea.select();
-      textArea.setSelectionRange(0, 99999);
-      document.execCommand("copy");
-      alert("Prompt copied to clipboard!");
+      const copyBtn = document.querySelector('button[onclick="copyPrompt()"]');
+      navigator.clipboard.writeText(textArea.value).then(() => {
+        showToast("Prompt copied to clipboard!");
+        copyBtn.textContent = "Done";
+        setTimeout(() => { copyBtn.textContent = "Copy Prompt"; }, 2000);
+      });
     }
+    const originalPrompt = `Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-body boy peeking out of an Instagram post frame, as if he's a social media character. He is sitting on the bottom bar of the frame with his legs hanging down. He is holding a smartphone in his hands. His outfit and hairstyle should match the ones shown in the reference photos. The background is neutral. The boy looks joyful and cute, with big wide eyes and a bright smile. The frame includes the profile name. Add Instagram-style icons for "like," "comment," and "share." The entire frame is held by a large hand. Use a 9:16 vertical format.`;
+    let promptCleared = false;
+    function clearPrompt() {
+      const textArea = document.getElementById("promptText");
+      const clearBtn = document.querySelector('button[onclick="clearPrompt()"]');
+      if (!promptCleared) {
+        textArea.value = "";
+        clearBtn.textContent = "Show";
+        showToast("Prompt cleared!");
+        promptCleared = true;
+      } else {
+        textArea.value = originalPrompt;
+        clearBtn.textContent = "Clear";
+        showToast("Prompt restored!");
+        promptCleared = false;
+      }
+    }
+    // Removed copyAuthor, only one copy button remains
   </script>
 </body>
 </html>
