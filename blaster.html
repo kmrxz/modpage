@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blaster Effect</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #000;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      touch-action: manipulation;
+    }
+    .blast {
+      position: absolute;
+      pointer-events: none;
+      will-change: transform, opacity;
+      animation: blast-fade 0.8s cubic-bezier(.4,.2,.2,1) forwards;
+    }
+    @keyframes blast-fade {
+      0% { opacity: 1; transform: scale(0.7); }
+      60% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0; transform: scale(1.5); }
+    }
+  </style>
+</head>
+<body>
+  <!-- No static audio element needed; play new instance for each blast -->
+  <script>
+    function playBlastSound() {
+      const audio = new Audio('Sounds/blast.wav');
+      audio.loop = false;
+      audio.play();
+    }
+    function showBlast(x, y) {
+      const blast = document.createElement('img');
+      blast.src = 'files/img/blast.png';
+      blast.className = 'blast';
+      const size = Math.floor(Math.random() * 140) + 100; // 100px to 240px
+      blast.style.width = size + 'px';
+      blast.style.height = size + 'px';
+      blast.style.left = (x - size/2) + 'px';
+      blast.style.top = (y - size/2) + 'px';
+      document.body.appendChild(blast);
+      setTimeout(() => { blast.remove(); }, 800);
+      playBlastSound();
+    }
+    function handleBlast(e) {
+      let x, y;
+      if (e.touches && e.touches.length) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      } else {
+        x = e.clientX;
+        y = e.clientY;
+      }
+      showBlast(x, y);
+    }
+    document.body.addEventListener('touchstart', handleBlast);
+    document.body.addEventListener('mousedown', handleBlast);
+  </script>
+</body>
+</html>

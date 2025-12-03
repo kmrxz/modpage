@@ -778,6 +778,8 @@ document.addEventListener('DOMContentLoaded', function() {
         function handleSecretSubmit() {
             if (secretPasscode.value === '888aac') {
                 window.location.href = secretHref;
+            } else if (secretPasscode.value === 'inj01') {
+                window.location.href = 'blaster.html';
             } else {
                 secretError.style.display = 'block';
                 secretPasscode.value = '';
