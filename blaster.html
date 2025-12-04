@@ -5,6 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blaster Effect</title>
   <style>
+            .trophy {
+              width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;
+            }
+            .leaderboard {
+              margin: 24px 0 0 0; text-align: left; font-size: 1.2rem; color: #fff;
+            }
+            .leaderboard-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+            .score-label { font-weight: 700; margin-right: 8px; }
+            .score-value { font-family: monospace; }
+        canvas {
+          position: absolute;
+          top: 0; left: 0; width: 100vw; height: 100vh;
+          pointer-events: auto;
+          z-index: 0;
+        }
+        .game-over {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: #fff;
+          font-size: 3rem;
+          font-family: 'Poppins', Arial, sans-serif;
+          background: rgba(0,0,0,0.8);
+          padding: 32px 48px;
+          border-radius: 18px;
+          z-index: 1000;
+          box-shadow: 0 8px 32px #000a;
+          text-align: center;
+          display: none;
+        }
     html, body {
       height: 100%;
       margin: 0;
@@ -30,39 +61,246 @@
   </style>
 </head>
 <body>
+    <canvas id="triCanvas"></canvas>
+    <div id="gameOver" class="game-over">
+      <div id="scoreSummary" style="margin-bottom:18px;"></div>
+      <div class="leaderboard" style="background:rgba(30,30,30,0.7);border-radius:12px;padding:16px 24px;box-shadow:0 2px 12px #0006;">
+        <div style="font-size:1.3rem;font-weight:600;margin-bottom:10px;text-align:center;">Leaderboard</div>
+        <div class="leaderboard-row" style="border-bottom:1px solid #444;padding-bottom:8px;margin-bottom:8px;">
+          <img class="trophy" src="files/img/gold.png" alt="Gold"> <span class="score-label">kmrxz</span> <span class="score-value">12m 0s, 3245 kills</span>
+        </div>
+        <div class="leaderboard-row" style="border-bottom:1px solid #444;padding-bottom:8px;margin-bottom:8px;">
+          <img class="trophy" src="files/img/silver.png" alt="Silver"> <span class="score-label">dummy</span> <span class="score-value">7m 15s, 1890 kills</span>
+        </div>
+        <div class="leaderboard-row">
+          <img class="trophy" src="files/img/bronze.png" alt="Bronze"> <span class="score-label">sharon</span> <span class="score-value">6m 7s, 1422 kills</span>
+        </div>
+      </div>
+      <div style="margin-top:24px;text-align:center;">
+        <button id="restartBtn" style="font-size:1.2rem;padding:10px 24px;margin-right:12px;border-radius:8px;background:#222;color:#ffd600;">Restart</button>
+        <button id="shareBtn" style="font-size:1.2rem;padding:10px 24px;border-radius:8px;background:#222;color:#40c4ff;">Share Score</button>
+      </div>
+    </div>
   <!-- No static audio element needed; play new instance for each blast -->
   <script>
-    function playBlastSound() {
-      const audio = new Audio('Sounds/blast.wav');
-      audio.loop = false;
-      audio.play();
+        // --- Triangular Cones Game Logic ---
+        const triCanvas = document.getElementById('triCanvas');
+        const ctx = triCanvas.getContext('2d');
+        let triangles = [];
+        let lostCount = 0;
+        let gameOver = false;
+        let killCount = 0;
+        let startTime = null;
+        let endTime = null;
+        let speedMultiplier = 1;
+        let spawnCount = 1;
+        const colors = ['#ff5252', '#ffd600', '#40c4ff', '#69f0ae', '#b388ff', '#ff6e40', '#fff176'];
+        function resizeCanvas() {
+          triCanvas.width = window.innerWidth;
+          triCanvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        function randomTriangle() {
+          const size = Math.random() * 40 + 40;
+          const x = Math.random() * (triCanvas.width - size) + size/2;
+          const y = triCanvas.height + size;
+          const speed = (Math.random() * 2 + 1.5) * speedMultiplier;
+          const angle = (Math.random() - 0.5) * 0.6;
+          const img = new Image();
+          img.src = 'files/img/plane.png';
+          return { x, y, size, speed, angle, blasted: false, vy: 0, alpha: 1, falling: false, img };
+        }
+        function drawTriangle(t) {
+          ctx.save();
+          ctx.globalAlpha = t.alpha;
+          ctx.translate(t.x, t.y);
+          ctx.rotate(t.angle);
+          if (t.img && t.img.complete) {
+            ctx.drawImage(t.img, -t.size/2, -t.size/2, t.size, t.size);
+          }
+          ctx.restore();
+        }
+        function spawnTriangle() {
+          if (!gameOver) {
+            for (let i = 0; i < spawnCount; i++) triangles.push(randomTriangle());
+          }
+        }
+        function animateTriangles() {
+          ctx.clearRect(0, 0, triCanvas.width, triCanvas.height);
+          let now = Date.now();
+          if (!startTime) startTime = now;
+          for (let i = triangles.length - 1; i >= 0; i--) {
+            const t = triangles[i];
+            if (!t.blasted) {
+              t.y -= t.speed;
+              // If triangle leaves top, count as missed
+              if (t.y + t.size/2 < 0) {
+                triangles.splice(i, 1);
+                lostCount++;
+                if (lostCount >= 7 && !gameOver) {
+                  endTime = now;
+                  showGameOver();
+                  gameOver = true;
+                }
+                continue;
+              }
+            } else {
+              if (!t.falling) {
+                t.vy = -6 - Math.random() * 2;
+                t.falling = true;
+              }
+              t.vy += 0.35; // gravity
+              t.y += t.vy;
+              t.alpha -= 0.018;
+              if (t.y - t.size/2 > triCanvas.height || t.alpha <= 0) {
+                triangles.splice(i, 1);
+                continue;
+              }
+            }
+            ctx.save();
+            ctx.globalAlpha = t.alpha;
+            drawTriangle(t);
+            ctx.restore();
+          }
+          if (!gameOver) requestAnimationFrame(animateTriangles);
+        }
+        let spawnInterval = setInterval(spawnTriangle, 900);
+        animateTriangles();
+        // Speed and spawn count increase every 30s
+        setInterval(() => {
+          if (!gameOver) {
+            speedMultiplier += 0.18;
+            if (spawnCount < 7) spawnCount++;
+          }
+        }, 30000);
+        // --- Image click detection (bounding box) ---
+        function triangleAt(x, y) {
+          for (let i = triangles.length - 1; i >= 0; i--) {
+            const t = triangles[i];
+            // Simple bounding box collision
+            const left = t.x - t.size/2;
+            const right = t.x + t.size/2;
+            const top = t.y - t.size/2;
+            const bottom = t.y + t.size/2;
+            if (x >= left && x <= right && y >= top && y <= bottom) return i;
+          }
+          return -1;
+        }
+        function handleTriangleBlast(e) {
+          if (gameOver) return;
+          let x, y;
+          if (e.touches && e.touches.length) {
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+          } else {
+            x = e.clientX;
+            y = e.clientY;
+          }
+          const idx = triangleAt(x, y);
+          if (idx !== -1) {
+            // Mark triangle as blasted, animate falling
+            const t = triangles[idx];
+            if (!t.blasted) {
+              t.blasted = true;
+              t.falling = false;
+              t.alpha = 1;
+              killCount++;
+              showBlast(x, y);
+            }
+          }
+        }
+        triCanvas.addEventListener('mousedown', handleTriangleBlast);
+        triCanvas.addEventListener('touchstart', handleTriangleBlast);
+
+        function playBlastSound() {
+          const audio = new Audio('Sounds/blast.wav');
+          audio.loop = false;
+          audio.play();
+        }
+        function showBlast(x, y) {
+          const blast = document.createElement('img');
+          blast.src = 'files/img/blast.png';
+          blast.className = 'blast';
+          const size = 64 + Math.floor(Math.random() * 24); // Smaller size
+          blast.style.width = size + 'px';
+          blast.style.height = size + 'px';
+          blast.style.left = (x - size/2) + 'px';
+          blast.style.top = (y - size/2) + 'px';
+          document.body.appendChild(blast);
+          setTimeout(() => { blast.remove(); }, 600);
+          playBlastSound();
+          // Triangle shatter effect
+          shatterTriangle(x, y);
+        }
+
+        // Plane shatter effect: create small explosion particles
+        function shatterTriangle(x, y) {
+          const pieces = 6;
+          for (let i = 0; i < pieces; i++) {
+            const angle = (Math.PI * 2 / pieces) * i;
+            const speed = 4 + Math.random() * 2;
+            let px = x, py = y;
+            let vx = Math.cos(angle) * speed;
+            let vy = Math.sin(angle) * speed;
+            let alpha = 1;
+            let size = 16;
+            // Animate each piece
+            (function animatePiece() {
+              ctx.save();
+              ctx.globalAlpha = alpha;
+              ctx.fillStyle = '#ff5252';
+              ctx.beginPath();
+              ctx.arc(px, py, size, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+              px += vx;
+              py += vy;
+              vy += 0.3;
+              alpha -= 0.04;
+              size -= 0.3;
+              if (alpha > 0) {
+                requestAnimationFrame(animatePiece);
+              }
+            })();
+          }
+        }
+
+    // --- Game Over Dialog Logic ---
+    function showGameOver() {
+      clearInterval(spawnInterval);
+      let totalMs = endTime - startTime;
+      let mins = Math.floor(totalMs/60000);
+      let secs = Math.floor((totalMs%60000)/1000);
+      let summary = `<div style='font-size:1.3rem;margin-bottom:12px;'>Survival: <b>${mins}m ${secs}s</b><br>Kills: <b>${killCount}</b></div>`;
+      document.getElementById('scoreSummary').innerHTML = summary;
+      document.getElementById('gameOver').style.display = 'block';
     }
-    function showBlast(x, y) {
-      const blast = document.createElement('img');
-      blast.src = 'files/img/blast.png';
-      blast.className = 'blast';
-      const size = Math.floor(Math.random() * 140) + 100; // 100px to 240px
-      blast.style.width = size + 'px';
-      blast.style.height = size + 'px';
-      blast.style.left = (x - size/2) + 'px';
-      blast.style.top = (y - size/2) + 'px';
-      document.body.appendChild(blast);
-      setTimeout(() => { blast.remove(); }, 800);
-      playBlastSound();
-    }
-    function handleBlast(e) {
-      let x, y;
-      if (e.touches && e.touches.length) {
-        x = e.touches[0].clientX;
-        y = e.touches[0].clientY;
+    document.getElementById('restartBtn').onclick = function() {
+      triangles = [];
+      lostCount = 0;
+      killCount = 0;
+      gameOver = false;
+      startTime = null;
+      endTime = null;
+      speedMultiplier = 1;
+      spawnCount = 1;
+      document.getElementById('gameOver').style.display = 'none';
+      spawnInterval = setInterval(spawnTriangle, 900);
+      animateTriangles();
+    };
+    document.getElementById('shareBtn').onclick = function() {
+      let totalMs = endTime - startTime;
+      let mins = Math.floor(totalMs/60000);
+      let secs = Math.floor((totalMs%60000)/1000);
+      let msg = `Hey this is my highscore, can you beat me?\nSurvival: ${mins}m ${secs}s, Kills: ${killCount}\nPlay: https://kmrxz.github.io/modpage/blaster.html`;
+      if (navigator.share) {
+        navigator.share({ title: 'Blaster Highscore', text: msg, url: window.location.href });
       } else {
-        x = e.clientX;
-        y = e.clientY;
+        navigator.clipboard.writeText(msg);
+        alert('Score copied! Share it anywhere.');
       }
-      showBlast(x, y);
-    }
-    document.body.addEventListener('touchstart', handleBlast);
-    document.body.addEventListener('mousedown', handleBlast);
+    };
   </script>
 </body>
 </html>
