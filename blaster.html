@@ -1,306 +1,703 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blaster Effect</title>
-  <style>
-            .trophy {
-              width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;
-            }
-            .leaderboard {
-              margin: 24px 0 0 0; text-align: left; font-size: 1.2rem; color: #fff;
-            }
-            .leaderboard-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-            .score-label { font-weight: 700; margin-right: 8px; }
-            .score-value { font-family: monospace; }
-        canvas {
-          position: absolute;
-          top: 0; left: 0; width: 100vw; height: 100vh;
-          pointer-events: auto;
-          z-index: 0;
-        }
-        .game-over {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          color: #fff;
-          font-size: 3rem;
-          font-family: 'Poppins', Arial, sans-serif;
-          background: rgba(0,0,0,0.8);
-          padding: 32px 48px;
-          border-radius: 18px;
-          z-index: 1000;
-          box-shadow: 0 8px 32px #000a;
-          text-align: center;
-          display: none;
-        }
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: #000;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-      touch-action: manipulation;
-    }
-    .blast {
-      position: absolute;
-      pointer-events: none;
-      will-change: transform, opacity;
-      animation: blast-fade 0.8s cubic-bezier(.4,.2,.2,1) forwards;
-    }
-    @keyframes blast-fade {
-      0% { opacity: 1; transform: scale(0.7); }
-      60% { opacity: 1; transform: scale(1.1); }
-      100% { opacity: 0; transform: scale(1.5); }
-    }
-  </style>
-</head>
-<body>
-    <canvas id="triCanvas"></canvas>
-    <div id="gameOver" class="game-over">
-      <div id="scoreSummary" style="margin-bottom:18px;"></div>
-      <div class="leaderboard" style="background:rgba(30,30,30,0.7);border-radius:12px;padding:16px 24px;box-shadow:0 2px 12px #0006;">
-        <div style="font-size:1.3rem;font-weight:600;margin-bottom:10px;text-align:center;">Leaderboard</div>
-        <div class="leaderboard-row" style="border-bottom:1px solid #444;padding-bottom:8px;margin-bottom:8px;">
-          <img class="trophy" src="files/img/gold.png" alt="Gold"> <span class="score-label">kmrxz</span> <span class="score-value">12m 0s, 3245 kills</span>
-        </div>
-        <div class="leaderboard-row" style="border-bottom:1px solid #444;padding-bottom:8px;margin-bottom:8px;">
-          <img class="trophy" src="files/img/silver.png" alt="Silver"> <span class="score-label">dummy</span> <span class="score-value">7m 15s, 1890 kills</span>
-        </div>
-        <div class="leaderboard-row">
-          <img class="trophy" src="files/img/bronze.png" alt="Bronze"> <span class="score-label">sharon</span> <span class="score-value">6m 7s, 1422 kills</span>
-        </div>
-      </div>
-      <div style="margin-top:24px;text-align:center;">
-        <button id="restartBtn" style="font-size:1.2rem;padding:10px 24px;margin-right:12px;border-radius:8px;background:#222;color:#ffd600;">Restart</button>
-        <button id="shareBtn" style="font-size:1.2rem;padding:10px 24px;border-radius:8px;background:#222;color:#40c4ff;">Share Score</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Blaster — Demo</title>
+    <style>
+      :root{--bg:#0b1220;--panel:#0f1724;--accent:#00e676;--muted:#9aa4b2}
+      html,body{height:100%;margin:0;background:linear-gradient(180deg,#071021 0%, #0b1220 100%);color:#e6eef6;font-family: 'Segoe UI', Roboto, system-ui, -apple-system, "Helvetica Neue", Arial}
+      canvas{display:block;width:100%;height:100vh}
+      /* Left side HUD */
+      .leftPanel{position:fixed;left:16px;top:16px;width:220px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 18px rgba(2,6,23,0.6);z-index:70}
+      .leftPanel h4{margin:0 0 8px 0;font-size:14px;color:var(--accent)}
+      .leftPanel .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+      .leftPanel .value{font-weight:700;font-size:20px;margin-bottom:6px}
+      .leader{margin-top:10px;background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;display:none}
+      .leader h5{margin:0 0 6px 0;font-size:13px;color:#ffd;}
+      .leader ol{list-style:none;margin:0;padding:0}
+      .leader li{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 4px;border-bottom:1px dashed rgba(255,255,255,0.02)}
+      .leader .rank{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:800}
+      .leader .rank.r1{background:#ff5252;color:#111}
+      .leader .rank.r2{background:#ff8a50;color:#111}
+      .leader .rank.r3{background:#ffd54f;color:#111}
+      /* Start panel (center) */
+      .startPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 10px 30px rgba(2,6,23,0.6);z-index:90}
+      .startPanel input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;margin-bottom:8px}
+      .startPanel button{width:100%;padding:8px;border-radius:8px;border:none;background:var(--accent);color:#022;font-weight:700}
+      .instruction{font-size:13px;color:var(--muted);margin-top:8px}
+      .hidden{display:none}
+      /* slow tip */
+      .slowTip{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:rgba(0,0,0,0.72);padding:10px 14px;border-radius:10px;color:var(--accent);font-weight:800;font-size:16px;z-index:9999;animation:blink 0.6s ease-in-out infinite;box-shadow:0 6px 18px rgba(0,0,0,0.6);pointer-events:none}
+      @keyframes blink{0%{opacity:1}50%{opacity:0.15}100%{opacity:1}}
+      .controls{position:fixed;left:0;right:0;bottom:12px;padding:10px 12px;display:flex;gap:12px;justify-content:center;align-items:flex-end;z-index:30}
+      .btn{width:84px;height:84px;border-radius:18px;background:var(--panel);border:1px solid rgba(255,255,255,0.03);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:none}
+      .btn.pressed{background:var(--accent);color:#022}
+      .btn.wide{width:140px}
+    </style>
+  </head>
+  <body>
+    <div class="leftPanel" id="leftPanel">
+      <div class="label">Player</div>
+      <div class="value" id="playerNameDisplay">Player: —</div>
+      <div class="label" style="margin-top:6px">UID</div>
+      <div class="value" id="uidDisplay" style="font-size:12px;padding-top:0">—</div>
+      <div class="label">Score</div>
+      <div class="value" id="scoreDisplay">0</div>
+      <div class="label">Missed</div>
+      <div class="value" id="missDisplaySmall">0/10</div>
+      <div class="leader">
+        <h5>Leaderboard</h5>
+        <ol id="leaderboard" style="margin:0;padding-left:16px"></ol>
       </div>
     </div>
-  <!-- No static audio element needed; play new instance for each blast -->
-  <script>
-        // --- Triangular Cones Game Logic ---
-        const triCanvas = document.getElementById('triCanvas');
-        const ctx = triCanvas.getContext('2d');
-        let triangles = [];
-        let lostCount = 0;
-        let gameOver = false;
-        let killCount = 0;
-        let startTime = null;
-        let endTime = null;
-        let speedMultiplier = 1;
-        let spawnCount = 1;
-        const colors = ['#ff5252', '#ffd600', '#40c4ff', '#69f0ae', '#b388ff', '#ff6e40', '#fff176'];
-        function resizeCanvas() {
-          triCanvas.width = window.innerWidth;
-          triCanvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        function randomTriangle() {
-          const size = Math.random() * 40 + 40;
-          const x = Math.random() * (triCanvas.width - size) + size/2;
-          const y = triCanvas.height + size;
-          const speed = (Math.random() * 2 + 1.5) * speedMultiplier;
-          const angle = (Math.random() - 0.5) * 0.6;
-          const img = new Image();
-          img.src = 'files/img/plane.png';
-          return { x, y, size, speed, angle, blasted: false, vy: 0, alpha: 1, falling: false, img };
-        }
-        function drawTriangle(t) {
-          ctx.save();
-          ctx.globalAlpha = t.alpha;
-          ctx.translate(t.x, t.y);
-          ctx.rotate(t.angle);
-          if (t.img && t.img.complete) {
-            ctx.drawImage(t.img, -t.size/2, -t.size/2, t.size, t.size);
-          }
-          ctx.restore();
-        }
-        function spawnTriangle() {
-          if (!gameOver) {
-            for (let i = 0; i < spawnCount; i++) triangles.push(randomTriangle());
-          }
-        }
-        function animateTriangles() {
-          ctx.clearRect(0, 0, triCanvas.width, triCanvas.height);
-          let now = Date.now();
-          if (!startTime) startTime = now;
-          for (let i = triangles.length - 1; i >= 0; i--) {
-            const t = triangles[i];
-            if (!t.blasted) {
-              t.y -= t.speed;
-              // If triangle leaves top, count as missed
-              if (t.y + t.size/2 < 0) {
-                triangles.splice(i, 1);
-                lostCount++;
-                if (lostCount >= 7 && !gameOver) {
-                  endTime = now;
-                  showGameOver();
-                  gameOver = true;
-                }
-                continue;
-              }
-            } else {
-              if (!t.falling) {
-                t.vy = -6 - Math.random() * 2;
-                t.falling = true;
-              }
-              t.vy += 0.35; // gravity
-              t.y += t.vy;
-              t.alpha -= 0.018;
-              if (t.y - t.size/2 > triCanvas.height || t.alpha <= 0) {
-                triangles.splice(i, 1);
-                continue;
-              }
-            }
-            ctx.save();
-            ctx.globalAlpha = t.alpha;
-            drawTriangle(t);
-            ctx.restore();
-          }
-          if (!gameOver) requestAnimationFrame(animateTriangles);
-        }
-        let spawnInterval = setInterval(spawnTriangle, 900);
-        animateTriangles();
-        // Speed and spawn count increase every 30s
-        setInterval(() => {
-          if (!gameOver) {
-            speedMultiplier += 0.18;
-            if (spawnCount < 7) spawnCount++;
-          }
-        }, 30000);
-        // --- Image click detection (bounding box) ---
-        function triangleAt(x, y) {
-          for (let i = triangles.length - 1; i >= 0; i--) {
-            const t = triangles[i];
-            // Simple bounding box collision
-            const left = t.x - t.size/2;
-            const right = t.x + t.size/2;
-            const top = t.y - t.size/2;
-            const bottom = t.y + t.size/2;
-            if (x >= left && x <= right && y >= top && y <= bottom) return i;
-          }
-          return -1;
-        }
-        function handleTriangleBlast(e) {
-          if (gameOver) return;
-          let x, y;
-          if (e.touches && e.touches.length) {
-            x = e.touches[0].clientX;
-            y = e.touches[0].clientY;
-          } else {
-            x = e.clientX;
-            y = e.clientY;
-          }
-          const idx = triangleAt(x, y);
-          if (idx !== -1) {
-            // Mark triangle as blasted, animate falling
-            const t = triangles[idx];
-            if (!t.blasted) {
-              t.blasted = true;
-              t.falling = false;
-              t.alpha = 1;
-              killCount++;
-              showBlast(x, y);
-            }
-          }
-        }
-        triCanvas.addEventListener('mousedown', handleTriangleBlast);
-        triCanvas.addEventListener('touchstart', handleTriangleBlast);
 
-        function playBlastSound() {
-          const audio = new Audio('Sounds/blast.wav');
-          audio.loop = false;
-          audio.play();
-        }
-        function showBlast(x, y) {
-          const blast = document.createElement('img');
-          blast.src = 'files/img/blast.png';
-          blast.className = 'blast';
-          const size = 64 + Math.floor(Math.random() * 24); // Smaller size
-          blast.style.width = size + 'px';
-          blast.style.height = size + 'px';
-          blast.style.left = (x - size/2) + 'px';
-          blast.style.top = (y - size/2) + 'px';
-          document.body.appendChild(blast);
-          setTimeout(() => { blast.remove(); }, 600);
-          playBlastSound();
-          // Triangle shatter effect
-          shatterTriangle(x, y);
-        }
+    <div class="startPanel" id="startPanel">
+      <input id="playerNameInput" placeholder="Enter player name" maxlength="18" />
+      <button id="btnStart">Start</button>
+      <div class="instruction">Green = +1pts · Red = -5pts <br> Leaving red = +10pts+5s slow time</div>
+        <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <a href="#" id="creditsLink" style="color:var(--muted);font-size:13px;text-decoration:underline">Credits</a>
+          <div style="font-size:12px;color:var(--muted)">v1.0</div>
+        </div>
+    </div>
 
-        // Plane shatter effect: create small explosion particles
-        function shatterTriangle(x, y) {
-          const pieces = 6;
-          for (let i = 0; i < pieces; i++) {
-            const angle = (Math.PI * 2 / pieces) * i;
-            const speed = 4 + Math.random() * 2;
-            let px = x, py = y;
-            let vx = Math.cos(angle) * speed;
-            let vy = Math.sin(angle) * speed;
-            let alpha = 1;
-            let size = 16;
-            // Animate each piece
-            (function animatePiece() {
-              ctx.save();
-              ctx.globalAlpha = alpha;
-              ctx.fillStyle = '#ff5252';
-              ctx.beginPath();
-              ctx.arc(px, py, size, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.restore();
-              px += vx;
-              py += vy;
-              vy += 0.3;
-              alpha -= 0.04;
-              size -= 0.3;
-              if (alpha > 0) {
-                requestAnimationFrame(animatePiece);
-              }
-            })();
-          }
-        }
+    <div id="topControls" style="position:fixed;left:260px;top:12px;z-index:60;display:flex;gap:12px;align-items:center;">
+      <div class="status" id="ctrlStatus">Left: up • Action: up • Right: up</div>
+      <button id="btnPausePlay" style="padding:6px 10px;border-radius:8px;background:#222;color:#ffd600;border:none">Pause</button>
+      <button id="btnAutoFire" style="padding:6px 10px;border-radius:8px;background:#222;color:#40c4ff;border:none">Auto: Off</button>
+    </div>
+    <canvas id="game"></canvas>
+    <!-- HUD canvas sits above controls so player is visible over buttons; pointer-events:none lets touches go through -->
+    <canvas id="hud" style="position:fixed;left:0;top:0;width:100%;height:100vh;z-index:40;pointer-events:none"></canvas>
 
-    // --- Game Over Dialog Logic ---
-    function showGameOver() {
-      clearInterval(spawnInterval);
-      let totalMs = endTime - startTime;
-      let mins = Math.floor(totalMs/60000);
-      let secs = Math.floor((totalMs%60000)/1000);
-      let summary = `<div style='font-size:1.3rem;margin-bottom:12px;'>Survival: <b>${mins}m ${secs}s</b><br>Kills: <b>${killCount}</b></div>`;
-      document.getElementById('scoreSummary').innerHTML = summary;
-      document.getElementById('gameOver').style.display = 'block';
-    }
-    document.getElementById('restartBtn').onclick = function() {
-      triangles = [];
-      lostCount = 0;
-      killCount = 0;
-      gameOver = false;
-      startTime = null;
-      endTime = null;
-      speedMultiplier = 1;
-      spawnCount = 1;
-      document.getElementById('gameOver').style.display = 'none';
-      spawnInterval = setInterval(spawnTriangle, 900);
-      animateTriangles();
-    };
-    document.getElementById('shareBtn').onclick = function() {
-      let totalMs = endTime - startTime;
-      let mins = Math.floor(totalMs/60000);
-      let secs = Math.floor((totalMs%60000)/1000);
-      let msg = `Hey this is my highscore, can you beat me?\nSurvival: ${mins}m ${secs}s, Kills: ${killCount}\nPlay: https://kmrxz.github.io/modpage/blaster.html`;
-      if (navigator.share) {
-        navigator.share({ title: 'Blaster Highscore', text: msg, url: window.location.href });
-      } else {
-        navigator.clipboard.writeText(msg);
-        alert('Score copied! Share it anywhere.');
+    <div class="controls" aria-hidden="false">
+      <button id="btnLeft" class="btn" aria-label="Left">◀</button>
+      <button id="btnAction" class="btn wide" aria-label="Action">Fire</button>
+      <button id="btnRight" class="btn" aria-label="Right">▶</button>
+    </div>
+
+    <!-- Firebase (modular) initialization & helpers -->
+    <script type="module">
+      // Firebase modular SDK via CDN
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+      import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+      import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBomwQV1qfwrrVC__PYHIxSmE9wrHKC3mY",
+        authDomain: "blastergamekmrxz.firebaseapp.com",
+        projectId: "blastergamekmrxz",
+        storageBucket: "blastergamekmrxz.firebasestorage.app",
+        messagingSenderId: "349787225298",
+        appId: "1:349787225298:web:d5e8de4ec304d47580810b",
+        measurementId: "G-ES9Q1KR0T0"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      async function initFirebase(){
+        try{
+          await signInAnonymously(auth);
+        }catch(e){ console.warn('Anonymous sign-in failed', e); }
+        onAuthStateChanged(auth, user => {
+          window._fbUser = user || null;
+          window.dispatchEvent(new CustomEvent('fbAuthChanged'));
+          if (user) console.log('Firebase auth uid:', user.uid);
+          // load per-user state when auth changes
+          if (user){ try{ loadUserState().catch(()=>{}); }catch(e){} }
+        });
+        // initial leaderboard load
+        try{ await loadTopScores(); }catch(e){ console.warn('loadTopScores failed', e); }
       }
-    };
-  </script>
-</body>
+
+      async function saveScoreToFirestore(name, score){
+        if (!window._fbUser) { console.warn('Not authenticated yet'); return; }
+        const uid = window._fbUser.uid;
+        const ref = doc(db, 'leaderboard', uid);
+        try{
+          const snap = await getDoc(ref);
+          if (!snap.exists() || (snap.data().score || 0) < score){
+            await setDoc(ref, { uid, name: name || 'Player', score: Number(score)||0, ts: Date.now() });
+          }
+        }catch(e){ console.error('saveScoreToFirestore failed', e); }
+      }
+
+      // user state (usedCheats etc) stored separately in `users/{uid}` so we can update without touching leaderboard rules
+      async function saveUserState(payload){
+        if (!window._fbUser) { console.warn('Not authenticated yet'); return; }
+        const uid = window._fbUser.uid;
+        const ref = doc(db, 'users', uid);
+        try{
+          await setDoc(ref, Object.assign({ uid, ts: Date.now() }, payload || {}), { merge: true });
+          return true;
+        }catch(e){ console.error('saveUserState failed', e); return false; }
+      }
+
+      async function loadUserState(){
+        if (!window._fbUser) return null;
+        const uid = window._fbUser.uid;
+        const ref = doc(db, 'users', uid);
+        try{
+          const snap = await getDoc(ref);
+          if (snap.exists()){ window._fbUserState = snap.data(); window.dispatchEvent(new CustomEvent('fbUserStateUpdated')); return snap.data(); }
+          window._fbUserState = null; window.dispatchEvent(new CustomEvent('fbUserStateUpdated')); return null;
+        }catch(e){ console.error('loadUserState failed', e); window._fbUserState = null; window.dispatchEvent(new CustomEvent('fbUserStateUpdated')); return null; }
+      }
+
+      async function loadTopScores(){
+        try{
+          const col = collection(db, 'leaderboard');
+          const q = query(col, orderBy('score','desc'), limit(10));
+          const snaps = await getDocs(q);
+          const results = [];
+          snaps.forEach(s => results.push(s.data()));
+          window._fbLeaderboard = results;
+          window.dispatchEvent(new CustomEvent('fbLeaderboardUpdated'));
+          return results;
+        }catch(e){ console.error('loadTopScores failed', e); window._fbLeaderboard = []; window.dispatchEvent(new CustomEvent('fbLeaderboardUpdated')); return []; }
+      }
+
+      // expose minimal API to global scope for the main script to use
+      window.initFirebase = initFirebase;
+      window.saveScoreToFirestore = saveScoreToFirestore;
+      window.loadTopScores = loadTopScores;
+      window.saveUserState = saveUserState;
+      window.loadUserState = loadUserState;
+
+      // auto-init
+      initFirebase();
+    </script>
+
+    <script>
+      // Controls setup
+      const statusEl = document.getElementById('ctrlStatus');
+      const leftBtn = document.getElementById('btnLeft');
+      const rightBtn = document.getElementById('btnRight');
+      const actionBtn = document.getElementById('btnAction');
+      const controls = { left:false, right:false, action:false };
+      // runtime toggles
+      let paused = false;
+      let autoFire = false;
+      function updateStatus(){
+        statusEl.textContent = `Left: ${controls.left? 'down':'up'} • Action: ${controls.action? 'down':'up'} • Right: ${controls.right? 'down':'up'}`;
+      }
+      function bindButton(el, key){
+        const start = ev => { ev.preventDefault(); // when autoFire is on, don't toggle action state via the button
+          if (!(key === 'action' && autoFire)) controls[key]=true; el.classList.add('pressed'); updateStatus(); window.dispatchEvent(new CustomEvent('controlstart',{detail:{key}})); };
+        const end = ev => { ev.preventDefault(); if (!(key === 'action' && autoFire)) controls[key]=false; el.classList.remove('pressed'); updateStatus(); window.dispatchEvent(new CustomEvent('controlend',{detail:{key}})); };
+        el.addEventListener('touchstart', start, {passive:false}); el.addEventListener('touchend', end);
+        el.addEventListener('mousedown', start); el.addEventListener('mouseup', end); el.addEventListener('mouseleave', end);
+      }
+      bindButton(leftBtn,'left'); bindButton(rightBtn,'right'); bindButton(actionBtn,'action');
+      window.addEventListener('keydown', e => {
+        if (e.key === 'ArrowLeft') { controls.left = true; leftBtn.classList.add('pressed'); updateStatus(); }
+        if (e.key === 'ArrowRight') { controls.right = true; rightBtn.classList.add('pressed'); updateStatus(); }
+        if (e.key === ' ' || e.key === 'Spacebar') { controls.action = true; actionBtn.classList.add('pressed'); updateStatus(); }
+      });
+      window.addEventListener('keyup', e => {
+        if (e.key === 'ArrowLeft') { controls.left = false; leftBtn.classList.remove('pressed'); updateStatus(); }
+        if (e.key === 'ArrowRight') { controls.right = false; rightBtn.classList.remove('pressed'); updateStatus(); }
+        if (e.key === ' ' || e.key === 'Spacebar') { controls.action = false; actionBtn.classList.remove('pressed'); updateStatus(); }
+      });
+      window.gameControls = { isDown: k => !!controls[k], onStart: fn => window.addEventListener('controlstart', e => fn(e.detail.key)), onEnd: fn => window.addEventListener('controlend', e => fn(e.detail.key)) };
+      updateStatus();
+
+      // Simple demo game using controls
+      const canvas = document.getElementById('game');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = innerWidth;
+      let h = canvas.height = innerHeight;
+      window.addEventListener('resize', ()=>{ w = canvas.width = innerWidth; h = canvas.height = innerHeight; });
+
+      let score = 0;
+      let missed = 0; // count green particles that reached the floor
+      const missedLimit = 10;
+      // speed factor increases over time so particles fall faster
+      let speedFactor = 1;
+      setInterval(()=>{ if (!paused && !gameOver && started) speedFactor += 0.06; }, 8000);
+      // game start / player
+      let started = false;
+      let playerName = '';
+      // slow-motion timer (ms since epoch until which slow motion applies)
+      let slowUntil = 0;
+      // applySlow now *adds* time to the existing slow window when already active
+      function applySlow(seconds){
+        const now = Date.now();
+        if (slowUntil && slowUntil > now){
+          slowUntil += (seconds * 1000);
+        } else {
+          slowUntil = now + (seconds * 1000);
+        }
+        const remaining = Math.ceil((slowUntil - now) / 1000);
+        showSlowTip(remaining);
+      }
+      function getEffectiveSpeedFactor(){ return (Date.now() < slowUntil) ? Math.max(0.2, speedFactor * 0.35) : speedFactor; }
+
+      // spawn scaling: start with low spawn chance and increase with speed
+      const spawnBase = 0.006;
+      function getSpawnChance(){ return Math.min(0.08, spawnBase + (speedFactor - 1) * 0.01); }
+
+      // audio (use local Sounds folder)
+      const coinSound = new Audio('Sounds/coin.mp3'); coinSound.preload = 'auto';
+      const blastSound = new Audio('Sounds/blast.wav'); blastSound.preload = 'auto';
+
+      // shatter/effects for hits
+      const effects = [];
+      function createShatter(x,y,color){
+        const count = 12;
+        for (let i=0;i<count;i++){
+          const ang = Math.random() * Math.PI * 2;
+          const speed = 1 + Math.random() * 3;
+          effects.push({ x: x, y: y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed - 1, life: 600 + Math.random()*400, born: Date.now(), color });
+        }
+      }
+      function updateAndDrawEffects(dt){
+        for (let i = effects.length -1; i >=0; i--){
+          const p = effects[i];
+          const age = Date.now() - p.born;
+          if (age > p.life){ effects.splice(i,1); continue; }
+          // simple physics
+          p.vy += 0.12; // gravity
+          p.x += p.vx * (dt/16);
+          p.y += p.vy * (dt/16);
+          const a = 1 - (age / p.life);
+          ctx.globalAlpha = a;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, 3, 3);
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      // slow tip UI
+      let slowTipTimer = null;
+      function showSlowTip(seconds){
+        // remove existing
+        const existing = document.getElementById('slowTip');
+        if (existing) existing.remove();
+        const d = document.createElement('div'); d.id = 'slowTip'; d.className = 'slowTip'; d.textContent = `Time dilated for ${seconds}s`;
+        document.body.appendChild(d);
+        if (slowTipTimer) clearTimeout(slowTipTimer);
+        slowTipTimer = setTimeout(()=>{ d.remove(); slowTipTimer = null; }, seconds * 1000);
+      }
+      const bullets = [];
+      const enemies = [];
+      const player = { x: w / 2, y: h - 60, size: 18, speed: 6 };
+      let gameOver = false;
+      // HUD canvas
+      const hud = document.getElementById('hud');
+      const ctxHud = hud.getContext('2d');
+      function resizeCanvases(){
+        w = canvas.width = innerWidth;
+        h = canvas.height = innerHeight;
+        hud.width = innerWidth;
+        hud.height = innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvases);
+      resizeCanvases();
+
+      function updateScore(){
+        const scoreEl = document.getElementById('scoreDisplay');
+        const missEl = document.getElementById('missDisplaySmall');
+        const playerEl = document.getElementById('playerNameDisplay');
+        const uidEl = document.getElementById('uidDisplay');
+        if (scoreEl) scoreEl.textContent = score;
+        if (missEl) missEl.textContent = `${missed}/${missedLimit}`;
+        if (playerEl) playerEl.textContent = `Player: ${playerName || '—'}`;
+        if (uidEl) uidEl.textContent = window._fbUser ? `uid: ${window._fbUser.uid}` : '—';
+        // keep small status for controls for dev visibility
+        statusEl.textContent = `Left: ${controls.left? 'down':'up'} • Action: ${controls.action? 'down':'up'} • Right: ${controls.right? 'down':'up'}`;
+      }
+
+      function spawnEnemy(){ if (gameOver || paused || !started) return; 
+        // red spawn suppressed while redDisabledUntil in future
+        const canSpawnRed = Date.now() > redDisabledUntil;
+        const isRed = canSpawnRed && (Math.random() < 0.25);
+        const size = isRed ? 20 : 18; enemies.push({ x: Math.random() * (w - 40) + 20, y: -20, size: size, speed: 1 + Math.random() * 1.8, type: isRed ? 'red' : 'green' }); }
+
+      // draw player on HUD so it appears above controls
+      function drawPlayer(){
+        ctxHud.fillStyle = '#0f0';
+        ctxHud.beginPath();
+        ctxHud.moveTo(player.x, player.y - player.size);
+        ctxHud.lineTo(player.x - player.size, player.y + player.size);
+        ctxHud.lineTo(player.x + player.size, player.y + player.size);
+        ctxHud.closePath();
+        ctxHud.fill();
+      }
+      function drawBullets(){ ctx.fillStyle = '#0ff'; bullets.forEach(b => ctx.fillRect(b.x - 2, b.y - 10, 4, 10)); }
+      function drawEnemies(){
+        enemies.forEach(e => {
+          if (e.type === 'green') {
+            ctx.fillStyle = '#69f0ae'; // green
+            ctx.beginPath(); ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2); ctx.fill();
+          } else {
+            ctx.fillStyle = '#ff5252'; // red
+            ctx.beginPath(); ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2); ctx.fill();
+          }
+        });
+      }
+
+      function moveBullets(){ for (let i = bullets.length -1; i >=0; i--){ bullets[i].y -= 8; if (bullets[i].y < -10) bullets.splice(i,1); } }
+      function moveEnemies(){
+        for (let i = enemies.length -1; i>=0; i--){
+          const e = enemies[i];
+          e.y += e.speed * getEffectiveSpeedFactor();
+          // collision with player (collect when touching)
+          const dx = e.x - player.x;
+          const dy = e.y - player.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < (e.size/2 + player.size/2)) {
+            // player collects particle
+            if (e.type === 'green') {
+              score += 1;
+            } else {
+              // touching red costs points unless immortal cheat active or ultraMode
+              if (ultraMode){ score += 1000; } else if (Date.now() < immortalRedUntil) { /* no effect */ } else { score -= 5; }
+            }
+            enemies.splice(i,1);
+            updateScore();
+            continue;
+          }
+          if (e.y > h - 10) {
+            // reached floor
+            if (e.type === 'green') {
+              // missing green counts toward loss unless ultraMode
+              if (!ultraMode) { missed++; updateScore(); if (missed >= missedLimit) { gameOver = true; showGameOver(); return; } }
+            } else {
+              // red left to fall: reward +10 and brief slow motion
+              score += 10; updateScore(); applySlow(5);
+            }
+            enemies.splice(i,1);
+          }
+        }
+      }
+      function handleCollisions(){
+        for (let i = enemies.length -1; i>=0; i--){
+          for (let j = bullets.length -1; j>=0; j--){
+            const dx = enemies[i].x - bullets[j].x;
+            const dy = enemies[i].y - bullets[j].y;
+            const dist = Math.sqrt(dx*dx+dy*dy);
+            if (dist < enemies[i].size/2 + 6){
+              // bullet hit particle
+              const p = enemies[i];
+              // create shatter
+              const color = p.type === 'green' ? '#69f0ae' : '#ff5252';
+              createShatter(p.x, p.y, color);
+              // play appropriate sound
+              try{ if (p.type === 'green') coinSound.play().catch(()=>{}); else blastSound.play().catch(()=>{}); }catch(e){}
+              // scoring rules: ultraMode or normal
+              if (ultraMode){
+                // every hit adds 100, red gives 1000
+                if (p.type === 'green') score += 100; else score += 1000;
+              } else {
+                if (p.type === 'green') score += 1; else score -= 5;
+              }
+              // remove both
+              enemies.splice(i,1);
+              bullets.splice(j,1);
+              updateScore();
+              break;
+            }
+          }
+        }
+      }
+
+      function shoot(){ bullets.push({ x: player.x, y: player.y - player.size }); }
+      let lastShot = 0;
+
+      let _lastFrame = 0;
+      function gameLoop(ts){
+        if (gameOver) return;
+        if (!_lastFrame) _lastFrame = ts;
+        const dt = ts - _lastFrame;
+        _lastFrame = ts;
+        ctx.clearRect(0,0,w,h);
+        // clear HUD each frame and redraw player on top
+        ctxHud.clearRect(0,0,hud.width,hud.height);
+        
+        // pause handling
+        if (paused) { requestAnimationFrame(gameLoop); return; }
+
+        // controls
+        if (controls.left) player.x = Math.max(player.size, player.x - player.speed);
+        if (controls.right) player.x = Math.min(w - player.size, player.x + player.speed);
+        // faster fire rate: allow shooting every 100ms while action is held or when autoFire is on
+        const firing = autoFire ? true : controls.action;
+        if (firing && ts - lastShot > 100){ shoot(); lastShot = ts; }
+
+        // keyboard fallback handled via controls state
+        if (!paused && Math.random() < getSpawnChance()) spawnEnemy();
+        moveBullets(); moveEnemies(); handleCollisions();
+        // refresh cheat button and countdowns
+        refreshCheatButton(); updateCheatCountdowns();
+        // draw enemies and bullets on main canvas
+        drawBullets(); drawEnemies();
+        // draw shatter effects (from hits)
+        updateAndDrawEffects(dt);
+        // draw player on HUD so it's above controls
+        drawPlayer();
+        requestAnimationFrame(gameLoop);
+      }
+
+      // populate leaderboard (uses Firebase-loaded data if available). Shows up to 10 entries.
+      function populateLeaderboard(){
+        const list = document.getElementById('leaderboard');
+        if (!list) return;
+        const fb = window._fbLeaderboard || [];
+        const max = 10;
+        list.innerHTML = '';
+        for (let i=0;i<max;i++){
+          const it = fb[i] || null;
+          const li = document.createElement('li'); li.style.display='flex'; li.style.alignItems='center'; li.style.gap='8px'; li.style.padding='6px 4px';
+          const rank = document.createElement('span'); rank.className = 'rank'; rank.textContent = (i+1);
+          if (i===0) rank.classList.add('r1'); if (i===1) rank.classList.add('r2'); if (i===2) rank.classList.add('r3');
+          const txt = document.createElement('div'); txt.style.flex='1';
+          if (it) txt.textContent = `${it.name} — ${it.score}`; else txt.textContent = `—`;
+          li.appendChild(rank); li.appendChild(txt); list.appendChild(li);
+        }
+      }
+      // initial render (will be updated when Firebase data loads)
+      populateLeaderboard();
+      // listen for fb updates
+      window.addEventListener('fbLeaderboardUpdated', ()=>{ populateLeaderboard(); });
+      updateScore();
+
+      // Background music playlist (start when player clicks Start)
+      const bgTracks = [
+        'files/audio/Green is good .mp3',
+        'files/audio/Green is good techno.mp3'
+      ];
+      let bgIndex = Math.floor(Math.random() * bgTracks.length);
+      const bgAudio = new Audio(); bgAudio.preload = 'auto'; bgAudio.volume = 0.55;
+      bgAudio.addEventListener('ended', ()=>{
+        bgIndex = (bgIndex + 1) % bgTracks.length; bgAudio.src = bgTracks[bgIndex]; bgAudio.play().catch(()=>{});
+      });
+
+      // Start button wiring
+      const startBtn = document.getElementById('btnStart');
+      const startPanel = document.getElementById('startPanel');
+      const nameInput = document.getElementById('playerNameInput');
+      startBtn.addEventListener('click', ()=>{
+        const val = nameInput.value.trim();
+        if (!val){
+          // indicate error
+          nameInput.style.border = '1px solid #ff5252';
+          setTimeout(()=>{ nameInput.style.border = ''; }, 1200);
+          return;
+        }
+        playerName = val;
+        started = true;
+        startPanel.style.display = 'none';
+        updateScore();
+        lastShot = 0;
+        // start background audio
+        try{ bgAudio.src = bgTracks[bgIndex]; bgAudio.play().catch(()=>{}); }catch(e){}
+        // begin loop
+        requestAnimationFrame(gameLoop);
+      });
+      nameInput.addEventListener('keydown', (ev)=>{ if (ev.key === 'Enter') startBtn.click(); });
+
+      // Credits dialog
+      const creditsDialog = document.createElement('div');
+      creditsDialog.id = 'creditsDialog'; creditsDialog.style.position = 'fixed'; creditsDialog.style.left = '50%'; creditsDialog.style.top = '50%'; creditsDialog.style.transform = 'translate(-50%,-50%)'; creditsDialog.style.background = 'rgba(0,0,0,0.9)'; creditsDialog.style.color = '#fff'; creditsDialog.style.padding = '18px 20px'; creditsDialog.style.borderRadius = '12px'; creditsDialog.style.display = 'none'; creditsDialog.style.zIndex = 120;
+      creditsDialog.innerHTML = `<div style="font-size:18px;font-weight:700;margin-bottom:8px">Credits</div><div style="font-size:14px;line-height:1.4">Developed by kmrx<br>Music by suno.ai<br>Thanks to GithubCopilot and GitHub</div><div style="margin-top:14px;text-align:right"><button id='creditsClose' style='padding:6px 10px;border-radius:8px;background:#222;color:#ffd600;border:none'>Close</button></div>`;
+      document.body.appendChild(creditsDialog);
+      document.getElementById('creditsLink').addEventListener('click', (ev)=>{ ev.preventDefault(); creditsDialog.style.display = 'block'; });
+      document.body.addEventListener('click', (ev)=>{ if (ev.target && ev.target.id === 'creditsClose'){ creditsDialog.style.display = 'none'; } });
+
+      // Cheat modal (created hidden)
+      const cheatDialog = document.createElement('div'); cheatDialog.id = 'cheatDialog'; cheatDialog.style.position = 'fixed'; cheatDialog.style.left = '50%'; cheatDialog.style.top = '50%'; cheatDialog.style.transform = 'translate(-50%,-50%)'; cheatDialog.style.background = 'rgba(0,0,0,0.95)'; cheatDialog.style.color = '#fff'; cheatDialog.style.padding = '18px 20px'; cheatDialog.style.borderRadius = '12px'; cheatDialog.style.display = 'none'; cheatDialog.style.zIndex = 200;
+      cheatDialog.innerHTML = `<div style="font-size:16px;font-weight:700;margin-bottom:8px">Cheat Codes</div>
+        <input id='cheatInput' placeholder='Enter cheats (e.g. AD100)' style='width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;margin-bottom:10px' />
+        <div style='display:flex;gap:8px;justify-content:flex-end'>
+          <button id='cheatApply' style='padding:6px 10px;border-radius:8px;background:var(--accent);color:#022;border:none'>Apply</button>
+          <button id='cheatClose' style='padding:6px 10px;border-radius:8px;background:#222;color:#ffd600;border:none'>Close</button>
+        </div>`;
+      document.body.appendChild(cheatDialog);
+
+      // Small cheat button (visible while playing) top-left area
+      const cheatBtn = document.createElement('button'); cheatBtn.id = 'cheatBtn'; cheatBtn.textContent = 'Cheats'; cheatBtn.style.position='fixed'; cheatBtn.style.left='18px'; cheatBtn.style.top='140px'; cheatBtn.style.zIndex='95'; cheatBtn.style.padding='6px 10px'; cheatBtn.style.borderRadius='8px'; cheatBtn.style.background='#222'; cheatBtn.style.color='#ffd600'; cheatBtn.style.border='none'; cheatBtn.style.display='none'; document.body.appendChild(cheatBtn);
+
+      // cheat state and usage tracking
+      const usedCheats = { AD100:0, MISSEDME:0, DAMN1000:0, IMTHEHACKERMF:0, IMIMMORTALMF:0, SLOWGAME60:0, IMULTRALEGENDARYHACKERMF:0 };
+      let redDisabledUntil = 0;
+      let immortalRedUntil = 0;
+      let ultraMode = false; // special ultimate cheat
+      let ultraQuitBtn = null;
+
+      function showCheatDialog(){ paused = true; cheatDialog.style.display='block'; cheatBtn.disabled = true; }
+      function closeCheatDialog(){ paused = false; cheatDialog.style.display='none'; cheatBtn.disabled = false; }
+      cheatBtn.addEventListener('click', ()=>{ showCheatDialog(); });
+      document.getElementById('cheatClose').addEventListener('click', ()=>{ closeCheatDialog(); });
+      document.getElementById('cheatApply').addEventListener('click', ()=>{ const code = document.getElementById('cheatInput').value.trim().toUpperCase(); applyCheat(code); document.getElementById('cheatInput').value=''; });
+
+      const overlay = document.createElement('div');
+      overlay.id = 'gameOverPanel';
+      overlay.style.position = 'fixed';
+      overlay.style.left = '50%';
+      overlay.style.top = '50%';
+      overlay.style.transform = 'translate(-50%,-50%)';
+      overlay.style.background = 'rgba(0,0,0,0.85)';
+      overlay.style.color = '#fff';
+      overlay.style.padding = '20px 28px';
+      overlay.style.borderRadius = '12px';
+      overlay.style.display = 'none';
+      overlay.style.zIndex = 60;
+      overlay.innerHTML = `<div style="font-size:20px;margin-bottom:8px;">Game Over</div><div style="margin-bottom:12px;">Missed: <span id='missCount'>0</span>/10</div><button id='btnRestart' style='padding:8px 12px;border-radius:8px;background:#222;color:#ffd600;border:none'>Restart</button>`;
+      document.body.appendChild(overlay);
+      async function showGameOver(){
+        // save score to Firestore (if available) and refresh leaderboard
+        try{
+          if (window.saveScoreToFirestore) await window.saveScoreToFirestore(playerName || 'Player', score);
+          if (window.loadTopScores) await window.loadTopScores();
+        }catch(e){ console.warn('Error saving/loading leaderboard', e); }
+
+        const fb = window._fbLeaderboard || [];
+        const max = 10;
+        let lb = '<div style="text-align:left;margin-top:8px"><ol style="list-style:none;padding:0;margin:0">';
+        for (let i=0;i<max;i++){
+          const it = fb[i] || null;
+          const rankClass = i===0? 'r1' : (i===1? 'r2' : (i===2? 'r3':''));
+          const nameText = it ? it.name : '—';
+          const scoreText = it ? it.score : '—';
+          lb += `<li style="display:flex;align-items:center;gap:8px;padding:6px 0"><span class="rank ${rankClass}" style="width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:800">${i+1}</span><div style="flex:1">${nameText} — ${scoreText}</div></li>`;
+        }
+        lb += '</ol></div>';
+
+        overlay.innerHTML = `
+          <div style="font-size:20px;margin-bottom:8px;">Game Over</div>
+          <div style="margin-bottom:6px;">Player: ${playerName || '—'}</div>
+          <div style="margin-bottom:6px;">Score: ${score}</div>
+          <div style="margin-bottom:12px;">Missed: <span id='missCount'>${missed}</span>/${missedLimit}</div>
+          <div style="text-align:left;margin-bottom:12px"><strong>Leaderboard</strong>${lb}</div>
+          <div style="display:flex;gap:8px;justify-content:center">
+            <button id='btnRestart' style='padding:8px 12px;border-radius:8px;background:#222;color:#ffd600;border:none'>Restart</button>
+            <button id='btnHome' style='padding:8px 12px;border-radius:8px;background:#222;color:#40c4ff;border:none'>Home</button>
+          </div>`;
+        overlay.style.display = 'block';
+      }
+      
+      // Cheat application logic
+      function applyCheat(code){
+        if (!code) return;
+        if (code === 'AD100'){
+          if (usedCheats.AD100) return alert('AD100 already used this game');
+          score += 100; usedCheats.AD100 = 1; updateScore();
+          if (window.saveUserState) window.saveUserState({ usedCheats, name: playerName });
+          alert('Added 100 points'); return;
+        }
+        if (code === 'MISSEDME'){
+          if (usedCheats.MISSEDME >= 3) return alert('MISSEDME used max times');
+          missed = 0; usedCheats.MISSEDME += 1; updateScore();
+          if (window.saveUserState) window.saveUserState({ usedCheats, name: playerName });
+          alert('Missed reset'); return;
+        }
+        if (code === 'DAMN1000'){
+          if (usedCheats.DAMN1000) return alert('DAMN1000 already used');
+          score += 1000; usedCheats.DAMN1000 = 1; updateScore();
+          if (window.saveUserState) window.saveUserState({ usedCheats, name: playerName });
+          alert('Added 1000 points'); return;
+        }
+        if (code === 'IMTHEHACKERMF'){
+          if (usedCheats.IMTHEHACKERMF) return alert('Cheat already used');
+          usedCheats.IMTHEHACKERMF = 1; redDisabledUntil = Date.now() + 60000; // remove red spawn
+          // remove existing red particles
+          for (let i = enemies.length -1; i>=0; i--){ if (enemies[i].type === 'red') enemies.splice(i,1); }
+          if (window.saveUserState) window.saveUserState({ usedCheats, name: playerName });
+          alert('Red particles removed for 60s'); return;
+        }
+        if (code === 'IMIMMORTALMF'){
+          if (usedCheats.IMIMMORTALMF) return alert('Cheat already used');
+          usedCheats.IMIMMORTALMF = 1; immortalRedUntil = Date.now() + 60000; if (window.saveUserState) window.saveUserState({ usedCheats, name: playerName }); alert('Immortal red active for 60s'); return;
+        }
+        if (code === 'SLOWGAME60'){
+          if (usedCheats.SLOWGAME60) return alert('Cheat already used');
+          usedCheats.SLOWGAME60 = 1; applySlow(60); if (window.saveUserState) window.saveUserState({ usedCheats, name: playerName }); alert('Game slowed for 60s'); return;
+        }
+        if (code === 'DEF'){
+          // reset settings back to default but preserve score and used cheats
+          speedFactor = 1; slowUntil = 0; redDisabledUntil = 0; immortalRedUntil = 0; effects.length = 0; updateScore(); if (window.saveUserState) window.saveUserState({ usedCheats, name: playerName }); alert('Settings reset (score preserved)'); return;
+        }
+        if (code === 'IMULTRALEGENDARYHACKERMF'){
+          if (usedCheats.IMULTRALEGENDARYHACKERMF) return alert('Cheat already used');
+          usedCheats.IMULTRALEGENDARYHACKERMF = 1; ultraMode = true;
+          // show quit button in top controls
+          if (!ultraQuitBtn){ ultraQuitBtn = document.createElement('button'); ultraQuitBtn.id='btnQuit'; ultraQuitBtn.textContent='Quit'; ultraQuitBtn.style.marginLeft='6px'; ultraQuitBtn.style.padding='6px 8px'; ultraQuitBtn.style.borderRadius='8px'; ultraQuitBtn.style.background='#600'; ultraQuitBtn.style.color='#fff'; document.getElementById('topControls').appendChild(ultraQuitBtn); ultraQuitBtn.addEventListener('click', ()=>{ gameOver = true; showGameOver(); }); }
+          if (window.saveUserState) window.saveUserState({ usedCheats, name: playerName });
+          alert('Ultra mode enabled'); return;
+        }
+        alert('Unknown cheat code');
+      }
+      // show cheat countdowns below missed count
+      const cheatCountdownEl = document.createElement('div'); cheatCountdownEl.id='cheatCountdown'; cheatCountdownEl.style.fontSize='12px'; cheatCountdownEl.style.color='var(--muted)'; cheatCountdownEl.style.marginTop='6px'; document.getElementById('leftPanel').appendChild(cheatCountdownEl);
+
+      // update UI when firebase auth / user state changes
+      window.addEventListener('fbAuthChanged', ()=>{ updateScore(); });
+      window.addEventListener('fbUserStateUpdated', ()=>{
+        // merge saved usedCheats into runtime
+        try{
+          if (window._fbUserState && window._fbUserState.usedCheats){
+            Object.keys(window._fbUserState.usedCheats).forEach(k => { if (usedCheats.hasOwnProperty(k)) usedCheats[k] = window._fbUserState.usedCheats[k]; });
+            updateScore();
+          }
+        }catch(e){/* ignore */}
+      });
+
+      // wire pause/auto buttons and restart behavior
+      const btnPause = document.getElementById('btnPausePlay');
+      const btnAuto = document.getElementById('btnAutoFire');
+      const missDisplay = document.getElementById('missDisplay');
+      btnPause.addEventListener('click', ()=>{
+        paused = !paused;
+        btnPause.textContent = paused ? 'Play' : 'Pause';
+      });
+      btnAuto.addEventListener('click', ()=>{
+        autoFire = !autoFire;
+        btnAuto.textContent = autoFire ? 'Auto fire: On' : 'Auto fire: Off';
+      });
+
+      // Hook cheat button visibility while playing
+      function refreshCheatButton(){ cheatBtn.style.display = started && !gameOver ? 'block' : 'none'; }
+      // update cheat countdowns
+      function updateCheatCountdowns(){
+        const now = Date.now();
+        const parts = [];
+        if (redDisabledUntil > now) parts.push(`No-Red: ${Math.ceil((redDisabledUntil-now)/1000)}s`);
+        if (immortalRedUntil > now) parts.push(`ImmortalRed: ${Math.ceil((immortalRedUntil-now)/1000)}s`);
+        if (slowUntil > now) parts.push(`Slow: ${Math.ceil((slowUntil-now)/1000)}s`);
+        cheatCountdownEl.textContent = parts.join('  •  ');
+      }
+
+      document.body.addEventListener('click', (e)=>{
+        if (!e.target) return;
+        if (e.target.id === 'btnRestart'){
+          // reset and start immediately (keep player name)
+          missed = 0; score = 0; enemies.length = 0; bullets.length = 0; gameOver = false; paused = false; autoFire = false; started = true;
+          overlay.style.display = 'none';
+          startPanel.style.display = 'none';
+          btnPause.textContent = 'Pause';
+          btnAuto.textContent = 'Auto: Off';
+          updateScore();
+          // reset cheat timers except usedCheats remain
+          redDisabledUntil = 0; immortalRedUntil = 0; slowUntil = 0; ultraMode = false;
+          if (ultraQuitBtn){ ultraQuitBtn.remove(); ultraQuitBtn = null; }
+          requestAnimationFrame(gameLoop);
+        }
+        if (e.target.id === 'btnHome'){
+          // go back to start panel (do not start)
+          missed = 0; score = 0; enemies.length = 0; bullets.length = 0; gameOver = false; paused = false; autoFire = false; started = false;
+          overlay.style.display = 'none';
+          startPanel.style.display = 'block';
+          nameInput.focus();
+          btnPause.textContent = 'Pause';
+          btnAuto.textContent = 'Auto: Off';
+          updateScore();
+        }
+        // credits close handled earlier
+      });
+    </script>
+  </body>
 </html>

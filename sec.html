@@ -1,11 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>SECRET PAGE!!!</h1>
-</body>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Interactive Section</title>
+        <style>
+            html,body{height:100%;margin:0}
+            body{background:#000;overflow:hidden;font-family:Arial,Helvetica,sans-serif}
+            #particleCanvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;display:block}
+            #oomg{
+                position:fixed;
+                left:50%;top:50%;transform:translate(-50%,-50%);
+                z-index:2;color:#532981;font-weight:800;font-size:6rem;pointer-events:auto;
+                text-shadow:0 8px 30px rgba(0,0,0,0.7);cursor:pointer;user-select:none;
+                transition:transform 0.18s ease,color 0.18s ease,filter 0.18s;
+            }
+            #oomg.pulse{animation: oomg-pulse 0.9s ease-out;}
+            @keyframes oomg-pulse{0%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.18)}100%{transform:translate(-50%,-50%) scale(1)}}
+            /* make sure other content (if any) is above canvas */
+            .content{position:relative;z-index:3;color:#fff}
+        </style>
+    </head>
+    <body>
+        <canvas id="particleCanvas"></canvas>
+        <div id="oomg">Oomb</div>
+
+        <script type="module">
+            import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
+
+            const canvas = document.getElementById('particleCanvas');
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const particleCount = 1200;
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i++) positions[i] = (Math.random() - 0.5) * 10;
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({ color: 0xA259FF, size: 0.04, transparent: true, opacity: 0.85 });
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+
+            // simple mouse interaction: move camera slightly toward pointer
+            let mouseX = 0, mouseY = 0;
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+            }, { passive: true });
+            window.addEventListener('touchmove', (e) => {
+                if (e.touches && e.touches[0]){
+                    mouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+                    mouseY = -(e.touches[0].clientY / window.innerHeight - 0.5) * 2;
+                }
+            }, { passive: true });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                // slight rotation and parallax
+                points.rotation.y += 0.0008;
+                camera.position.x += (mouseX * 1.4 - camera.position.x) * 0.06;
+                camera.position.y += (mouseY * 1.4 - camera.position.y) * 0.06;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            });
+
+            // interactive text behavior
+            const oomg = document.getElementById('oomg');
+            let targetX = window.innerWidth/2, targetY = window.innerHeight/2;
+            let curX = targetX, curY = targetY;
+            window.addEventListener('mousemove', (e) => { targetX = e.clientX; targetY = e.clientY; });
+            window.addEventListener('touchmove', (e) => { if(e.touches && e.touches[0]){ targetX = e.touches[0].clientX; targetY = e.touches[0].clientY; } }, {passive:true});
+
+            function follow() {
+                curX += (targetX - curX) * 0.12;
+                curY += (targetY - curY) * 0.12;
+                oomg.style.left = curX + 'px';
+                oomg.style.top = curY + 'px';
+                requestAnimationFrame(follow);
+            }
+            follow();
+
+            oomg.addEventListener('click', () => {
+                oomg.classList.remove('pulse');
+                // trigger reflow to restart animation
+                void oomg.offsetWidth;
+                oomg.classList.add('pulse');
+                // flash particle color briefly
+                material.color.set(0xffe066);
+                setTimeout(() => material.color.set(0xA259FF), 400);
+            });
+        </script>
+    </body>
 </html>

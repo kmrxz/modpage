@@ -10,6 +10,7 @@
       --bg: #081025;
       --muted: #bfcbdc;
       --accent: #7c3aed;
+      --heading-color: #8140c7;
       --button-text: #fff;
       --h2-color: #cfe0ff;
       --card-bg: rgba(255,255,255,0.03);
@@ -46,13 +47,14 @@
     }
     h1 {
       text-align:center;
-      font-size:2.3rem;
+      font-size:4.6rem;
       font-weight:800;
-      color:var(--accent);
+      color:var(--heading-color);
       margin-top:32px;
       margin-bottom:0;
       letter-spacing:1.2px;
-      text-shadow:0 2px 12px #0008;
+      text-shadow:0 2px 18px #000a;
+      line-height:0.95;
     }
     .description {
       margin: 18px 0 18px 0;
@@ -84,6 +86,12 @@
       resize: vertical;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow: auto;
+      box-sizing: border-box;
+      line-height: 1.4;
+      max-height: 340px;
     }
     .button-group {
       display: flex;
@@ -174,7 +182,7 @@
     }
     @media (max-width: 700px) {
       .main-wrapper { padding: 16px 4px; margin-top: 18px; }
-      h1 { font-size: 1.3rem; }
+      h1 { font-size: 2.6rem; }
       button { font-size: 0.95rem; padding: 8px 12px; }
     }
   </style>
@@ -189,6 +197,7 @@
       These prompts are shared for educational and creative use only. I do not claim ownership or authorship of any prompt listed here. All credits belong to the original creators. If you are the author and want credit or removal, please contact me via <a href="https://instagram.com/echo_rapt0r" target="_blank" style="color:var(--accent);text-decoration:underline;">Instagram</a>.
     </div>
     <div class="prompt-flex">
+      <h2 class="post-title" id="title1"></h2>
       <img src="images/alven.jpg" alt="Prompt Illustration" class="prompt-img" />
       <div class="prompt-content">
         <textarea id="promptText" readonly>
@@ -197,9 +206,33 @@ Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-
         <div class="author-row" style="margin-bottom:0;">
           <span class="author-label">Author:</span> unclaimed (shared by kmrXz)
         </div>
+        <div class="author-row" style="margin-top:4px;margin-bottom:0;">
+          <span class="author-label">Platform:</span> ChatGPT (suggested)
+        </div>
         <div class="button-group" style="margin-top:8px;">
-          <button onclick="copyPrompt()">Copy</button>
-          <button onclick="clearPrompt()">Clear</button>
+          <button onclick="copyPrompt('promptText')">Copy</button>
+          <button onclick="clearPrompt('promptText')">Clear</button>
+          <button onclick="window.open('https://instagram.com/echo_rapt0r', '_blank'); showToast('Contact via Instagram to claim ownership!');">Claim Ownership</button>
+        </div>
+      </div>
+    </div>
+    <!-- Second prompt container -->
+    <div class="prompt-flex" style="margin-top:18px;">
+      <h2 class="post-title" id="title2"></h2>
+      <img src="images/inj.jpg" alt="Prompt Illustration" class="prompt-img" />
+      <div class="prompt-content">
+        <textarea id="promptText2" readonly>
+Generate a hand drawn portrait illustration in redand yellow pen on notebook paper inspired by doodle art and comic annotations. Keep full likeness of the subject expressive lines,spontaneous gestures,bold outline glow , handwritten notes around ,realistic pen stroke texture,4k resolution.
+        </textarea>
+        <div class="author-row" style="margin-bottom:0;">
+          <span class="author-label">Author:</span> unclaimed (shared by kmrXz)
+        </div>
+        <div class="author-row" style="margin-top:4px;margin-bottom:0;">
+          <span class="author-label">Platform:</span> Gemini (suggested)
+        </div>
+        <div class="button-group" style="margin-top:8px;">
+          <button onclick="copyPrompt('promptText2')">Copy</button>
+          <button onclick="clearPrompt('promptText2')">Clear</button>
           <button onclick="window.open('https://instagram.com/echo_rapt0r', '_blank'); showToast('Contact via Instagram to claim ownership!');">Claim Ownership</button>
         </div>
       </div>
@@ -236,10 +269,15 @@ Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-
       width: 100%;
       max-width: 100%;
       min-width: 180px;
-      height: 220px;
+      height: auto;
+      min-height: 160px;
       margin-bottom: 8px;
       overflow-y: auto;
       resize: vertical;
+      box-sizing: border-box;
+      max-height: 340px;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     @media (max-width: 700px) {
       .prompt-flex {
@@ -319,23 +357,58 @@ Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-
         setTimeout(() => { copyBtn.textContent = "Copy Prompt"; }, 2000);
       });
     }
-    const originalPrompt = `Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-body boy peeking out of an Instagram post frame, as if he's a social media character. He is sitting on the bottom bar of the frame with his legs hanging down. He is holding a smartphone in his hands. His outfit and hairstyle should match the ones shown in the reference photos. The background is neutral. The boy looks joyful and cute, with big wide eyes and a bright smile. The frame includes the profile name. Add Instagram-style icons for "like," "comment," and "share." The entire frame is held by a large hand. Use a 9:16 vertical format.`;
-    let promptCleared = false;
-    function clearPrompt() {
-      const textArea = document.getElementById("promptText");
-      const clearBtn = document.querySelector('button[onclick="clearPrompt()"]');
-      if (!promptCleared) {
+    const originalPrompt1 = `Create a 3D illustration in a cartoon style inspired by DreamWorks. Show a full-body boy peeking out of an Instagram post frame, as if he's a social media character. He is sitting on the bottom bar of the frame with his legs hanging down. He is holding a smartphone in his hands. His outfit and hairstyle should match the ones shown in the reference photos. The background is neutral. The boy looks joyful and cute, with big wide eyes and a bright smile. The frame includes the profile name. Add Instagram-style icons for "like," "comment," and "share." The entire frame is held by a large hand. Use a 9:16 vertical format.`;
+    const originalPrompt2 = `Generate a hand drawn portrait illustration in redand yellow pen on notebook paper inspired by doodle art and comic annotations. Keep full likeness of the subject expressive lines,spontaneous gestures,bold outline glow , handwritten notes around ,realistic pen stroke texture,4k resolution and image as inj.jpg.`;
+    const clearedState = { 'promptText': false, 'promptText2': false };
+
+    function copyPrompt(id) {
+      const textArea = document.getElementById(id);
+      const btn = document.querySelector(`button[onclick="copyPrompt('${id}')"]`);
+      navigator.clipboard.writeText(textArea.value).then(() => {
+        showToast("Prompt copied to clipboard!");
+        if (btn) { btn.textContent = "Done"; setTimeout(() => { btn.textContent = "Copy"; }, 1600); }
+      });
+    }
+
+    function clearPrompt(id) {
+      const textArea = document.getElementById(id);
+      const btn = document.querySelector(`button[onclick="clearPrompt('${id}')"]`);
+      if (!clearedState[id]) {
         textArea.value = "";
-        clearBtn.textContent = "Show";
+        if (btn) btn.textContent = "Show";
         showToast("Prompt cleared!");
-        promptCleared = true;
+        clearedState[id] = true;
+        updateTitleFromPrompt(id);
       } else {
-        textArea.value = originalPrompt;
-        clearBtn.textContent = "Clear";
+        textArea.value = (id === 'promptText') ? originalPrompt1 : originalPrompt2;
+        if (btn) btn.textContent = "Clear";
         showToast("Prompt restored!");
-        promptCleared = false;
+        clearedState[id] = false;
+        updateTitleFromPrompt(id);
       }
     }
+
+    function generateTitleFromPrompt(text) {
+      if (!text) return 'Untitled Prompt';
+      const words = text.trim().replace(/\s+/g, ' ').split(' ');
+      const title = words.slice(0, 4).join(' ');
+      return title.length < text.length ? title + '...' : title;
+    }
+
+    function updateTitleFromPrompt(id) {
+      const textArea = document.getElementById(id);
+      const titleEl = document.getElementById(id === 'promptText' ? 'title1' : 'title2');
+      if (titleEl && textArea) titleEl.textContent = generateTitleFromPrompt(textArea.value);
+    }
+
+    // Initialize titles
+    window.addEventListener('load', () => {
+      // Ensure textareas have original text exactly as constants
+      document.getElementById('promptText').value = originalPrompt1;
+      document.getElementById('promptText2').value = originalPrompt2;
+      updateTitleFromPrompt('promptText');
+      updateTitleFromPrompt('promptText2');
+    });
     // Removed copyAuthor, only one copy button remains
   </script>
 </body>
