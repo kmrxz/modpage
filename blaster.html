@@ -51,7 +51,13 @@
         <ol id="leaderboard" style="margin:0;padding-left:16px"></ol>
       </div>
     </div>
-
+* {
+  -webkit-touch-callout: none; /* Disable long-press menu on iOS */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
     <div class="startPanel" id="startPanel">
       <input id="playerNameInput" placeholder="Enter player name" maxlength="18" />
       <button id="btnStart">Start</button>
