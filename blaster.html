@@ -21,7 +21,7 @@
       .leader .rank.r1{background:#ff5252;color:#111}
       .leader .rank.r2{background:#ff8a50;color:#111}
       .leader .rank.r3{background:#ffd54f;color:#111}
-      /* Start panel  (center) */
+      /* Start panel (center) */
       .startPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 10px 30px rgba(2,6,23,0.6);z-index:90}
       .startPanel input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;margin-bottom:8px}
       .startPanel button{width:100%;padding:8px;border-radius:8px;border:none;background:var(--accent);color:#022;font-weight:700}
@@ -34,6 +34,16 @@
       .btn{width:84px;height:84px;border-radius:18px;background:var(--panel);border:1px solid rgba(255,255,255,0.03);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:none}
       .btn.pressed{background:var(--accent);color:#022}
       .btn.wide{width:140px}
+    </style>
+    <style>
+      /* Cheat button positioned top-right to avoid covering left HUD */
+      #cheatBtn{ position:fixed; right:16px; top:12px; z-index:120; padding:6px 10px; border-radius:8px; background:#222; color:#ffd600; border:none; display:none; box-shadow:0 6px 16px rgba(0,0,0,0.5); }
+      /* Responsive adjustments for top controls on small screens */
+      @media (max-width:720px){
+        #topControls{ right:12px !important; left:auto !important; top:12px !important; gap:8px; align-items:center; }
+        #topControls .status{ display:none; }
+        #btnAutoFire, #btnPausePlay{ padding:6px 8px !important; font-size:13px !important; min-width:64px !important; }
+      }
     </style>
   </head>
   <body>
@@ -51,13 +61,10 @@
         <ol id="leaderboard" style="margin:0;padding-left:16px"></ol>
       </div>
     </div>
-* {
-  -webkit-touch-callout: none; /* Disable long-press menu on iOS */
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
+
+    <!-- Firebase debug panel (helps diagnose auth / Firestore issues) -->
+    <div id="fbDebug" style="position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,0.7);color:#fff;padding:10px 12px;border-radius:10px;font-size:13px;z-index:120;max-width:320px;box-shadow:0 6px 18px rgba(0,0,0,0.6)">FB: initializing...</div>
+
     <div class="startPanel" id="startPanel">
       <input id="playerNameInput" placeholder="Enter player name" maxlength="18" />
       <button id="btnStart">Start</button>
@@ -68,10 +75,9 @@
         </div>
     </div>
 
-    <div id="topControls" style="position:fixed;left:260px;top:12px;z-index:60;display:flex;gap:12px;align-items:center;">
+    <div id="topControls" style="position:fixed;right:16px;top:12px;z-index:260;display:flex;gap:12px;align-items:center;">
       <div class="status" id="ctrlStatus">Left: up • Action: up • Right: up</div>
-      <button id="btnPausePlay" style="padding:6px 10px;border-radius:8px;background:#222;color:#ffd600;border:none">Pause</button>
-      <button id="btnAutoFire" style="padding:6px 10px;border-radius:8px;background:#222;color:#40c4ff;border:none">Auto: Off</button>
+      <button id="btnTools" style="padding:8px 10px;border-radius:8px;background:#222;color:#ffd600;border:none">Tools</button>
     </div>
     <canvas id="game"></canvas>
     <!-- HUD canvas sits above controls so player is visible over buttons; pointer-events:none lets touches go through -->
@@ -104,42 +110,87 @@
       const auth = getAuth(app);
       const db = getFirestore(app);
 
+      // simple in-page debug helper
+      function fbDebug(msg, level='info'){
+        try{
+          const el = document.getElementById('fbDebug');
+          if (el) el.textContent = 'FB: ' + msg;
+        }catch(e){}
+        if (level === 'error') console.error('[FBDEBUG]', msg); else if (level === 'warn') console.warn('[FBDEBUG]', msg); else console.log('[FBDEBUG]', msg);
+      }
+
+      // show basic firebase config & origin (masked apiKey) for quick diagnosis
+      function fbShowConfig(){
+        try{
+          const el = document.getElementById('fbDebug');
+          if (!el) return;
+          const maskedKey = (firebaseConfig && firebaseConfig.apiKey) ? (firebaseConfig.apiKey.slice(0,6) + '...' + firebaseConfig.apiKey.slice(-4)) : 'n/a';
+          const text = `proj:${firebaseConfig.projectId || 'n/a'} • origin:${location.origin} • key:${maskedKey}`;
+          el.textContent = 'FB: ' + text;
+          console.log('[FBDEBUG] config:', { projectId: firebaseConfig.projectId, origin: location.origin });
+        }catch(e){}
+      }
+
       async function initFirebase(){
+        fbDebug('initializing...');
         try{
           await signInAnonymously(auth);
-        }catch(e){ console.warn('Anonymous sign-in failed', e); }
+          fbDebug('anonymous sign-in requested');
+        }catch(e){ console.warn('Anonymous sign-in failed', e); fbDebug('anonymous sign-in failed: '+(e && e.message), 'error'); }
+
         onAuthStateChanged(auth, user => {
           window._fbUser = user || null;
+          fbDebug(user ? ('signed in: ' + user.uid) : 'signed out');
+          console.log('Firebase auth state changed, user=', user && user.uid);
           window.dispatchEvent(new CustomEvent('fbAuthChanged'));
-          if (user) console.log('Firebase auth uid:', user.uid);
+          // attempt to update UI immediately if updateScore is available
+          try{ if (window.updateScore) window.updateScore(); }catch(e){}
           // load per-user state when auth changes
-          if (user){ try{ loadUserState().catch(()=>{}); }catch(e){} }
+          if (user){
+            loadUserState().then(data => {
+              fbDebug('user state loaded');
+              try{ if (window.updateScore) window.updateScore(); }catch(e){}
+            }).catch(err => { console.warn('loadUserState failed', err); fbDebug('loadUserState failed: '+(err && err.message),'warn'); });
+          }
         });
+
         // initial leaderboard load
-        try{ await loadTopScores(); }catch(e){ console.warn('loadTopScores failed', e); }
+        try{
+          const results = await loadTopScores();
+          fbDebug('leaderboard loaded: ' + (results && results.length ? results.length : 0) + ' entries');
+        }catch(e){ console.warn('loadTopScores failed', e); fbDebug('loadTopScores failed: '+(e && e.message),'warn'); }
+        // if UI populate function exists, call it after initial load
+        try{ if (window.populateLeaderboard) window.populateLeaderboard(); }catch(e){}
+        // also show config & origin in debug panel to help diagnose GitHub Pages origin issues
+        try{ fbShowConfig(); }catch(e){}
       }
 
       async function saveScoreToFirestore(name, score){
-        if (!window._fbUser) { console.warn('Not authenticated yet'); return; }
+        if (!window._fbUser) { console.warn('Not authenticated yet'); fbDebug('saveScore: auth missing','warn'); return; }
         const uid = window._fbUser.uid;
         const ref = doc(db, 'leaderboard', uid);
         try{
           const snap = await getDoc(ref);
           if (!snap.exists() || (snap.data().score || 0) < score){
             await setDoc(ref, { uid, name: name || 'Player', score: Number(score)||0, ts: Date.now() });
+            fbDebug('score saved: ' + (name||'Player') + ' ' + score);
+            try{ await loadTopScores(); fbDebug('leaderboard refreshed after save'); }catch(e){}
+          } else {
+            fbDebug('score not saved (existing higher or equal)');
           }
-        }catch(e){ console.error('saveScoreToFirestore failed', e); }
+        }catch(e){ console.error('saveScoreToFirestore failed', e); fbDebug('saveScore failed: '+(e && e.message),'error'); }
       }
 
       // user state (usedCheats etc) stored separately in `users/{uid}` so we can update without touching leaderboard rules
       async function saveUserState(payload){
-        if (!window._fbUser) { console.warn('Not authenticated yet'); return; }
+        if (!window._fbUser) { console.warn('Not authenticated yet'); fbDebug('saveUserState: auth missing','warn'); return; }
         const uid = window._fbUser.uid;
         const ref = doc(db, 'users', uid);
         try{
           await setDoc(ref, Object.assign({ uid, ts: Date.now() }, payload || {}), { merge: true });
+          fbDebug('user state saved');
           return true;
-        }catch(e){ console.error('saveUserState failed', e); return false; }
+        }catch(e){ console.error('saveUserState failed', e); fbDebug('saveUserState failed: '+(e && e.message),'error'); return false; }
       }
 
       async function loadUserState(){
@@ -162,6 +213,7 @@
           snaps.forEach(s => results.push(s.data()));
           window._fbLeaderboard = results;
           window.dispatchEvent(new CustomEvent('fbLeaderboardUpdated'));
+          fbDebug('loaded top scores (' + results.length + ')');
           return results;
         }catch(e){ console.error('loadTopScores failed', e); window._fbLeaderboard = []; window.dispatchEvent(new CustomEvent('fbLeaderboardUpdated')); return []; }
       }
@@ -312,7 +364,7 @@
         if (scoreEl) scoreEl.textContent = score;
         if (missEl) missEl.textContent = `${missed}/${missedLimit}`;
         if (playerEl) playerEl.textContent = `Player: ${playerName || '—'}`;
-        if (uidEl) uidEl.textContent = window._fbUser ? `uid: ${window._fbUser.uid}` : '—';
+        if (uidEl) uidEl.textContent = window._fbUser ? `uid: ${window._fbUser.uid}` : 'not signed in';
         // keep small status for controls for dev visibility
         statusEl.textContent = `Left: ${controls.left? 'down':'up'} • Action: ${controls.action? 'down':'up'} • Right: ${controls.right? 'down':'up'}`;
       }
@@ -468,7 +520,7 @@
       // initial render (will be updated when Firebase data loads)
       populateLeaderboard();
       // listen for fb updates
-      window.addEventListener('fbLeaderboardUpdated', ()=>{ populateLeaderboard(); });
+      window.addEventListener('fbLeaderboardUpdated', ()=>{ populateLeaderboard(); try{ if (window.updateScore) window.updateScore(); }catch(e){} fbDebug('leaderboard UI updated'); });
       updateScore();
 
       // Background music playlist (start when player clicks Start)
@@ -524,8 +576,8 @@
         </div>`;
       document.body.appendChild(cheatDialog);
 
-      // Small cheat button (visible while playing) top-left area
-      const cheatBtn = document.createElement('button'); cheatBtn.id = 'cheatBtn'; cheatBtn.textContent = 'Cheats'; cheatBtn.style.position='fixed'; cheatBtn.style.left='18px'; cheatBtn.style.top='140px'; cheatBtn.style.zIndex='95'; cheatBtn.style.padding='6px 10px'; cheatBtn.style.borderRadius='8px'; cheatBtn.style.background='#222'; cheatBtn.style.color='#ffd600'; cheatBtn.style.border='none'; cheatBtn.style.display='none'; document.body.appendChild(cheatBtn);
+      // we'll create a Tools dialog (contains Pause, Auto, Cheats) instead of a standalone cheat button
+      let prevPaused = false;
 
       // cheat state and usage tracking
       const usedCheats = { AD100:0, MISSEDME:0, DAMN1000:0, IMTHEHACKERMF:0, IMIMMORTALMF:0, SLOWGAME60:0, IMULTRALEGENDARYHACKERMF:0 };
@@ -534,11 +586,67 @@
       let ultraMode = false; // special ultimate cheat
       let ultraQuitBtn = null;
 
-      function showCheatDialog(){ paused = true; cheatDialog.style.display='block'; cheatBtn.disabled = true; }
-      function closeCheatDialog(){ paused = false; cheatDialog.style.display='none'; cheatBtn.disabled = false; }
-      cheatBtn.addEventListener('click', ()=>{ showCheatDialog(); });
+      // show/close cheat dialog: preserve previous paused state
+      function showCheatDialog(){ prevPaused = paused; paused = true; cheatDialog.style.display='block';
+        const tcb = document.getElementById('toolsCheatBtn'); if (tcb) tcb.disabled = true; if (window.toolsDialog) window.toolsDialog.style.display='none'; }
+      function closeCheatDialog(){ cheatDialog.style.display='none'; const tcb = document.getElementById('toolsCheatBtn'); if (tcb) tcb.disabled = false; paused = (typeof prevPaused !== 'undefined') ? prevPaused : false; }
       document.getElementById('cheatClose').addEventListener('click', ()=>{ closeCheatDialog(); });
       document.getElementById('cheatApply').addEventListener('click', ()=>{ const code = document.getElementById('cheatInput').value.trim().toUpperCase(); applyCheat(code); document.getElementById('cheatInput').value=''; });
+
+      // Tools dialog (contains Pause, Auto and Cheats). Created hidden; opened by #btnTools
+      const toolsDialog = document.createElement('div');
+      toolsDialog.id = 'toolsDialog';
+      toolsDialog.style.position = 'fixed';
+      toolsDialog.style.right = '16px';
+      toolsDialog.style.top = '48px';
+      toolsDialog.style.background = 'rgba(6,8,18,0.95)';
+      toolsDialog.style.color = '#fff';
+      toolsDialog.style.padding = '12px';
+      toolsDialog.style.borderRadius = '10px';
+      toolsDialog.style.display = 'none';
+      toolsDialog.style.zIndex = 220;
+      toolsDialog.style.boxShadow = '0 8px 30px rgba(0,0,0,0.6)';
+      toolsDialog.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:700">Tools</div>
+          <button id="toolsClose" style="background:transparent;border:none;color:#9fbefc;font-size:16px;">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:150px">
+          <button id="btnPausePlay" style="padding:8px;border-radius:8px;border:none;background:#222;color:#ffd600">Pause</button>
+          <button id="btnAutoFire" style="padding:8px;border-radius:8px;border:none;background:#222;color:#40c4ff">Auto: Off</button>
+          <button id="toolsCheatBtn" style="padding:8px;border-radius:8px;border:none;background:var(--panel);color:var(--accent)">Cheats</button>
+        </div>
+      `;
+      document.body.appendChild(toolsDialog);
+      window.toolsDialog = toolsDialog;
+
+      // wire tools toggle button
+      const toolsBtnEl = document.getElementById('btnTools');
+      function openToolsDialog(){ prevPaused = paused; paused = true; toolsDialog.style.display = 'block'; toolsBtnEl.classList.add('pressed');
+        try{ const pb = document.getElementById('btnPausePlay'); if (pb) pb.textContent = paused ? 'Play' : 'Pause'; }catch(e){}
+      }
+      function closeToolsDialog(){
+        toolsDialog.style.display = 'none';
+        toolsBtnEl.classList.remove('pressed');
+        // if user left the dialog without toggling pause (paused still true), restore previous paused state
+        if (typeof prevPaused !== 'undefined' && paused === true){ paused = prevPaused; }
+        try{ const pb = document.getElementById('btnPausePlay'); if (pb) pb.textContent = paused ? 'Play' : 'Pause'; }catch(e){}
+      }
+      if (toolsBtnEl){ toolsBtnEl.addEventListener('click', ()=>{ if (toolsDialog.style.display === 'block') closeToolsDialog(); else openToolsDialog(); }); }
+      // keyboard shortcut: 'T' or 't' toggles Tools dialog (ignore when typing in inputs)
+      window.addEventListener('keydown', function(e){
+        if (!e || !e.key) return;
+        const active = document.activeElement;
+        const inInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+        if (inInput) return; // don't interfere with typing
+        if (e.key === 't' || e.key === 'T'){
+          if (toolsDialog.style.display === 'block') closeToolsDialog(); else openToolsDialog();
+        }
+      });
+      // close button inside dialog
+      toolsDialog.addEventListener('click', (ev)=>{ if (ev.target && ev.target.id === 'toolsClose'){ closeToolsDialog(); } });
+      // wire the inner cheat button to open the cheat dialog (and close tools dialog)
+      toolsDialog.addEventListener('click', (ev)=>{ if (ev.target && ev.target.id === 'toolsCheatBtn'){ closeToolsDialog(); showCheatDialog(); } });
 
       const overlay = document.createElement('div');
       overlay.id = 'gameOverPanel';
@@ -665,8 +773,8 @@
         btnAuto.textContent = autoFire ? 'Auto fire: On' : 'Auto fire: Off';
       });
 
-      // Hook cheat button visibility while playing
-      function refreshCheatButton(){ cheatBtn.style.display = started && !gameOver ? 'block' : 'none'; }
+      // Hook cheat button visibility while playing (controls visibility of the cheat button inside Tools dialog)
+      function refreshCheatButton(){ const tcb = document.getElementById('toolsCheatBtn'); if (tcb) tcb.style.display = (started && !gameOver) ? 'block' : 'none'; }
       // update cheat countdowns
       function updateCheatCountdowns(){
         const now = Date.now();
