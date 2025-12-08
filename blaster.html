@@ -69,6 +69,11 @@
       <input id="playerNameInput" placeholder="Enter player name" maxlength="18" />
       <button id="btnStart">Start</button>
       <div class="instruction">Green = +1pts · Red = -5pts <br> Leaving red = +10pts+5s slow time</div>
+      <!-- Start-screen leaderboard (shows top 5 before starting) -->
+      <div id="startLeaderboard" style="margin-top:12px;background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:700">Top Players</div>
+        <ol id="startLeaderboardList" style="margin:0;padding-left:16px;font-size:13px;color:var(--muted)"></ol>
+      </div>
         <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
           <a href="#" id="creditsLink" style="color:var(--muted);font-size:13px;text-decoration:underline">Credits</a>
           <div style="font-size:12px;color:var(--muted)">v1.0</div>
@@ -516,6 +521,11 @@
           if (it) txt.textContent = `${it.name} — ${it.score}`; else txt.textContent = `—`;
           li.appendChild(rank); li.appendChild(txt); list.appendChild(li);
         }
+        // also render a compact top-5 into the start panel (if present)
+        try{
+          const startList = document.getElementById('startLeaderboardList');
+          if (startList){ startList.innerHTML = ''; const top = Math.min(5, fb.length); for (let i=0;i<5;i++){ const it = fb[i] || null; const li2 = document.createElement('li'); li2.style.padding='4px 0'; if (it) li2.textContent = `${i+1}. ${it.name} — ${it.score}`; else li2.textContent = `${i+1}. —`; startList.appendChild(li2); } }
+        }catch(e){/* ignore */}
       }
       // initial render (will be updated when Firebase data loads)
       populateLeaderboard();
