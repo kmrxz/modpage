@@ -409,7 +409,37 @@
         const particles = [];
         const explosionParticles = [];
         const rippleEffects = [];
-        const colors = ["#0000ff"];
+        let particleColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-color') || '#0000ff';
+        let connectLineColor = getComputedStyle(document.documentElement).getPropertyValue('--connect-line') || '#ff00ff';
+        let rippleStroke = getComputedStyle(document.documentElement).getPropertyValue('--ripple-stroke') || '#0000ff';
+        const colors = [particleColor.trim() || '#0000ff'];
+
+        function updateVisualTheme(){
+            try{
+                const s = getComputedStyle(document.documentElement);
+                const currentTheme = (document.documentElement.getAttribute('data-theme') || '').trim();
+                if (currentTheme === 'green-black'){
+                    // for the green-black theme, use the theme's button start color for particles
+                    const btnStart = (s.getPropertyValue('--btn-grad-start') || s.getPropertyValue('--btn-grad-end') || '#10b981').trim();
+                    const btnEnd = (s.getPropertyValue('--btn-grad-end') || btnStart).trim();
+                    particleColor = btnStart;
+                    connectLineColor = btnEnd;
+                    rippleStroke = btnStart;
+                } else {
+                    particleColor = (s.getPropertyValue('--particle-color') || '#0000ff').trim();
+                    connectLineColor = (s.getPropertyValue('--connect-line') || '#ff00ff').trim();
+                    rippleStroke = (s.getPropertyValue('--ripple-stroke') || '#0000ff').trim();
+                }
+                // update colors array for new particles
+                colors[0] = particleColor;
+                // apply wallpaper filter if present
+                const wf = (s.getPropertyValue('--wallpaper-filter') || '').trim();
+                const flower = document.querySelector('.flower-image');
+                if (flower){
+                    if (wf) flower.style.filter = wf; else flower.style.filter = '';
+                }
+            }catch(e){ console.warn('updateVisualTheme error', e); }
+        }
         class Particle {
             constructor(x, y, color) {
                 this.x = x;
@@ -447,7 +477,7 @@
                 ctx.globalAlpha = this.alpha;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = "#0000ff";
+                ctx.strokeStyle = rippleStroke;
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 ctx.restore();
@@ -464,7 +494,7 @@
         function triggerExplosion(x, y) {
             const numParticles = 2;
             for (let i = 0; i < numParticles; i++) {
-                const particle = new Particle(x, y, "#0000ff");
+                const particle = new Particle(x, y, particleColor);
                 particle.vx = Math.random() * 6 - 3;
                 particle.vy = Math.random() * 6 - 3;
                 explosionParticles.push(particle);
@@ -501,7 +531,7 @@
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = "#ff00ff";
+                        ctx.strokeStyle = connectLineColor;
                         ctx.lineWidth = 2;
                         ctx.stroke();
                         ctx.restore();
@@ -610,6 +640,12 @@
      <p class="description">A Small timer to set before boiling Eggs</p> <a href="eggtimer.html" target="_blank"> <button class="download-button"><span>Visit</span></button> </a> 
     </div> 
   
+     <div class="mod"> 
+     <h2>Telegram channel</h2> 
+     <img src="images/default.jpg" alt="Telegram channel icon"> 
+     <p class="description">Sone useful tools ar shared here.Join our telegram channel</p> <a href="https://t.me/theappchannel6" target="_blank"> <button class="download-button"><span>Join</span></button> </a> 
+    </div> 
+
        <div class="mod"> 
      <h2>Elite Blaster Game</h2> 
      <img src="images/default.jpg" alt="To boil eggs properly"> 
@@ -955,7 +991,11 @@ document.addEventListener('DOMContentLoaded', function () {
             '--bg':'#f0f8ff','--muted':'#0b1b33','--accent':'#3b82f6','--card-bg':'rgba(11,27,51,0.04)','--btn-grad-start':'#8ab4ff','--btn-grad-end':'#7c9eff','--button-text':'#071032','--select-bg':'rgba(0,0,0,0.04)','--select-color':'#071032','--h2-color':'#071032'
         },
         'orange': {
-            '--bg':'#fff7f0','--muted':'#6b3f22','--accent':'#f97316','--card-bg':'rgba(249,115,22,0.04)','--btn-grad-start':'#fb923c','--btn-grad-end':'#f97316','--button-text':'#3b1f0d','--select-bg':'rgba(59,31,13,0.04)','--select-color':'#3b1f0d','--h2-color':'#2a1407'
+            '--bg':'#fbf0ea','--muted':'#6b3f22','--accent':'#f97316','--card-bg':'rgba(249,115,22,0.04)','--btn-grad-start':'#fb923c','--btn-grad-end':'#f97316','--button-text':'#3b1f0d','--select-bg':'rgba(59,31,13,0.04)','--select-color':'#3b1f0d','--h2-color':'#2a1407',
+            '--particle-color':'#ff8a50',
+            '--connect-line':'#ffb07a',
+            '--ripple-stroke':'#ff8a50',
+            '--wallpaper-filter':'brightness(0.92) saturate(1.05)'
         },
         // modal-specific overrides to keep dialog readable when bright/orange themes are active
         'orange-modal': {
@@ -983,6 +1023,18 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyTheme(name){
         const t = themes[name] || themes['default'];
         Object.keys(t).forEach(k=> document.documentElement.style.setProperty(k, t[k]));
+            // mark currently-applied theme on the document so visuals can react
+            try{ document.documentElement.setAttribute('data-theme', name); document.documentElement.style.setProperty('--current-theme', name); }catch(e){}
+            // after applying CSS vars, update particle and wallpaper visuals
+            try{ if (typeof updateVisualTheme === 'function') updateVisualTheme(); }catch(e){console.warn('updateVisualTheme failed',e);} 
+            // remove existing particles from the previous theme so only new-theme particles are visible
+            try{
+                if (Array.isArray(particles)) particles.length = 0;
+                if (Array.isArray(explosionParticles)) explosionParticles.length = 0;
+                if (Array.isArray(rippleEffects)) rippleEffects.length = 0;
+                // ensure particle pool repopulates based on scroll/viewport
+                if (typeof updateParticles === 'function') updateParticles();
+            }catch(e){ console.warn('clear particles on theme apply failed', e); }
     }
 
     // initialize select value and theme
