@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Flappy Kenthan</title>
+  <style>
+    html,body{height:100%;margin:0}
+    body{display:flex;align-items:center;justify-content:center;background:#081025;color:#cfe0ff;font-family:Arial}
+    #game{background:linear-gradient(#07131a,#04202a);display:block;border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,0.6)}
+    .hud{position:fixed;left:20px;top:20px;color:#bfe6c3;font-weight:700}
+    .center-msg{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);color:#fff;text-align:center}
+    button{cursor:pointer}
+  </style>
+</head>
+<body>
+  <!-- Background music (off by default) -->
+  <audio id="bgMusic" src="files/audio/Green is good techno.mp3" loop></audio>
+  <!-- Hit sound -->
+  <audio id="hitSnd" src="Sounds/blast.wav"></audio>
+  <button id="music-toggle" style="position:fixed;right:16px;top:16px;z-index:1200;padding:8px 10px;border-radius:8px;border:none;background:#0c6f46;color:#fff;cursor:pointer">Play Music</button>
+
+  <canvas id="game" width="480" height="640"></canvas>
+  <div class="hud">Score: <span id="score">0</span></div>
+  <div id="overlay" class="center-msg" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <img id="overlay-bird" src="files/img/kenthan.png" alt="bird" style="width:96px;height:auto;display:block;">
+    <h1 style="margin:0;font-size:28px;letter-spacing:1px">Flappy Kenthan</h1>
+    <p id="overlay-sub" style="margin:6px 0 0 0;color:#bfe6c3">Click or press Space to start</p>
+  </div>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    // Bird image (use provided path)
+    const birdImg = new Image();
+    const defaultBirdSrc = 'files/img/kenthan.png';
+    const blastBirdSrc = 'files/img/blast.png';
+    birdImg.src = defaultBirdSrc;
+    let birdLoaded = false;
+    birdImg.onload = () => birdLoaded = true;
+    // explosion image (same asset) and active explosion state
+    const explosionImg = new Image();
+    explosionImg.src = blastBirdSrc;
+    let explosionImgLoaded = false;
+    explosionImg.onload = () => explosionImgLoaded = true;
+    let explosion = null; // {x,y,created,ttl}
+    // audio elements
+    const bgMusic = document.getElementById('bgMusic');
+    const hitSnd = document.getElementById('hitSnd');
+    const musicToggle = document.getElementById('music-toggle');
+    let musicEnabled = false; // keep off by default
+    if (bgMusic) { bgMusic.volume = 0.5; bgMusic.pause(); }
+    if (musicToggle){
+      musicToggle.addEventListener('click', ()=>{
+        musicEnabled = !musicEnabled;
+        if (musicEnabled){ bgMusic.play().catch(()=>{}); musicToggle.textContent = 'Pause Music'; }
+        else { bgMusic.pause(); musicToggle.textContent = 'Play Music'; }
+      });
+    }
+    // track whether last hit was a pipe (for blast image)
+    let lastHitWasPipe = false;
+
+    // Game state
+    let frames = 0;
+    let pipes = [];
+    let score = 0;
+    let running = false; // true while physics running
+    let started = false; // true after player starts the game
+
+    const bird = {
+      x: 90,
+      y: H/2,
+      w: 48,
+      h: 36,
+      vy: 0,
+      gravity: 0.45,
+      jump: -8
+    };
+
+    function startGame(){
+      frames = 0; pipes = []; score = 0; document.getElementById('score').textContent = score;
+      bird.y = H/2; bird.vy = 0; running = true; started = true;
+      // hide overlay
+      const overlay = document.getElementById('overlay'); if (overlay) { overlay.style.display = 'none'; overlay.querySelector('#overlay-bird').src = defaultBirdSrc; }
+      // restore bird image
+      birdImg.src = defaultBirdSrc;
+      lastHitWasPipe = false;
+    }
+
+    function init(){
+      // initial pre-start state
+      frames = 0; pipes = []; score = 0; document.getElementById('score').textContent = score;
+      bird.y = H/2; bird.vy = 0; running = false; started = false;
+      const overlay = document.getElementById('overlay'); if (overlay) { overlay.style.display = 'flex'; overlay.querySelector('#overlay-sub').textContent = 'Click or press Space to start'; }
+    }
+
+    function spawnPipe(){
+      const gap = 140;
+      const minTop = 60;
+      const maxTop = H - 200;
+      const top = Math.floor(Math.random() * (maxTop - minTop)) + minTop;
+      pipes.push({x: W, top: top, gap: gap, passed:false});
+    }
+
+    function onPipeHit(){
+      // handle effects when hitting a pipe: blast image + sound + lower music volume
+      lastHitWasPipe = true;
+      running = false;
+      try{
+        // swap bird image to blast
+        birdImg.src = blastBirdSrc;
+        const overlay = document.getElementById('overlay');
+        if (overlay) overlay.querySelector('#overlay-bird').src = blastBirdSrc;
+        // play hit sound
+        if (hitSnd){ try{ hitSnd.currentTime = 0; hitSnd.play().catch(()=>{}); }catch(e){} }
+        // show blast at bird position for 1s
+        try{
+          explosion = { x: bird.x, y: bird.y, created: performance.now(), ttl: 1000 };
+          setTimeout(()=>{ explosion = null; }, 1000);
+        }catch(e){}
+        // lower bg music temporarily
+        if (bgMusic && !bgMusic.paused){
+          const prev = bgMusic.volume;
+          try{ bgMusic.volume = Math.max(0.02, prev * 0.25); }catch(e){}
+          setTimeout(()=>{ try{ if (bgMusic) bgMusic.volume = prev; }catch(e){} }, 1500);
+        }
+      }catch(e){ console.warn('onPipeHit error', e); }
+    }
+
+    function update(){
+      frames++;
+      // spawn pipes every ~90 frames
+      if (frames % 90 === 0) spawnPipe();
+
+      // bird physics
+      bird.vy += bird.gravity;
+      bird.y += bird.vy;
+
+      // ground/ceiling
+      if (bird.y + bird.h/2 >= H){ running = false; lastHitWasPipe = false; }
+      if (bird.y - bird.h/2 <= 0){ bird.y = bird.h/2; bird.vy = 0; }
+
+      // pipes movement and collisions
+      for (let i = pipes.length-1; i >= 0; i--){
+        const p = pipes[i];
+        p.x -= 2.6;
+        // passed
+        if (!p.passed && p.x + 40 < bird.x){ p.passed = true; score++; document.getElementById('score').textContent = score; }
+        // remove offscreen
+        if (p.x + 60 < 0) pipes.splice(i,1);
+        // collision box check
+        const bx = bird.x, by = bird.y, bw = bird.w, bh = bird.h;
+        const pipeW = 60;
+        if (bx + bw/2 > p.x && bx - bw/2 < p.x + pipeW){
+          if (by - bh/2 < p.top || by + bh/2 > p.top + p.gap){
+            // hit a pipe
+            onPipeHit();
+          }
+        }
+      }
+    }
+
+    function draw(){
+      // background
+      ctx.clearRect(0,0,W,H);
+      // sky gradient
+      const g = ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,'#092434'); g.addColorStop(1,'#02121a');
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+      // pipes
+      ctx.fillStyle = '#0a5f3a';
+      pipes.forEach(p=>{
+        ctx.fillRect(p.x, 0, 60, p.top);
+        ctx.fillRect(p.x, p.top + p.gap, 60, H - (p.top + p.gap));
+        // pipe caps
+        ctx.fillStyle = '#0c6f46';
+        ctx.fillRect(p.x-2, p.top - 8, 64, 8);
+        ctx.fillRect(p.x-2, p.top + p.gap, 64, 8);
+        ctx.fillStyle = '#0a5f3a';
+      });
+
+      // bird
+      ctx.save();
+      const bx = bird.x - bird.w/2, by = bird.y - bird.h/2;
+      if (birdLoaded){
+        ctx.drawImage(birdImg, bx, by, bird.w, bird.h);
+      } else {
+        // fallback: circle
+        ctx.fillStyle = '#ffd166'; ctx.beginPath(); ctx.arc(bird.x, bird.y, 16,0,Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+
+      // draw explosion (if any) on top
+      if (explosion && explosionImgLoaded){
+        const now = performance.now();
+        const age = now - explosion.created;
+        const ttl = explosion.ttl || 1000;
+        const alpha = Math.max(0, 1 - (age / ttl));
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        const exSize = 64;
+        ctx.drawImage(explosionImg, explosion.x - exSize/2, explosion.y - exSize/2, exSize, exSize);
+        ctx.restore();
+      }
+
+      // ground
+      ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.fillRect(0,H-20,W,20);
+
+      if (!running){
+        // keep drawing background but show overlay DOM for game over / restart info
+        const overlay = document.getElementById('overlay');
+        if (overlay){
+            overlay.style.display = 'flex';
+            overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + ' — Click or press Space to restart';
+        } else {
+            ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0,0,W,H);
+            ctx.fillStyle = '#fff'; ctx.font = '24px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('Game Over', W/2, H/2 - 24);
+            ctx.fillText('Click or press Space to restart', W/2, H/2 + 8);
+            ctx.fillText('Score: ' + score, W/2, H/2 + 44);
+        }
+      }
+    }
+
+    function loop(){
+      if (running) update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    // controls
+    function flap(){
+      if (!started){
+        // first input starts the game
+        startGame();
+        bird.vy = bird.jump;
+        return;
+      }
+      if (!running){
+        // restart
+        startGame();
+        return;
+      }
+      bird.vy = bird.jump;
+    }
+    window.addEventListener('keydown', (e)=>{ if (e.code === 'Space') { e.preventDefault(); flap(); }});
+    canvas.addEventListener('click', ()=>{ flap(); });
+    canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); flap(); }, {passive:false});
+
+    // start (show pre-start overlay)
+    init(); loop();
+  </script>
+</body>
+</html>
