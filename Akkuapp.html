@@ -14,6 +14,7 @@
       background: #000;
       color: #ccc;
       overflow-x: hidden;
+      user-select: none;
     }
 
     /* Header */
@@ -95,6 +96,11 @@
       margin-bottom: 5px;
       font-family: 'Pacifico', cursive;
     }
+    /* Animated per-letter title: only the hovered letter animates */
+    .animated-title{cursor:default}
+    .animated-title .letter{display:inline-block;transform:translateY(0);transition:transform .28s cubic-bezier(.2,.9,.2,1);will-change:transform}
+    /* Individual letter hover — only that letter moves */
+    .animated-title .letter:hover{transform:translateY(-14px);transition-duration:.22s}
 
     .secondary-text {
       font-size: 16px;
@@ -136,6 +142,9 @@
     .vitamin-btn:hover {
         box-shadow: 0 0 15px 5px rgba(60, 179, 113, 0.5);
     }
+    .vitamin-btn[aria-disabled="true"]{opacity:.55;cursor:not-allowed;box-shadow:none}
+    /* hide inline timer; countdown shown only in toast when user clicks disabled button */
+    #resetTimer{display:none}
 
     #result-container {
       margin-top: 20px;
@@ -213,31 +222,93 @@
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
     }
+    /* Light theme overrides: all text uses dark colors (no light fonts) */
+    body.light-theme {
+      background: #f7f9fc;
+      color: #111;
+    }
+    body.light-theme header {
+      background: #e6eef8;
+      color: #111;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    }
+    body.light-theme header h1 { color: #111; }
+    body.light-theme .secondary-text { color: #223344; }
+    /* Use a light button background with dark text to avoid light font on light theme */
+    body.light-theme .vitamin-btn { background: #cfeee0; color: #0b4a33; border: 1px solid #b5e5c9; }
+    body.light-theme .vitamin-level { color: #7a2222; }
+    body.light-theme .waves .wave:nth-child(1) path { fill: #cfe6ff; }
+    body.light-theme .waves .wave:nth-child(2) path { fill: #e9f2ff; }
+    /* Drawer background in light theme */
+    body.light-theme #drawer { background: #eef6fc; color: #111; }
+    body.light-theme #drawer a { color: #122233; }
+    /* Light-theme drawer hover */
+    body.light-theme #drawer a:hover { background: #d6efff; color: #022233; }
+    .theme-toggle { position: absolute; right: 15px; top: 12px; background: transparent; border: none; font-size: 20px; cursor: pointer; color: inherit; }
+    /* Ensure headings and result text are dark in light theme */
+    body.light-theme .content h2 { color: #111 !important; }
+    body.light-theme .menu-icon, body.light-theme .close-icon, body.light-theme .theme-toggle { color: #111 !important; }
+    body.light-theme #result-container .result-text { color: #111 !important; }
+    body.light-theme #result-container .expected-level { color: #0b704b !important; }
+    /* Darker variants for level classes on light background */
+    body.light-theme .level-low { color: #205a7a !important; }
+    body.light-theme .level-medium { color: #0b704b !important; }
+    body.light-theme .level-high { color: #a65a00 !important; }
+    body.light-theme .level-critical { color: #a68000 !important; }
+    /* Dialog styles */
+    .dialog-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1500;display:block}
+    .dialog-overlay[hidden]{display:none}
+    .dialog{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1600;display:block}
+    .dialog[hidden]{display:none}
+    .dialog-content{min-width:280px;background:#0d1a2f;color:var(--muted);padding:16px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.4);font-family:Arial,sans-serif}
+    .dialog-content h3{margin:0 0 8px 0;font-family:Pacifico,cursive}
+    .dialog-content input{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--muted)}
+    .btn-primary{background:MediumSeaGreen;border:none;padding:8px 12px;border-radius:6px;color:#072;cursor:pointer}
+    .btn-secondary{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px 12px;border-radius:6px;color:var(--muted);cursor:pointer}
+    /* Drawer change-name button: no background, slight red font */
+    #openNameDialog{display:block;width:100%;text-align:left;padding:10px 20px;background:transparent;border:none;font-size:18px;font-family:'Courgette',cursive;color:#d9534f;cursor:pointer}
+    #openNameDialog:hover{background:transparent;color:#c9302c;text-decoration:underline}
+    /* Light theme dialog overrides */
+    body.light-theme .dialog-content{background:#fff;color:#111}
+    body.light-theme .dialog-content input{border:1px solid #d9eaf8;background:#fff;color:#111}
+    body.light-theme .btn-primary{background:#0b7a4d;color:#fff}
+    body.light-theme .btn-secondary{border:1px solid #cfdff0;color:#223}
+    /* Toast */
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:#111;color:#fff;padding:10px 14px;border-radius:8px;z-index:1700;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);pointer-events:auto}
+    body.light-theme .toast{background:#222;color:#fff}
   </style>
 </head>
 <body>
 
   <div id="drawer">
     <span class="close-icon" onclick="toggleDrawer()">☰</span>
-    <a href="#">Home</a>
+    <a href="index.html">Home</a>
     <a href="#">Cool shots</a>
-    <a href="#">AI Music</a>
+    <a href="musicpage.html">AI Music</a>
     <a href="#">Settings</a>
-    <a href="#">Theme</a>
-    <a href="#">About</a>
+    <div style="padding:10px 20px;">
+      <button id="openNameDialog">Change name</button>
+    </div>
+    <a href="about.html">About</a>
   </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <header>
     <span class="menu-icon" onclick="toggleDrawer()">☰</span>
-    Akkuapp
+    <span id="appTitle">Akkuapp</span>
+    <button id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Toggle theme">🌙</button>
   </header>
 
   <div class="content">
-    <h2>Hey Injaa...</h2>
-    <p class="secondary-text">Akku is about to die because of the lack of Vitamin S</p>
-    <p class="secondary-text"> only Injan can help him</p>
-    <p class="vitamin-level">Critical Vitamin S level: 0%</p>
-    <button class="vitamin-btn" id="vitaminBtn">Give Vitamin S</button>
+    <h2 id="animatedTitle" class="animated-title">Hey Injaa...</h2>
+    <p id="akkuStatus" class="secondary-text"><span id="partnerNameInStatus">Akku</span> is about to die because of the lack of <span id="termLabel">Vitamin S</span></p>
+    <p class="secondary-text">Only <span id="helperName">Injaa</span> can help him</p>
+    <p class="vitamin-level">Critical <span id="termLabelInline">Vitamin S</span> level: 0%</p>
+    <button class="vitamin-btn" id="vitaminBtn">Give <span id="termBtnText">Vitamin S</span></button>
+    <div style="margin-top:6px;font-size:14px;color:#b0c4de"><span id="resetTimer"></span></div>
     <div id="result-container"></div>
   </div>
 
@@ -248,6 +319,41 @@
     <svg class="wave" viewBox="0 0 1200 300" preserveAspectRatio="none">
       <path d="M0,200 C300,100 900,300 1200,200 L1200,300 L0,300 Z"></path>
     </svg>
+  </div>
+
+  <!-- Name dialog (hidden by default) -->
+  <div id="nameDialogOverlay" class="dialog-overlay" hidden aria-hidden="true"></div>
+  <div id="nameDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle" hidden>
+    <div class="dialog-content">
+      <h3 id="dialogTitle">What does your boyfriend/girlfriend call you?</h3>
+      <input id="dialogNameInput" type="text" placeholder="Enter name" aria-label="Your nickname" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+        <button id="dialogCloseBtn" class="btn-secondary">Cancel</button>
+        <button id="dialogApplyBtn" class="btn-primary">Apply</button>
+      </div>
+    </div>
+  </div>
+  <!-- Partner dialog (what you call your boyfriend/girlfriend) -->
+  <div id="partnerDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="partnerDialogTitle" hidden>
+    <div class="dialog-content">
+      <h3 id="partnerDialogTitle">What do you call your Boyfriend/Girlfriend?</h3>
+      <input id="dialogPartnerInput" type="text" placeholder="Enter partner's name" aria-label="Partner name" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+        <button id="partnerDialogCloseBtn" class="btn-secondary">Cancel</button>
+        <button id="partnerDialogApplyBtn" class="btn-primary">Apply</button>
+      </div>
+    </div>
+  </div>
+  <!-- Term dialog (what you call your love) -->
+  <div id="termDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="termDialogTitle" hidden>
+    <div class="dialog-content">
+      <h3 id="termDialogTitle">How do you like to call your love? e.g.: Vitamin S, Roses, Chocolate</h3>
+      <input id="dialogTermInput" type="text" placeholder="Enter term (e.g. Vitamin S)" aria-label="Term name" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+        <button id="termDialogCloseBtn" class="btn-secondary">Cancel</button>
+        <button id="termDialogApplyBtn" class="btn-primary">Apply</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -263,6 +369,15 @@
         drawer.style.width = "0";
       }
     });
+
+    // global toast helper so any scope can show messages
+    function showToast(msg, ms = 3000){
+      const toast = document.getElementById('toast');
+      if(!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(()=>{ toast.classList.remove('show'); }, ms);
+    }
 
     const vitaminOptions = [
       { text: "Text him", level: "60%" },
@@ -296,53 +411,359 @@
       { text: "Snuggle up under a blanket together", level: "6969%" }
     ];
 
-    document.getElementById("vitaminBtn").addEventListener("click", function() {
-      const resultContainer = document.getElementById("result-container");
-      
-      // Clear previous results and hide for animation
-      resultContainer.classList.remove('show');
-      
-      // Use a short delay to allow the hide animation to play
-      setTimeout(() => {
-        // Get a random option from the list
-        const randomIndex = Math.floor(Math.random() * vitaminOptions.length);
-        const selectedOption = vitaminOptions[randomIndex];
-        
-        // Create and append the text elements
-        const textElement = document.createElement('p');
-        textElement.className = 'result-text';
-        textElement.textContent = selectedOption.text;
-        
-        const levelElement = document.createElement('p');
-        levelElement.className = 'expected-level';
-        
-        // This is the key change to make the percentage a different color
-        if (selectedOption.text === "Give him a gift") {
-            levelElement.textContent = selectedOption.level;
-        } else {
-            const levelValue = parseInt(selectedOption.level);
-            let colorClass = '';
-            if (levelValue <= 50) {
-                colorClass = 'level-low';
-            } else if (levelValue <= 200) {
-                colorClass = 'level-medium';
-            } else if (levelValue <= 500) {
-                colorClass = 'level-high';
-            } else {
-                colorClass = 'level-critical';
-            }
-            levelElement.innerHTML = `Expected Vitamin S: <span class="${colorClass}">${selectedOption.level}</span>`;
+    (function(){
+      const BTN_KEY = 'akku-daily';
+      const DAILY_LIMIT = 3;
+      const vitaminBtn = document.getElementById('vitaminBtn');
+      const resetTimerEl = document.getElementById('resetTimer');
+      const resultContainer = document.getElementById('result-container');
+
+      function getResetKey(now = new Date()){
+        const d = new Date(now);
+        const today6 = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 6,0,0,0);
+        if(d < today6){ const y = new Date(d); y.setDate(d.getDate()-1); return y.toISOString().slice(0,10); }
+        return d.toISOString().slice(0,10);
+      }
+      function getNextResetTime(now = new Date()){
+        const d = new Date(now);
+        const today6 = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 6,0,0,0);
+        if(d < today6) return today6;
+        const t = new Date(d); t.setDate(d.getDate()+1); t.setHours(6,0,0,0); return t;
+      }
+
+      function loadDaily(){
+        try{ const raw = localStorage.getItem(BTN_KEY); return raw ? JSON.parse(raw) : {key:getResetKey(),count:0}; }catch(e){ return {key:getResetKey(),count:0}; }
+      }
+      function saveDaily(obj){ try{ localStorage.setItem(BTN_KEY, JSON.stringify(obj)); }catch(e){} }
+
+      function ensureDaily(){
+        const nowKey = getResetKey();
+        const data = loadDaily();
+        if(data.key !== nowKey){ data.key = nowKey; data.count = 0; saveDaily(data); }
+        return data;
+      }
+
+      function incrementDaily(){ const data = ensureDaily(); data.count = (data.count||0)+1; saveDaily(data); return data.count; }
+      function getDailyCount(){ const data = ensureDaily(); return data.count||0; }
+
+      function getNextResetMs(){ return getNextResetTime().getTime() - Date.now(); }
+
+      let resetTimerInterval = null;
+      function startResetTimer(){
+        if(resetTimerInterval) clearInterval(resetTimerInterval);
+        function tick(){
+          const ms = getNextResetMs();
+          if(ms <= 0){ // reset now
+            const d = ensureDaily(); d.count = 0; saveDaily(d); updateButtonState();
+            // restart for next day
+            return startResetTimer();
+          }
+          // timer kept for internal logic only; UI countdown is shown in toast when disabled button is clicked
+          // keep this tick for reset behavior
         }
-        
-        resultContainer.innerHTML = '';
-        resultContainer.appendChild(textElement);
-        resultContainer.appendChild(levelElement);
-        
-        // Show the container with the fade-in animation
-        resultContainer.classList.add('show');
-      }, 500);
-    });
+        tick();
+        resetTimerInterval = setInterval(tick,1000);
+      }
+
+      function disableButton(){ if(vitaminBtn) vitaminBtn.setAttribute('aria-disabled','true'); }
+      function enableButton(){ if(vitaminBtn) vitaminBtn.removeAttribute('aria-disabled'); }
+
+      function updateButtonState(){ const count = getDailyCount(); if(count >= DAILY_LIMIT){ vitaminBtn.setAttribute('aria-disabled','true'); } else { vitaminBtn.removeAttribute('aria-disabled'); } }
+
+      function formatDuration(ms){
+        if(ms <= 0) return '00:00:00';
+        const s = Math.floor(ms/1000);
+        const hh = Math.floor(s/3600); const mm = Math.floor((s%3600)/60); const ss = s%60;
+        return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+      }
+
+      function saveLastResult(obj){ try{ localStorage.setItem('akku-lastResult', JSON.stringify(obj)); }catch(e){} }
+      function loadLastResult(){ try{ const raw = localStorage.getItem('akku-lastResult'); return raw ? JSON.parse(raw) : null;}catch(e){return null} }
+      function renderLastResult(){ const last = loadLastResult(); if(!last) return; resultContainer.innerHTML = ''; const t = document.createElement('p'); t.className='result-text'; t.textContent = last.text; const l = document.createElement('p'); l.className='expected-level'; l.innerHTML = last.levelHTML; resultContainer.appendChild(t); resultContainer.appendChild(l); resultContainer.classList.add('show'); }
+
+      // init
+      updateButtonState(); startResetTimer(); renderLastResult();
+
+      // new handler with daily limit enforcement
+      vitaminBtn.addEventListener('click', function(){
+        const count = getDailyCount();
+        if(count >= DAILY_LIMIT){
+          const ms = getNextResetMs();
+          showToast(`Come back after ${formatDuration(ms)}`);
+          vitaminBtn.setAttribute('aria-disabled','true');
+          return;
+        }
+
+        // proceed with existing behavior
+        resultContainer.classList.remove('show');
+        setTimeout(() => {
+          const randomIndex = Math.floor(Math.random() * vitaminOptions.length);
+          const selectedOption = vitaminOptions[randomIndex];
+          const textElement = document.createElement('p');
+          textElement.className = 'result-text';
+          textElement.textContent = selectedOption.text;
+          const levelElement = document.createElement('p');
+          levelElement.className = 'expected-level';
+          if (selectedOption.text === 'Give him a gift'){
+            levelElement.textContent = selectedOption.level;
+            var levelHTML = selectedOption.level;
+          } else {
+            const digits = (''+selectedOption.level).replace(/[^0-9]/g,'');
+            const levelValue = digits ? parseInt(digits,10) : NaN;
+            let colorClass = '';
+            if(!isNaN(levelValue)){
+              if(levelValue <= 50) colorClass='level-low'; else if(levelValue <=200) colorClass='level-medium'; else if(levelValue <=500) colorClass='level-high'; else colorClass='level-critical';
+            }
+            const termName = (localStorage.getItem('akku-term') || 'Vitamin S');
+            const inner = isNaN(levelValue) ? selectedOption.level : `<span class="${colorClass}">${selectedOption.level}</span>`;
+            levelElement.innerHTML = `Expected ${termName}: ${inner}`;
+            var levelHTML = `Expected ${termName}: ${inner}`;
+          }
+          resultContainer.innerHTML = '';
+          resultContainer.appendChild(textElement);
+          resultContainer.appendChild(levelElement);
+          resultContainer.classList.add('show');
+
+          // persist last result and increment daily count
+          saveLastResult({ text: selectedOption.text, levelHTML: levelHTML });
+          const newCount = incrementDaily();
+          if(newCount >= DAILY_LIMIT){ vitaminBtn.setAttribute('aria-disabled','true'); showToast('Daily limit reached — come back tomorrow'); }
+        }, 500);
+      });
+    })();
+
+    // Theme toggle: persist selection in localStorage and apply class
+    (function(){
+      const themeToggle = document.getElementById('themeToggle');
+      if(!themeToggle) return;
+
+      function applyTheme(isLight){
+        if(isLight){
+          document.body.classList.add('light-theme');
+          themeToggle.textContent = '☀';
+          themeToggle.setAttribute('aria-pressed','true');
+        } else {
+          document.body.classList.remove('light-theme');
+          themeToggle.textContent = '🌙';
+          themeToggle.setAttribute('aria-pressed','false');
+        }
+      }
+
+      const stored = localStorage.getItem('akku-theme');
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      const startLight = stored ? (stored === 'light') : prefersLight;
+      applyTheme(startLight);
+
+      // secret: 4 clicks on theme toggle clears daily limit
+      let themeSecretClicks = 0;
+      function localToast(msg, ms = 2400){ const t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), ms); }
+      themeToggle.addEventListener('click', function(){
+        const nowLight = !document.body.classList.contains('light-theme');
+        applyTheme(nowLight);
+        localStorage.setItem('akku-theme', nowLight ? 'light' : 'dark');
+        // track secret clicks
+        themeSecretClicks = (themeSecretClicks || 0) + 1;
+        if(themeSecretClicks >= 4){
+          themeSecretClicks = 0;
+          try{
+            const todayKey = new Date().toISOString().slice(0,10);
+            localStorage.setItem('akku-daily', JSON.stringify({ key: todayKey, count: 0 }));
+            const vb = document.getElementById('vitaminBtn'); if(vb) vb.removeAttribute('aria-disabled');
+            localToast('Daily limit cleared');
+          }catch(e){ }
+        }
+      });
+    })();
+
+    // Name persistence with modal dialog and dynamic title rendering
+    (function(){
+      const NAME_KEY = 'akku-name';
+      const defaultName = 'Injaa';
+      const titleEl = document.getElementById('animatedTitle');
+      const openBtn = document.getElementById('openNameDialog');
+      const dialog = document.getElementById('nameDialog');
+      const overlay = document.getElementById('nameDialogOverlay');
+      const input = document.getElementById('dialogNameInput');
+      const applyBtn = document.getElementById('dialogApplyBtn');
+      const closeBtn = document.getElementById('dialogCloseBtn');
+
+      function getStoredName(){ try{ return localStorage.getItem(NAME_KEY) || defaultName; }catch(e){ return defaultName; } }
+      function setStoredName(name){ try{ localStorage.setItem(NAME_KEY, name); }catch(e){} }
+
+      function renderTitle(name){
+        if(!titleEl) return;
+        titleEl.textContent = '';
+        const text = `Hey ${name}...`;
+        Array.from(text).forEach(ch => {
+          const span = document.createElement('span');
+          span.className = 'letter';
+          span.textContent = ch.replace(/\s/, '\u00A0');
+          titleEl.appendChild(span);
+        });
+        // Update helper line (Only <name> can help him)
+        const helperEl = document.getElementById('helperName');
+        if(helperEl) helperEl.textContent = name;
+      }
+
+      function openDialog(){
+        const stored = getStoredName();
+        if(input) input.value = stored;
+        if(overlay) { overlay.removeAttribute('hidden'); overlay.setAttribute('aria-hidden','false'); }
+        if(dialog) { dialog.removeAttribute('hidden'); }
+        if(input) input.focus();
+      }
+
+      function closeDialog(){
+        if(overlay) { overlay.setAttribute('hidden',''); overlay.setAttribute('aria-hidden','true'); }
+        if(dialog) dialog.setAttribute('hidden','');
+        // return focus to menu button
+        const menu = document.querySelector('.menu-icon');
+        if(menu) menu.focus();
+      }
+
+      // initialize title
+      const stored = getStoredName();
+      renderTitle(stored);
+
+      if(openBtn){
+        openBtn.addEventListener('click', function(){
+          // close drawer when opening dialog
+          const drawer = document.getElementById('drawer');
+          if(drawer) drawer.style.width = '0';
+          openDialog();
+        });
+      }
+
+      // Partner dialog helpers
+      const PARTNER_KEY = 'akku-partner';
+      const defaultPartner = 'Akku';
+      const partnerDialog = document.getElementById('partnerDialog');
+      const partnerInput = document.getElementById('dialogPartnerInput');
+      const partnerApply = document.getElementById('partnerDialogApplyBtn');
+      const partnerClose = document.getElementById('partnerDialogCloseBtn');
+      // Term (what you call your love) storage
+      const TERM_KEY = 'akku-term';
+      const defaultTerm = 'Vitamin S';
+      const termDialog = document.getElementById('termDialog');
+      const termInput = document.getElementById('dialogTermInput');
+      const termApply = document.getElementById('termDialogApplyBtn');
+      const termClose = document.getElementById('termDialogCloseBtn');
+      function getTerm(){ try{ return localStorage.getItem(TERM_KEY) || defaultTerm; }catch(e){ return defaultTerm; } }
+      function setTerm(v){ try{ localStorage.setItem(TERM_KEY, v); }catch(e){} }
+      function updateTermInUI(term){
+        const partnerName = getPartner();
+        const status = document.getElementById('akkuStatus');
+        if(status) status.innerHTML = `${partnerName} is about to die because of the lack of <span id="termLabel">${term}</span>`;
+        const termLabelInline = document.getElementById('termLabelInline');
+        if(termLabelInline) termLabelInline.textContent = term;
+        const termBtnText = document.getElementById('termBtnText');
+        if(termBtnText) termBtnText.textContent = term;
+      }
+      function getPartner(){ try{ return localStorage.getItem(PARTNER_KEY) || defaultPartner; }catch(e){ return defaultPartner; } }
+      function setPartner(name){ try{ localStorage.setItem(PARTNER_KEY, name); }catch(e){} }
+      function updatePartnerInUI(name){
+        // title
+        const appTitle = document.getElementById('appTitle');
+        if(appTitle) appTitle.textContent = `${name}app`;
+        // page title
+        try{ document.title = `${name}app`; }catch(e){}
+        // status paragraph uses current term
+        const status = document.getElementById('akkuStatus');
+        const termName = getTerm();
+        if(status) status.textContent = `${name} is about to die because of the lack of ${termName}`;
+      }
+      function openPartnerDialog(){
+        const storedPartner = getPartner();
+        if(partnerInput) partnerInput.value = storedPartner;
+        if(overlay) { overlay.removeAttribute('hidden'); overlay.setAttribute('aria-hidden','false'); }
+        if(partnerDialog) partnerDialog.removeAttribute('hidden');
+        if(partnerInput) partnerInput.focus();
+      }
+      function closePartnerDialog(){
+        if(overlay) { overlay.setAttribute('hidden',''); overlay.setAttribute('aria-hidden','true'); }
+        if(partnerDialog) partnerDialog.setAttribute('hidden','');
+      }
+
+      // initialize partner name in UI
+      updatePartnerInUI(getPartner());
+      // initialize term in UI
+      updateTermInUI(getTerm());
+
+      if(partnerApply){
+        partnerApply.addEventListener('click', function(){
+          const val = (partnerInput && partnerInput.value) ? partnerInput.value.trim() : '';
+          const partnerName = val || defaultPartner;
+          setPartner(partnerName);
+          updatePartnerInUI(partnerName);
+          closePartnerDialog();
+          showToast(`Name changed to ${partnerName}`);
+          // after partner set, open term dialog so user can set the term
+          setTimeout(()=>{ openTermDialog(); }, 600);
+        });
+      }
+      if(partnerClose) partnerClose.addEventListener('click', closePartnerDialog);
+      if(overlay) overlay.addEventListener('click', function(){ if(partnerDialog && !partnerDialog.hasAttribute('hidden')) closePartnerDialog(); else if(termDialog && !termDialog.hasAttribute('hidden')) closeTermDialog(); else closeDialog(); });
+      if(partnerInput){ partnerInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') partnerApply && partnerApply.click(); if(e.key === 'Escape') closePartnerDialog(); }); }
+
+      // Term dialog handlers
+      function openTermDialog(){
+        const storedTerm = getTerm();
+        if(termInput) termInput.value = storedTerm;
+        if(overlay) { overlay.removeAttribute('hidden'); overlay.setAttribute('aria-hidden','false'); }
+        if(termDialog) termDialog.removeAttribute('hidden');
+        if(termInput) termInput.focus();
+      }
+      function closeTermDialog(){
+        if(overlay) { overlay.setAttribute('hidden',''); overlay.setAttribute('aria-hidden','true'); }
+        if(termDialog) termDialog.setAttribute('hidden','');
+      }
+      if(termApply){
+        termApply.addEventListener('click', function(){
+          const v = (termInput && termInput.value) ? termInput.value.trim() : '';
+          const termName = v || defaultTerm;
+          setTerm(termName);
+          updateTermInUI(termName);
+          closeTermDialog();
+          showToast(`${termName} saved`);
+        });
+      }
+      if(termClose) termClose.addEventListener('click', closeTermDialog);
+      if(termInput){ termInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') termApply && termApply.click(); if(e.key === 'Escape') closeTermDialog(); }); }
+
+        if(applyBtn){
+          applyBtn.addEventListener('click', function(){
+            const val = (input && input.value) ? input.value.trim() : '';
+            const name = val || defaultName;
+            setStoredName(name);
+            renderTitle(name);
+            closeDialog();
+            try{ showToast(`Name changed to ${name}`); }catch(e){}
+            // open partner dialog after a short delay so user can continue the setup
+            setTimeout(()=>{ openPartnerDialog(); }, 600);
+          });
+        }
+
+      if(closeBtn) closeBtn.addEventListener('click', closeDialog);
+      if(overlay) overlay.addEventListener('click', closeDialog);
+
+      // keyboard support: Enter to apply, Escape to close
+      if(input){
+        input.addEventListener('keydown', function(e){
+          if(e.key === 'Enter') applyBtn && applyBtn.click();
+          if(e.key === 'Escape') closeDialog();
+        });
+      }
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ if(dialog && !dialog.hasAttribute('hidden')) closeDialog(); } });
+      // toast helper
+      function showToast(msg, ms = 3000){
+        const toast = document.getElementById('toast');
+        if(!toast) return;
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(()=>{ toast.classList.remove('show'); }, ms);
+      }
+    })();
   </script>
 
 </body>
-</html>
+</html>()
