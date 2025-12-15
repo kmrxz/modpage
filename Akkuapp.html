@@ -26,7 +26,7 @@
       padding: 15px;
       color: #cccccc;
       font-size: 24px;
-      font-weight: bold;
+      font-weight: normal;
       position: relative;
       z-index: 1000;
       font-family: 'Pacifico', cursive;
@@ -117,7 +117,7 @@
     .vitamin-level {
       color: #b33939; /* Changed to a more subtle dark red */
       font-size: 20px;
-      font-weight: bold;
+      font-weight: normal;
       margin-bottom: 20px;
     }
 
@@ -129,7 +129,7 @@
       font-size: 16px;
       cursor: pointer;
       color: #0d1a2f;
-      font-weight: bold;
+      font-weight: normal;
       margin-bottom: 20px;
       font-family: 'Courgette', cursive;
       transition: transform 0.2s ease, box-shadow 0.4s ease;
@@ -162,7 +162,7 @@
     #result-container p {
       margin: 5px 0;
       font-size: 18px;
-      font-weight: bold;
+      font-weight: normal;
     }
 
     #result-container .result-text {
@@ -199,19 +199,24 @@
       overflow: hidden;
     }
     .wave {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 200%;
-        height: 100%;
-        animation: waveMove 10s linear infinite;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      animation: waveMove 10s linear infinite alternate;
+      will-change: transform;
+      backface-visibility: hidden;
+      transform-style: preserve-3d;
+      transform: translate3d(0,0,0);
     }
     .wave:nth-child(2) {
-        animation-duration: 15s; /* Different speed */
-        opacity: 0.5;
-        z-index: 1;
-        transform: translateX(10%);
-        fill: #0c1523; /* A different shade of blue/navy for the second wave */
+      animation-duration: 15s; /* Different speed */
+      opacity: 0.5;
+      z-index: 1;
+      transform: translateX(10%);
+      fill: #0c1523; /* A different shade of blue/navy for the second wave */
+      animation-delay: -5s;
     }
     .wave:nth-child(1) {
         fill: #0a0f1c; /* A slightly different shade of blue for the front wave */
@@ -219,8 +224,8 @@
     }
 
     @keyframes waveMove {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+      0% { transform: translate3d(0,0,0); }
+      100% { transform: translate3d(-50%,0,0); }
     }
     /* Light theme overrides: all text uses dark colors (no light fonts) */
     body.light-theme {
@@ -284,12 +289,12 @@
   <div id="drawer">
     <span class="close-icon" onclick="toggleDrawer()">☰</span>
     <a href="index.html">Home</a>
-    <a href="#">Cool shots</a>
-    <a href="musicpage.html">AI Music</a>
-    <a href="#">Settings</a>
     <div style="padding:10px 20px;">
       <button id="openNameDialog">Change name</button>
     </div>
+    <a href="#" id="resetDefaultsOption">Reset to defaults</a>
+    <a href="#" id="clearCacheOption">Clear cache</a>
+    <a href="musicpage.html">AI Music</a>
     <a href="about.html">About</a>
   </div>
 
@@ -315,9 +320,11 @@
   <div class="waves">
     <svg class="wave" viewBox="0 0 1200 300" preserveAspectRatio="none">
       <path d="M0,200 C300,100 900,300 1200,200 L1200,300 L0,300 Z"></path>
+      <path transform="translate(1200,0)" d="M0,200 C300,100 900,300 1200,200 L1200,300 L0,300 Z"></path>
     </svg>
     <svg class="wave" viewBox="0 0 1200 300" preserveAspectRatio="none">
       <path d="M0,200 C300,100 900,300 1200,200 L1200,300 L0,300 Z"></path>
+      <path transform="translate(1200,0)" d="M0,200 C300,100 900,300 1200,200 L1200,300 L0,300 Z"></path>
     </svg>
   </div>
 
@@ -378,6 +385,32 @@
       toast.classList.add('show');
       setTimeout(()=>{ toast.classList.remove('show'); }, ms);
     }
+
+    // Drawer options: Reset defaults (clear relevant cache and reload), Clear cache (toast only)
+    (function(){
+      const resetEl = document.getElementById('resetDefaultsOption');
+      const clearEl = document.getElementById('clearCacheOption');
+      function clearAllSettings(){
+        try{
+          const keys = ['akku-name','akku-partner','akku-term','akku-theme','akku-daily','akku-lastResult','akku-ref'];
+          keys.forEach(k => localStorage.removeItem(k));
+        }catch(e){}
+      }
+      if(resetEl) resetEl.addEventListener('click', function(e){
+        e.preventDefault();
+        showToast('Resetting to defaults...');
+        // small delay to allow toast to show
+        setTimeout(()=>{
+          clearAllSettings();
+          try{ location.reload(); }catch(e){}
+        }, 700);
+      });
+      if(clearEl) clearEl.addEventListener('click', function(e){
+        e.preventDefault();
+        showToast('Cache cleared');
+        // intentionally do not clear anything
+      });
+    })();
 
     const vitaminOptions = [
       { text: "Text him", level: "60%" },
