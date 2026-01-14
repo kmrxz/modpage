@@ -75,7 +75,7 @@
       h: 36,
       vy: 0,
       gravity: 0.45,
-      jump: -4
+      jump: -16
     };
 
     function startGame(){
@@ -229,12 +229,12 @@
         const overlay = document.getElementById('overlay');
         if (overlay){
             overlay.style.display = 'flex';
-            overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + ' — Click or press Space to restart';
+            overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + '(VALLA PANIKK PODA) — Click or press Space to restart';
         } else {
             ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0,0,W,H);
             ctx.fillStyle = '#fff'; ctx.font = '24px Arial'; ctx.textAlign = 'center';
             ctx.fillText('Game Over', W/2, H/2 - 24);
-            ctx.fillText('Click or press Space to restart', W/2, H/2 + 8);
+            ctx.fillText('(VALLA PANIKK PODA) Click or press Space to restart', W/2, H/2 + 8);
             ctx.fillText('Score: ' + score, W/2, H/2 + 44);
         }
       }
