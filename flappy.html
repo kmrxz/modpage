@@ -106,7 +106,6 @@
     function onPipeHit(){
       // handle effects when hitting a pipe: blast image + sound + lower music volume
       lastHitWasPipe = true;
-      running = false;
       try{
         // swap bird image to blast
         birdImg.src = blastBirdSrc;
@@ -125,7 +124,24 @@
           try{ bgMusic.volume = Math.max(0.02, prev * 0.25); }catch(e){}
           setTimeout(()=>{ try{ if (bgMusic) bgMusic.volume = prev; }catch(e){} }, 1500);
         }
+        // finalize game over (show overlay with final score)
+        gameOver();
       }catch(e){ console.warn('onPipeHit error', e); }
+    }
+
+    function gameOver(){
+      running = false;
+      started = false;
+      // ensure HUD shows final score and overlay displays it
+      const scoreSpan = document.getElementById('score');
+      if (scoreSpan) scoreSpan.textContent = score;
+      const overlay = document.getElementById('overlay');
+      if (overlay){
+        overlay.style.display = 'flex';
+        // show blast bird if pipe caused the hit
+        overlay.querySelector('#overlay-bird').src = lastHitWasPipe ? blastBirdSrc : defaultBirdSrc;
+        overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + ' — Valla panikk podaa';
+      }
     }
 
     function update(){
@@ -138,7 +154,7 @@
       bird.y += bird.vy;
 
       // ground/ceiling
-      if (bird.y + bird.h/2 >= H){ running = false; lastHitWasPipe = false; }
+      if (bird.y + bird.h/2 >= H){ lastHitWasPipe = false; gameOver(); }
       if (bird.y - bird.h/2 <= 0){ bird.y = bird.h/2; bird.vy = 0; }
 
       // pipes movement and collisions
