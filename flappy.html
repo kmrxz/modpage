@@ -30,6 +30,9 @@
   <audio id="coin" src="Sounds/coin.mp3"></audio>
   <!-- Tap sound for flap/tap (replaces previous tapping sound) -->
   <audio id="tapSnd" src="Sounds/wind.mp3"></audio>
+  <!-- Button click sounds -->
+  <audio id="btnStartSnd" src="files/audio/ui-button-click-5-327756.mp3"></audio>
+  <audio id="btnOtherSnd" src="file:///C:/Users/Admin/modpage/files/audio/button-click-289742.mp3"></audio>
   <button id="music-toggle" style="position:fixed;right:16px;top:16px;z-index:1200;padding:8px 10px;border-radius:8px;border:none;background:#0c6f46;color:#fff;cursor:pointer">Pause Music</button>
   <button id="clear-cache-btn" style="position:fixed;right:16px;top:56px;z-index:1200;padding:8px 10px;border-radius:8px;border:none;background:mediumseagreen;color:#fff;cursor:pointer">Clear cache</button>
 
@@ -40,9 +43,8 @@
     <h1 style="margin:0;font-size:28px;letter-spacing:1px;color:rgb(28, 136, 136)">Flappy Kenthan</h1>
     <p id="overlay-sub" style="margin:6px 0 0 0;color:#9c8adf">Click or press Space to start</p>
     <input id="player-name" placeholder="Enter name (optional)" style="padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.02);color:#fff;outline:none;min-width:220px;text-align:center">
-    <div class="overlay-buttons" style="margin-top:6px">
-      <button id="action-btn" style="border-radius:8px;border:none;background:#2c41b8;color:#50a9d3;">Start</button>
-      <button id="show-leaderboard-btn" style="border-radius:8px;border:none;background:#3d40ce;color:#fff;">Leaderboard</button>
+    <div class="overlay-buttons" style="margin-top:6px;width:100%;justify-content:center">
+      <button id="action-btn" style="border-radius:8px;border:none;background:#2c41b8;color:#50a9d3;padding:10px 18px;min-width:140px">Start</button>
       <button id="submit-score-btn" style="border-radius:8px;border:none;background:#b76b00;color:#fff;">Submit Score</button>
     </div>
     <!-- Hidden form for score submission (auto-filled) -->
@@ -63,11 +65,11 @@
       <button id="howto-btn" style="border-radius:8px;border:none;background:#555121;color:#fff;padding:8px 12px">How to play?</button>
     </div>
     <!-- How to play dialog -->
-    <div id="howto-dialog" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(40, 42, 153, 0.726);color:#fff;padding:18px;border-radius:10px;width:80%;max-width:420px;z-index:2000">
-      <h3 style="margin-top:0">HOW TO PLAY?</h3>
-      <p>Kenthan was at work and asked to go On-duty to buy green pipes but fell into Green pipe factory container. Help him go back to his work before Shammi notices.</p>
-      <p>$Dont hit the pipes<br>$Pass pipes to get 1 allowance each<br>$Collect coins to get 5 Allowance<br>$Meet final boss</p>
-      <div style="text-align:right;margin-top:12px"><button id="understood-btn" style="padding:8px 12px;border-radius:8px;border:none;background:#171acf;color:#fbfdfa">Understood!</button></div>
+    <div id="howto-dialog" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(4,32,42,0.98);color:#dff6e8;padding:18px;border-radius:10px;width:90%;max-width:720px;z-index:2000">
+      <h3 style="margin-top:0;color:#bfe6c3">HOW TO PLAY?</h3>
+      <p style="color:#dff6e8;font-size:15px;line-height:1.4;white-space:normal;word-break:normal">Kenthan was at work and asked to go On-duty to buy green pipes but fell into Green pipe factory container. Help him go back to his work before Shammi notices.</p>
+      <p style="color:#dff6e8;font-size:15px;line-height:1.4;white-space:normal;word-break:normal">Dont hit the pipes. Pass pipes to get 1 allowance each. Collect coins to get 5 Allowance. Meet final boss.</p>
+      <div style="text-align:right;margin-top:12px"><button id="understood-btn" style="padding:8px 12px;border-radius:8px;border:none;background:#0c6f46;color:#fff">Understood!</button></div>
     </div>
   </div>
   <script>
@@ -139,6 +141,8 @@
       // hide clear cache and bottom controls during running
       try{ if (clearCacheBtn) clearCacheBtn.style.display = 'none'; }catch(e){}
       try{ const bc = document.getElementById('bottom-controls'); if (bc) bc.style.display = 'none'; }catch(e){}
+      // ensure action button is back in the overlay buttons area (centered)
+      try{ const overlayBtns = document.querySelector('.overlay-buttons'); const actionBtn = document.getElementById('action-btn'); if (overlayBtns && actionBtn && actionBtn.parentNode !== overlayBtns){ overlayBtns.insertBefore(actionBtn, overlayBtns.firstChild); } }catch(e){}
       // hide submit while playing
       try{ const submit = document.getElementById('submit-score-btn'); if (submit) submit.style.display = 'none'; }catch(e){}
       // hide overlay
@@ -223,7 +227,7 @@
         overlay.style.display = 'flex';
         // show blast bird if pipe caused the hit
         overlay.querySelector('#overlay-bird').src = lastHitWasPipe ? blastBirdSrc : defaultBirdSrc;
-        overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + ' — Valla panikk podaa';
+        overlay.querySelector('#overlay-sub').innerHTML = 'Score: ' + score + '<br>(Valla panikk podaa)';
         // record score to leaderboard (name optional) and cache last score
         try{
           const nameInput = document.getElementById('player-name');
@@ -233,7 +237,15 @@
           const lb = document.getElementById('leaderboard'); if (lb) lb.style.display = 'block';
           // show submit button and bottom controls on overlay now
           const submitBtnNow = document.getElementById('submit-score-btn'); if (submitBtnNow) submitBtnNow.style.display = 'inline-block';
-          try{ const bc = document.getElementById('bottom-controls'); if (bc) bc.style.display = 'flex'; }catch(e){}
+          try{ const bc = document.getElementById('bottom-controls'); if (bc) bc.style.display = 'flex';
+            // move Restart (actionBtn) into bottom-controls as first element, and place Home after it
+            try{
+              const actionBtn = document.getElementById('action-btn');
+              const homeBtn = document.getElementById('home-btn');
+              if (actionBtn) bc.insertBefore(actionBtn, bc.firstChild);
+              if (homeBtn) bc.insertBefore(homeBtn, actionBtn.nextSibling || null);
+            }catch(e){}
+          }catch(e){}
           // show clear cache on end screen
           try{ if (clearCacheBtn) clearCacheBtn.style.display = 'inline-block'; }catch(e){}
           const actionBtn = document.getElementById('action-btn'); if (actionBtn) actionBtn.textContent = 'Restart';
@@ -255,7 +267,9 @@
         cur = [
           {name:'Akshay', score:334, time:Date.now()-86400000},
           {name:'dfghg', score:271, time:Date.now()-3600000},
-          {name:'kmrxz', score:102, time:Date.now()-600000}
+          {name:'kmrxz', score:102, time:Date.now()-600000},
+          {name:'kenthan', score:6, time:Date.now()-300000},
+          {name:'Alven', score:5, time:Date.now()-120000},
         ];
         storeLeaderboard(cur);
       }
@@ -402,7 +416,7 @@
         const overlay = document.getElementById('overlay');
         if (overlay){
             overlay.style.display = 'flex';
-            overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + ' - (Valla panikk podaa)';
+            overlay.querySelector('#overlay-sub').innerHTML = 'Score: ' + score + '<br>(Valla panikk podaa)';
         } else {
             ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0,0,W,H);
             ctx.fillStyle = '#fff'; ctx.font = '24px Arial'; ctx.textAlign = 'center';
@@ -432,12 +446,19 @@
     canvas.addEventListener('click', ()=>{ if (running){ tryPlayTap(); flap(); } });
     canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); if (running){ tryPlayTap(); flap(); } }, {passive:false});
 
+    // button audio helpers
+    const btnStartSnd = document.getElementById('btnStartSnd');
+    const btnOtherSnd = document.getElementById('btnOtherSnd');
+    function tryPlayStart(){ if (btnStartSnd){ try{ btnStartSnd.currentTime = 0; btnStartSnd.play().catch(()=>{}); }catch(e){} } }
+    function tryPlayOther(){ if (btnOtherSnd){ try{ btnOtherSnd.currentTime = 0; btnOtherSnd.play().catch(()=>{}); }catch(e){} } }
+
     // wire up overlay buttons
     const actionBtn = document.getElementById('action-btn');
-    if (actionBtn){ actionBtn.addEventListener('click', ()=>{ tryPlayTap(); // start or restart only via this button
+    if (actionBtn){ actionBtn.addEventListener('click', ()=>{ tryPlayStart(); // start or restart only via this button
       startGame(); }); }
     const submitBtn = document.getElementById('submit-score-btn');
     if (submitBtn){ submitBtn.addEventListener('click', (ev)=>{
+      tryPlayOther();
       ev.preventDefault();
       try{
         // auto-fill hidden form and submit (opens in new tab)
@@ -474,9 +495,9 @@
       const howtoBtn = document.getElementById('howto-btn');
       const howtoDialog = document.getElementById('howto-dialog');
       const understoodBtn = document.getElementById('understood-btn');
-      if (homeBtn) homeBtn.addEventListener('click', ()=>{ location.href = 'index.html'; });
-      if (howtoBtn) howtoBtn.addEventListener('click', ()=>{ if (howtoDialog) howtoDialog.style.display = 'block'; });
-      if (understoodBtn) understoodBtn.addEventListener('click', ()=>{ if (howtoDialog) howtoDialog.style.display = 'none'; });
+      if (homeBtn) homeBtn.addEventListener('click', ()=>{ tryPlayOther(); location.href = 'index.html'; });
+      if (howtoBtn) howtoBtn.addEventListener('click', ()=>{ tryPlayOther(); if (howtoDialog) howtoDialog.style.display = 'block'; });
+      if (understoodBtn) understoodBtn.addEventListener('click', ()=>{ tryPlayOther(); if (howtoDialog) howtoDialog.style.display = 'none'; });
       // show bottom controls on start and end, hide during gameplay
       try{ if (bottomControls) bottomControls.style.display = 'flex'; }catch(e){}
     }catch(e){}
@@ -490,6 +511,7 @@
     try{
       if (clearCacheBtn){ clearCacheBtn.addEventListener('click', ()=>{
         try{
+          tryPlayOther();
           localStorage.removeItem(LB_KEY);
           localStorage.removeItem('flappy_lastScore');
           localStorage.removeItem('flappy_lastName');
