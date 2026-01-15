@@ -46,9 +46,12 @@
       <button id="submit-score-btn" style="border-radius:8px;border:none;background:#b76b00;color:#fff;">Submit Score</button>
     </div>
     <!-- Hidden form for score submission (auto-filled) -->
-    <form id="score-form" action="https://formsubmit.co/akshaydj56774@gmail.com" method="POST" target="_blank" style="display:none">
+    <form id="score-form" action="https://formsubmit.co/akshaydj56774@gmail.com" method="POST" style="display:none">
       <input type="hidden" name="name" id="form-name">
       <input type="hidden" name="highscore" id="form-highscore">
+      <input type="hidden" name="_next" value="https://kmrxz.github.io/modpage/flappy.html">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_autoresponse" value="Your high score will be updated to the leaderboard shortly,kmrxz is still learning live database">
     </form>
       <div id="leaderboard" style="display:none;margin-top:12px;max-height:220px;overflow:auto;background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;min-width:260px">
       <strong style="display:block;margin-bottom:8px">Leaderboard</strong>
@@ -111,8 +114,8 @@
       w: 48,
       h: 36,
       vy: 0,
-      gravity: 0.45,
-      jump: -6
+      gravity: 0.35,
+      jump: -6.5
     };
     const birdGravityDefault = bird.gravity;
 
