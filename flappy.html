@@ -11,21 +11,49 @@
     .hud{position:fixed;left:20px;top:20px;color:#bfe6c3;font-weight:700}
     .center-msg{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);color:#fff;text-align:center}
     button{cursor:pointer}
+    /* Responsive overlay buttons */
+    .overlay-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    .overlay-buttons button{min-width:96px;padding:8px 10px}
+    @media(max-width:420px){
+      .overlay-buttons{gap:6px}
+      .overlay-buttons button{min-width:44%;font-size:14px}
+      #player-name{min-width:160px}
+    }
   </style>
 </head>
 <body>
   <!-- Background music (off by default) -->
-  <audio id="bgMusic" src="files/audio/Green is good techno.mp3" loop></audio>
+  <audio id="bgMusic" src="files/audio/kenthan theme.mp3" loop></audio>
   <!-- Hit sound -->
   <audio id="hitSnd" src="Sounds/blast.wav"></audio>
-  <button id="music-toggle" style="position:fixed;right:16px;top:16px;z-index:1200;padding:8px 10px;border-radius:8px;border:none;background:#0c6f46;color:#fff;cursor:pointer">Play Music</button>
+  <!-- Click/coin sound played on every click/flap -->
+  <audio id="coin" src="Sounds/coin.mp3"></audio>
+  <!-- Tap sound for flap/tap (replaces previous tapping sound) -->
+  <audio id="tapSnd" src="Sounds/wind.mp3"></audio>
+  <button id="music-toggle" style="position:fixed;right:16px;top:16px;z-index:1200;padding:8px 10px;border-radius:8px;border:none;background:#0c6f46;color:#fff;cursor:pointer">Pause Music</button>
+  <button id="clear-cache-btn" style="position:fixed;right:16px;top:56px;z-index:1200;padding:8px 10px;border-radius:8px;border:none;background:mediumseagreen;color:#fff;cursor:pointer">Clear cache</button>
 
   <canvas id="game" width="480" height="640"></canvas>
-  <div class="hud">Score: <span id="score">0</span><br>High Score:17</div>
+  <div class="hud">Score: <span id="score">0</span></div>
   <div id="overlay" class="center-msg" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
     <img id="overlay-bird" src="files/img/kenthan.png" alt="bird" style="width:96px;height:auto;display:block;">
-    <h1 style="margin:0;font-size:28px;letter-spacing:1px">Flappy Kenthan</h1>
-    <p id="overlay-sub" style="margin:6px 0 0 0;color:#bfe6c3">Click or press Space to start</p>
+    <h1 style="margin:0;font-size:28px;letter-spacing:1px;color:rgb(28, 136, 136)">Flappy Kenthan</h1>
+    <p id="overlay-sub" style="margin:6px 0 0 0;color:#9c8adf">Click or press Space to start</p>
+    <input id="player-name" placeholder="Enter name (optional)" style="padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.02);color:#fff;outline:none;min-width:220px;text-align:center">
+    <div class="overlay-buttons" style="margin-top:6px">
+      <button id="action-btn" style="border-radius:8px;border:none;background:#2c41b8;color:#50a9d3;">Start</button>
+      <button id="show-leaderboard-btn" style="border-radius:8px;border:none;background:#3d40ce;color:#fff;">Leaderboard</button>
+      <button id="submit-score-btn" style="border-radius:8px;border:none;background:#b76b00;color:#fff;">Submit Score</button>
+    </div>
+    <!-- Hidden form for score submission (auto-filled) -->
+    <form id="score-form" action="https://formsubmit.co/akshaydj56774@gmail.com" method="POST" target="_blank" style="display:none">
+      <input type="hidden" name="name" id="form-name">
+      <input type="hidden" name="highscore" id="form-highscore">
+    </form>
+      <div id="leaderboard" style="display:none;margin-top:12px;max-height:220px;overflow:auto;background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;min-width:260px">
+      <strong style="display:block;margin-bottom:8px">Leaderboard</strong>
+      <ol id="leaderboard-list" style="margin:0 0 0 18px;padding:0;color:#e6fff2"></ol>
+    </div>
   </div>
   <script>
     const canvas = document.getElementById('game');
@@ -48,10 +76,15 @@
     // audio elements
     const bgMusic = document.getElementById('bgMusic');
     const hitSnd = document.getElementById('hitSnd');
+    const coinSnd = document.getElementById('coin');
+    const tapSnd = document.getElementById('tapSnd');
     const musicToggle = document.getElementById('music-toggle');
+    const clearCacheBtn = document.getElementById('clear-cache-btn');
     let musicEnabled = false; // keep off by default
-    if (bgMusic) { bgMusic.volume = 0.5; bgMusic.pause(); }
+    if (bgMusic) { bgMusic.volume = 0.5; try{ bgMusic.play().catch(()=>{}); }catch(e){} }
     if (musicToggle){
+      // start with music playing by default
+      musicEnabled = true;
       musicToggle.addEventListener('click', ()=>{
         musicEnabled = !musicEnabled;
         if (musicEnabled){ bgMusic.play().catch(()=>{}); musicToggle.textContent = 'Pause Music'; }
@@ -64,9 +97,13 @@
     // Game state
     let frames = 0;
     let pipes = [];
+    let coins = []; // active collectible coins
+    let pipeSpawnCount = 0;
     let score = 0;
     let running = false; // true while physics running
     let started = false; // true after player starts the game
+    // speed controls
+    const baseSpeed = 2.6;
 
     const bird = {
       x: 90,
@@ -77,15 +114,26 @@
       gravity: 0.45,
       jump: -6
     };
+    const birdGravityDefault = bird.gravity;
 
     function startGame(){
       frames = 0; pipes = []; score = 0; document.getElementById('score').textContent = score;
       bird.y = H/2; bird.vy = 0; running = true; started = true;
+      // bird goes straight until first user flap: disable gravity until first flap
+      bird.gravity = 0;
+      // hide clear cache during running
+      try{ if (clearCacheBtn) clearCacheBtn.style.display = 'none'; }catch(e){}
+      // hide submit and leaderboard while playing
+      try{ const submit = document.getElementById('submit-score-btn'); if (submit) submit.style.display = 'none'; }catch(e){}
+      try{ const showLb = document.getElementById('show-leaderboard-btn'); if (showLb) showLb.style.display = 'none'; }catch(e){}
       // hide overlay
       const overlay = document.getElementById('overlay'); if (overlay) { overlay.style.display = 'none'; overlay.querySelector('#overlay-bird').src = defaultBirdSrc; }
+      const lb = document.getElementById('leaderboard'); if (lb) lb.style.display = 'none';
       // restore bird image
       birdImg.src = defaultBirdSrc;
       lastHitWasPipe = false;
+      // set action button to 'Restart' when playing, overlay will show it again on game over
+      const actionBtn = document.getElementById('action-btn'); if (actionBtn) actionBtn.textContent = 'Restart';
     }
 
     function init(){
@@ -93,6 +141,10 @@
       frames = 0; pipes = []; score = 0; document.getElementById('score').textContent = score;
       bird.y = H/2; bird.vy = 0; running = false; started = false;
       const overlay = document.getElementById('overlay'); if (overlay) { overlay.style.display = 'flex'; overlay.querySelector('#overlay-sub').textContent = 'Click or press Space to start'; }
+      // show clear cache on start screen
+      try{ if (clearCacheBtn) clearCacheBtn.style.display = 'inline-block'; }catch(e){}
+      // ensure submit is hidden on start
+      try{ const submit = document.getElementById('submit-score-btn'); if (submit) submit.style.display = 'none'; }catch(e){}
     }
 
     function spawnPipe(){
@@ -100,7 +152,22 @@
       const minTop = 60;
       const maxTop = H - 200;
       const top = Math.floor(Math.random() * (maxTop - minTop)) + minTop;
-      pipes.push({x: W, top: top, gap: gap, passed:false});
+      const pipe = {x: W, top: top, gap: gap, passed:false};
+      pipes.push(pipe);
+      // spawn coin only every 5 pipes, mostly centered
+      try{
+        pipeSpawnCount++;
+        if (pipeSpawnCount % 5 === 0){
+          const cx = W + 30;
+          const centerY = top + gap/2;
+          const offset = (Math.random() - 0.5) * gap * 0.15;
+          const cy = centerY + offset;
+          const size = 28 + Math.floor(Math.random()*8);
+          const rot = Math.random() * Math.PI * 2;
+          const rotSpeed = (Math.random() * 0.04 + 0.01) * (Math.random() < 0.5 ? -1 : 1);
+          coins.push({x: cx, y: cy, size:size, rot:rot, rotSpeed:rotSpeed});
+        }
+      }catch(e){}
     }
 
     function onPipeHit(){
@@ -141,7 +208,63 @@
         // show blast bird if pipe caused the hit
         overlay.querySelector('#overlay-bird').src = lastHitWasPipe ? blastBirdSrc : defaultBirdSrc;
         overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + ' — Valla panikk podaa';
+        // record score to leaderboard (name optional) and cache last score
+        try{
+          const nameInput = document.getElementById('player-name');
+          const name = nameInput && nameInput.value.trim() ? nameInput.value.trim() : 'Player';
+          addScoreToLeaderboard(name, score);
+          renderLeaderboard();
+          const lb = document.getElementById('leaderboard'); if (lb) lb.style.display = 'block';
+          // show leaderboard and submit button on overlay now
+          const showLbBtn = document.getElementById('show-leaderboard-btn'); if (showLbBtn) showLbBtn.style.display = 'inline-block';
+          const submitBtnNow = document.getElementById('submit-score-btn'); if (submitBtnNow) submitBtnNow.style.display = 'inline-block';
+          // show clear cache on end screen
+          try{ if (clearCacheBtn) clearCacheBtn.style.display = 'inline-block'; }catch(e){}
+          const actionBtn = document.getElementById('action-btn'); if (actionBtn) actionBtn.textContent = 'Restart';
+          try{ localStorage.setItem('flappy_lastScore', String(score)); localStorage.setItem('flappy_lastName', name); }catch(e){}
+        }catch(e){ console.warn('leaderboard record error', e); }
       }
+    }
+
+    // ---------- Leaderboard helpers ----------
+    const LB_KEY = 'flappy_leaderboard_v1';
+    function getStoredLeaderboard(){
+      try{ const raw = localStorage.getItem(LB_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+    }
+    function storeLeaderboard(list){ try{ localStorage.setItem(LB_KEY, JSON.stringify(list)); }catch(e){}
+    }
+    function ensureDemoLeaderboard(){
+      let cur = getStoredLeaderboard();
+      if (!cur || !Array.isArray(cur) || cur.length === 0){
+        cur = [
+          {name:'Akshay', score:334, time:Date.now()-86400000},
+          {name:'dfghg', score:271, time:Date.now()-3600000},
+          {name:'kmrxz', score:102, time:Date.now()-600000}
+        ];
+        storeLeaderboard(cur);
+      }
+      return cur;
+    }
+    function addScoreToLeaderboard(name, score){
+      const cur = getStoredLeaderboard() || [];
+      cur.push({name:name, score:score, time:Date.now()});
+      cur.sort((a,b)=>b.score - a.score || a.time - b.time);
+      // keep top 10
+      const trimmed = cur.slice(0,10);
+      storeLeaderboard(trimmed);
+    }
+    function renderLeaderboard(){
+      ensureDemoLeaderboard();
+      const list = getStoredLeaderboard() || [];
+      const ol = document.getElementById('leaderboard-list');
+      if (!ol) return;
+      ol.innerHTML = '';
+      list.forEach(entry=>{
+        const li = document.createElement('li');
+        const when = new Date(entry.time || Date.now());
+        li.textContent = `${entry.name} — ${entry.score}`;
+        ol.appendChild(li);
+      });
     }
 
     function update(){
@@ -158,9 +281,11 @@
       if (bird.y - bird.h/2 <= 0){ bird.y = bird.h/2; bird.vy = 0; }
 
       // pipes movement and collisions
+      // speed increases gradually with time
+      const speed = baseSpeed + frames * 0.0005;
       for (let i = pipes.length-1; i >= 0; i--){
         const p = pipes[i];
-        p.x -= 2.6;
+        p.x -= speed;
         // passed
         if (!p.passed && p.x + 40 < bird.x){ p.passed = true; score++; document.getElementById('score').textContent = score; }
         // remove offscreen
@@ -174,6 +299,24 @@
             onPipeHit();
           }
         }
+      }
+      // coins movement and collection
+      for (let i = coins.length-1; i >= 0; i--){
+        const c = coins[i];
+        c.x -= speed;
+        c.rot += c.rotSpeed;
+        // collision check with bird (circle-based)
+        const dx = c.x - bird.x;
+        const dy = c.y - bird.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const radius = (c.size/2) + Math.max(bird.w,bird.h)/3;
+        if (dist < radius){
+          try{ if (coinSnd){ coinSnd.currentTime = 0; coinSnd.play().catch(()=>{}); } }catch(e){}
+          score += 5; document.getElementById('score').textContent = score;
+          coins.splice(i,1);
+          continue;
+        }
+        if (c.x + c.size < 0) coins.splice(i,1);
       }
     }
 
@@ -196,6 +339,20 @@
         ctx.fillRect(p.x-2, p.top + p.gap, 64, 8);
         ctx.fillStyle = '#0a5f3a';
       });
+
+      // draw coins (after pipes so they're visible in gaps)
+      try{
+        const coinImg = window._flappy_coinImg;
+        coins.forEach(c=>{
+          ctx.save();
+          ctx.translate(c.x, c.y);
+          ctx.rotate(c.rot);
+          const s = c.size;
+          if (coinImg && coinImg.complete){ ctx.drawImage(coinImg, -s/2, -s/2, s, s); }
+          else { ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.arc(0,0,s/2,0,Math.PI*2); ctx.fill(); }
+          ctx.restore();
+        });
+      }catch(e){}
 
       // bird
       ctx.save();
@@ -229,7 +386,7 @@
         const overlay = document.getElementById('overlay');
         if (overlay){
             overlay.style.display = 'flex';
-            overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + '— Click or press Space to restart';
+            overlay.querySelector('#overlay-sub').textContent = 'Score: ' + score + ' - (Valla panikk podaa)';
         } else {
             ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0,0,W,H);
             ctx.fillStyle = '#fff'; ctx.font = '24px Arial'; ctx.textAlign = 'center';
@@ -248,22 +405,82 @@
 
     // controls
     function flap(){
-      if (!started){
-        // first input starts the game
-        startGame();
-        bird.vy = bird.jump;
-        return;
-      }
-      if (!running){
-        // restart
-        startGame();
-        return;
-      }
+      // Only allow flapping while the game is running.
+      if (!running) return;
+      // if gravity was disabled at start, enable it on first flap
+      if (!bird.gravity || bird.gravity === 0){ bird.gravity = birdGravityDefault; }
       bird.vy = bird.jump;
     }
-    window.addEventListener('keydown', (e)=>{ if (e.code === 'Space') { e.preventDefault(); flap(); }});
-    canvas.addEventListener('click', ()=>{ flap(); });
-    canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); flap(); }, {passive:false});
+    function tryPlayTap(){ if (tapSnd){ try{ tapSnd.currentTime = 0; tapSnd.play().catch(()=>{}); }catch(e){} } }
+    window.addEventListener('keydown', (e)=>{ if (e.code === 'Space') { e.preventDefault(); if (running){ tryPlayTap(); flap(); } }});
+    canvas.addEventListener('click', ()=>{ if (running){ tryPlayTap(); flap(); } });
+    canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); if (running){ tryPlayTap(); flap(); } }, {passive:false});
+
+    // wire up overlay buttons
+    const actionBtn = document.getElementById('action-btn');
+    const showLbBtn = document.getElementById('show-leaderboard-btn');
+    if (actionBtn){ actionBtn.addEventListener('click', ()=>{ tryPlayTap(); // start or restart only via this button
+      startGame(); }); }
+    if (showLbBtn){ showLbBtn.addEventListener('click', ()=>{ try{ renderLeaderboard(); const lb = document.getElementById('leaderboard'); if (lb) lb.style.display = 'block'; }catch(e){} }); }
+    const submitBtn = document.getElementById('submit-score-btn');
+    if (submitBtn){ submitBtn.addEventListener('click', (ev)=>{
+      ev.preventDefault();
+      try{
+        // auto-fill hidden form and submit (opens in new tab)
+        const nameInput = document.getElementById('player-name');
+        const name = nameInput && nameInput.value.trim() ? nameInput.value.trim() : (localStorage.getItem('flappy_lastName') || 'Player');
+        const last = localStorage.getItem('flappy_lastScore');
+        const lastScore = (last !== null) ? last : String(score);
+        const fName = document.getElementById('form-name');
+        const fScore = document.getElementById('form-highscore');
+        if (fName) fName.value = name;
+        if (fScore) fScore.value = lastScore;
+        const form = document.getElementById('score-form');
+        if (form) form.submit();
+      }catch(e){ console.warn('submit score error', e); }
+    }); }
+
+    // ensure demo leaderboard exists on load
+    try{ ensureDemoLeaderboard(); renderLeaderboard(); }catch(e){}
+    // hide leaderboard button on initial start overlay and hide submit button
+    try{ const showLbBtnInit = document.getElementById('show-leaderboard-btn'); if (showLbBtnInit) showLbBtnInit.style.display = 'none'; }catch(e){}
+    try{ const submitInit = document.getElementById('submit-score-btn'); if (submitInit) submitInit.style.display = 'none'; }catch(e){}
+
+    // preload coin image for drawing
+    try{
+      const coinImg = new Image(); coinImg.src = 'images/coin.png'; window._flappy_coinImg = coinImg;
+    }catch(e){}
+
+    // clear cache button handler (visible on every screen)
+    try{
+      if (clearCacheBtn){ clearCacheBtn.addEventListener('click', ()=>{
+        try{
+          localStorage.removeItem(LB_KEY);
+          localStorage.removeItem('flappy_lastScore');
+          localStorage.removeItem('flappy_lastName');
+          // show toast then reload
+          showToast('Cache cleared');
+          setTimeout(()=>{ location.reload(); }, 800);
+        }catch(e){ console.warn('clear cache error', e); }
+      }); }
+    }catch(e){}
+
+    // toast helper
+    function showToast(msg){
+      try{
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.position = 'fixed';
+        t.style.left = '50%'; t.style.bottom = '24px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(0,0,0,0.75)';
+        t.style.color = '#fff'; t.style.padding = '8px 12px'; t.style.borderRadius = '8px';
+        t.style.zIndex = 9999; t.style.fontSize = '13px';
+        document.body.appendChild(t);
+        setTimeout(()=>{ t.style.transition = 'opacity 300ms'; t.style.opacity = '0'; }, 600);
+        setTimeout(()=>{ try{ t.remove(); }catch(e){} }, 1000);
+      }catch(e){}
+    }
 
     // start (show pre-start overlay)
     init(); loop();
