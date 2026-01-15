@@ -57,6 +57,18 @@
       <strong style="display:block;margin-bottom:8px">Leaderboard</strong>
       <ol id="leaderboard-list" style="margin:0 0 0 18px;padding:0;color:#e6fff2"></ol>
     </div>
+    <!-- bottom controls (Home + How to play?) shown only on start and end screens -->
+    <div id="bottom-controls" style="display:flex;gap:8px;margin-top:10px">
+      <button id="home-btn" style="border-radius:8px;border:none;background:#245a39;color:#fff;padding:8px 12px">GO Home</button>
+      <button id="howto-btn" style="border-radius:8px;border:none;background:#555121;color:#fff;padding:8px 12px">How to play?</button>
+    </div>
+    <!-- How to play dialog -->
+    <div id="howto-dialog" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(40, 42, 153, 0.726);color:#fff;padding:18px;border-radius:10px;width:80%;max-width:420px;z-index:2000">
+      <h3 style="margin-top:0">HOW TO PLAY?</h3>
+      <p>Kenthan was at work and asked to go On-duty to buy green pipes but fell into Green pipe factory container. Help him go back to his work before Shammi notices.</p>
+      <p>$Dont hit the pipes<br>$Pass pipes to get 1 allowance each<br>$Collect coins to get 5 Allowance<br>$Meet final boss</p>
+      <div style="text-align:right;margin-top:12px"><button id="understood-btn" style="padding:8px 12px;border-radius:8px;border:none;background:#171acf;color:#fbfdfa">Understood!</button></div>
+    </div>
   </div>
   <script>
     const canvas = document.getElementById('game');
@@ -124,11 +136,11 @@
       bird.y = H/2; bird.vy = 0; running = true; started = true;
       // bird goes straight until first user flap: disable gravity until first flap
       bird.gravity = 0;
-      // hide clear cache during running
+      // hide clear cache and bottom controls during running
       try{ if (clearCacheBtn) clearCacheBtn.style.display = 'none'; }catch(e){}
-      // hide submit and leaderboard while playing
+      try{ const bc = document.getElementById('bottom-controls'); if (bc) bc.style.display = 'none'; }catch(e){}
+      // hide submit while playing
       try{ const submit = document.getElementById('submit-score-btn'); if (submit) submit.style.display = 'none'; }catch(e){}
-      try{ const showLb = document.getElementById('show-leaderboard-btn'); if (showLb) showLb.style.display = 'none'; }catch(e){}
       // hide overlay
       const overlay = document.getElementById('overlay'); if (overlay) { overlay.style.display = 'none'; overlay.querySelector('#overlay-bird').src = defaultBirdSrc; }
       const lb = document.getElementById('leaderboard'); if (lb) lb.style.display = 'none';
@@ -144,8 +156,9 @@
       frames = 0; pipes = []; score = 0; document.getElementById('score').textContent = score;
       bird.y = H/2; bird.vy = 0; running = false; started = false;
       const overlay = document.getElementById('overlay'); if (overlay) { overlay.style.display = 'flex'; overlay.querySelector('#overlay-sub').textContent = 'Click or press Space to start'; }
-      // show clear cache on start screen
+      // show clear cache and bottom controls on start screen
       try{ if (clearCacheBtn) clearCacheBtn.style.display = 'inline-block'; }catch(e){}
+      try{ const bc = document.getElementById('bottom-controls'); if (bc) bc.style.display = 'flex'; }catch(e){}
       // ensure submit is hidden on start
       try{ const submit = document.getElementById('submit-score-btn'); if (submit) submit.style.display = 'none'; }catch(e){}
     }
@@ -218,9 +231,9 @@
           addScoreToLeaderboard(name, score);
           renderLeaderboard();
           const lb = document.getElementById('leaderboard'); if (lb) lb.style.display = 'block';
-          // show leaderboard and submit button on overlay now
-          const showLbBtn = document.getElementById('show-leaderboard-btn'); if (showLbBtn) showLbBtn.style.display = 'inline-block';
+          // show submit button and bottom controls on overlay now
           const submitBtnNow = document.getElementById('submit-score-btn'); if (submitBtnNow) submitBtnNow.style.display = 'inline-block';
+          try{ const bc = document.getElementById('bottom-controls'); if (bc) bc.style.display = 'flex'; }catch(e){}
           // show clear cache on end screen
           try{ if (clearCacheBtn) clearCacheBtn.style.display = 'inline-block'; }catch(e){}
           const actionBtn = document.getElementById('action-btn'); if (actionBtn) actionBtn.textContent = 'Restart';
@@ -421,10 +434,8 @@
 
     // wire up overlay buttons
     const actionBtn = document.getElementById('action-btn');
-    const showLbBtn = document.getElementById('show-leaderboard-btn');
     if (actionBtn){ actionBtn.addEventListener('click', ()=>{ tryPlayTap(); // start or restart only via this button
       startGame(); }); }
-    if (showLbBtn){ showLbBtn.addEventListener('click', ()=>{ try{ renderLeaderboard(); const lb = document.getElementById('leaderboard'); if (lb) lb.style.display = 'block'; }catch(e){} }); }
     const submitBtn = document.getElementById('submit-score-btn');
     if (submitBtn){ submitBtn.addEventListener('click', (ev)=>{
       ev.preventDefault();
@@ -445,9 +456,30 @@
 
     // ensure demo leaderboard exists on load
     try{ ensureDemoLeaderboard(); renderLeaderboard(); }catch(e){}
-    // hide leaderboard button on initial start overlay and hide submit button
-    try{ const showLbBtnInit = document.getElementById('show-leaderboard-btn'); if (showLbBtnInit) showLbBtnInit.style.display = 'none'; }catch(e){}
+    // hide submit button on start
     try{ const submitInit = document.getElementById('submit-score-btn'); if (submitInit) submitInit.style.display = 'none'; }catch(e){}
+
+    // persist player name: load and save
+    try{
+      const nameInput = document.getElementById('player-name');
+      const cached = localStorage.getItem('flappy_lastName');
+      if (nameInput && cached) nameInput.value = cached;
+      if (nameInput){ nameInput.addEventListener('input', (e)=>{ try{ localStorage.setItem('flappy_lastName', nameInput.value); }catch(ee){} }); }
+    }catch(e){}
+
+    // bottom controls and dialog handlers
+    try{
+      const bottomControls = document.getElementById('bottom-controls');
+      const homeBtn = document.getElementById('home-btn');
+      const howtoBtn = document.getElementById('howto-btn');
+      const howtoDialog = document.getElementById('howto-dialog');
+      const understoodBtn = document.getElementById('understood-btn');
+      if (homeBtn) homeBtn.addEventListener('click', ()=>{ location.href = 'index.html'; });
+      if (howtoBtn) howtoBtn.addEventListener('click', ()=>{ if (howtoDialog) howtoDialog.style.display = 'block'; });
+      if (understoodBtn) understoodBtn.addEventListener('click', ()=>{ if (howtoDialog) howtoDialog.style.display = 'none'; });
+      // show bottom controls on start and end, hide during gameplay
+      try{ if (bottomControls) bottomControls.style.display = 'flex'; }catch(e){}
+    }catch(e){}
 
     // preload coin image for drawing
     try{
