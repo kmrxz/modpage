@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Beat Pad</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  background: #0b0b0f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: system-ui, sans-serif;
+}
+
+.pad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-gap: 15px;
+}
+
+.pad {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.05s ease, opacity 0.1s;
+}
+
+.pad:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+/* colors */
+.pad1 { background: #ff4757; }
+.pad2 { background: #ff7f50; }
+.pad3 { background: #ffa502; }
+.pad4 { background: #2ed573; }
+.pad5 { background: #1e90ff; }
+.pad6 { background: #3742fa; }
+.pad7 { background: #5352ed; }
+.pad8 { background: #a55eea; }
+.pad9 { background: #ff6b81; }
+
+.controls {
+  margin-top: 30px;
+}
+
+button {
+  background: #1f1f2e;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  margin: 0 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2c2c44;
+}
+</style>
+</head>
+
+<body>
+
+<div class="pad-grid">
+  <div class="pad pad1" data-sound="kick.wav"></div>
+  <div class="pad pad2" data-sound="snare.wav"></div>
+  <div class="pad pad3" data-sound="oh.wav"></div>
+
+  <div class="pad pad4" data-sound="symbol.wav"></div>
+  <div class="pad pad5" data-sound="tom.wav"></div>
+  <div class="pad pad6" data-sound="bass.wav"></div>
+
+  <div class="pad pad7" data-sound="brass.wav"></div>
+  <div class="pad pad8" data-sound="snap.wav"></div>
+  <div class="pad pad9" data-sound="ch.wav"></div>
+</div>
+
+<div class="controls">
+  <button id="record">● Record</button>
+  <button id="play">▶ Play</button>
+  <button id="save">⬇ Save</button>
+</div>
+
+<script>
+const pads = document.querySelectorAll(".pad");
+const basePath = "files/audio/pad/";
+
+let recording = false;
+let startTime = 0;
+let sequence = [];
+
+// audio context
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const destination = audioCtx.createMediaStreamDestination();
+const recorder = new MediaRecorder(destination.stream);
+let chunks = [];
+
+// load sounds
+const sounds = {};
+[
+ "kick.wav","snare.wav","oh.wav","symbol.wav",
+ "tom.wav","bass.wav","brass.wav","snap.wav","ch.wav"
+].forEach(name => {
+  fetch(basePath + name)
+    .then(r => r.arrayBuffer())
+    .then(b => audioCtx.decodeAudioData(b))
+    .then(buf => sounds[name] = buf);
+});
+
+function playSound(name) {
+  const src = audioCtx.createBufferSource();
+  src.buffer = sounds[name];
+  src.connect(audioCtx.destination);
+  src.connect(destination);
+  src.start();
+}
+
+// pad clicks
+pads.forEach(pad => {
+  pad.addEventListener("click", () => {
+    const sound = pad.dataset.sound;
+    playSound(sound);
+
+    if (recording) {
+      sequence.push({
+        sound,
+        time: audioCtx.currentTime - startTime
+      });
+    }
+  });
+});
+
+// record
+document.getElementById("record").onclick = () => {
+  sequence = [];
+  chunks = [];
+  startTime = audioCtx.currentTime;
+  recording = true;
+  recorder.start();
+};
+
+// play sequence
+document.getElementById("play").onclick = () => {
+  sequence.forEach(e => {
+    setTimeout(() => playSound(e.sound), e.time * 1000);
+  });
+};
+
+// save recording
+recorder.ondataavailable = e => chunks.push(e.data);
+
+document.getElementById("save").onclick = () => {
+  recording = false;
+  recorder.stop();
+
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: "audio/webm" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "beat.webm";
+    a.click();
+  };
+};
+</script>
+
+</body>
+</html>

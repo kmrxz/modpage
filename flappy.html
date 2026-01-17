@@ -341,7 +341,7 @@
     }
     function storeLeaderboard(list){ try{ localStorage.setItem(LB_KEY, JSON.stringify(list)); }catch(e){}
     }
-    function ensureDemoLeaderboard(){
+    function ensureDemoLeaderboar d(){
       let cur = getStoredLeaderboard();
       if (!cur || !Array.isArray(cur) || cur.length === 0){
         cur = [
