@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Valentine Card</title>
+
+<style>
+:root{
+  --bg:#ffeef3;
+  --card:#fff5f8;
+  --accent:#ff6b91;
+  --accent2:#ff9bb3;
+  --text:#3a2b2b;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,var(--bg),#fff);
+  font-family:system-ui,Segoe UI,Roboto;
+  color:var(--text);
+}
+
+.card{
+  width:min(680px,94vw);
+  padding:36px;
+  background:linear-gradient(180deg,var(--card),#fff);
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  text-align:center;
+}
+
+.heart{
+  width:120px;
+  height:100px;
+  margin:0 auto 16px;
+  position:relative;
+  animation:beat 1.5s infinite;
+}
+.heart::before,.heart::after{
+  content:"";
+  position:absolute;
+  width:60px;
+  height:95px;
+  background:linear-gradient(180deg,var(--accent),var(--accent2));
+  border-radius:60px 60px 0 0;
+  top:0;
+}
+.heart::before{left:60px;transform:rotate(-45deg);transform-origin:0 100%}
+.heart::after{left:0;transform:rotate(45deg);transform-origin:100% 100%}
+
+@keyframes beat{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.06)}
+}
+
+.actions{
+  position:relative;
+  height:90px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:20px;
+}
+
+button{
+  border:none;
+  padding:12px 22px;
+  border-radius:999px;
+  font-weight:600;
+  cursor:pointer;
+  color:#fff;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  box-shadow:0 8px 18px rgba(0,0,0,.15);
+}
+
+.yes, .no{
+  transition:transform .15s linear;
+}
+
+.actions.fixed-grid{
+  position:fixed;
+  display:grid;
+  grid-template-columns: auto auto;
+  gap:120px;
+  align-items:center;
+  justify-items:center;
+  z-index:60;
+  padding:28px 36px; /* larger internal padding to keep buttons away from edges */
+  border-radius:20px;
+  background:transparent;
+}
+.actions.fixed-grid .yes,
+.actions.fixed-grid .no{
+  position:relative;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.3);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+}
+.overlay.show{
+  opacity:1;
+  pointer-events:auto;
+}
+.dialog{
+  background:#fff;
+  padding:24px;
+  border-radius:14px;
+  max-width:420px;
+  text-align:center;
+}
+.close{
+  margin-top:12px;
+  background:none;
+  border:2px solid var(--accent);
+  color:var(--accent);
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+  <div class="heart"></div>
+  <h2>Will you be my valentine?</h2>
+  <p>I picked a heart just for you 💖</p>
+
+  <div class="actions" id="actions">
+    <button class="yes" id="yes">Yes</button>
+    <button class="no" id="no">No</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="dialog">
+    <h3>You made my day ❤️</h3>
+    <p>Two hearts, one beat.</p>
+    <button class="close" id="close">Close</button>
+  </div>
+</div>
+
+<script>
+const actions = document.getElementById("actions");
+const no = document.getElementById("no");
+const yes = document.getElementById("yes");
+const overlay = document.getElementById("overlay");
+const close = document.getElementById("close");
+
+let bounds;
+const GAP = 140; // minimum distance (px) between cursor and the `No` button
+const EDGE_GAP = 28; // distance from container wall to button center
+let isBouncing = false;
+
+function updateBounds(){
+  const r = actions.getBoundingClientRect();
+  const noRect = no.getBoundingClientRect();
+  const halfW = r.width/2 - EDGE_GAP - (noRect.width/2);
+  const halfH = r.height/2 - EDGE_GAP - (noRect.height/2);
+  bounds = {
+    minX: -Math.max(20, halfW),
+    maxX:  Math.max(20, halfW),
+    minY: -Math.max(10, halfH),
+    maxY:  Math.max(10, halfH)
+  };
+}
+updateBounds();
+window.addEventListener("resize", ()=>{
+  updateBounds();
+  fixAndSwapButtons();
+});
+
+// Fix the actions container as a centered, screen-relative grid and swap button order
+function fixAndSwapButtons(){
+  const rect = actions.getBoundingClientRect();
+  actions.classList.add('fixed-grid');
+
+  // center horizontally on screen, keep vertical position relative to original
+  actions.style.left = '50%';
+  actions.style.transform = 'translateX(-50%)';
+  actions.style.top = rect.top + 'px';
+
+  // make width screen-relative but not too wide
+  const w = Math.min(window.innerWidth * 0.6, 560);
+  actions.style.width = w + 'px';
+  actions.style.height = Math.max(120, rect.height) + 'px';
+
+  // ensure buttons are grid items
+  yes.style.position = 'relative';
+  no.style.position = 'relative';
+
+  // swap visual order so `No` appears left of `Yes` (or vice versa)
+  yes.style.order = '2';
+  no.style.order = '1';
+}
+
+fixAndSwapButtons();
+
+function triggerBounce(){
+  if(isBouncing) return;
+  isBouncing = true;
+  const randX = Math.floor(Math.random()*(bounds.maxX - bounds.minX)) + bounds.minX;
+  const randY = Math.floor(Math.random()*(bounds.maxY - bounds.minY)) + bounds.minY;
+
+  no.style.transition = 'transform .28s cubic-bezier(.2,.9,.2,1)';
+  no.style.transform = `translate(${randX}px,${randY}px)`;
+
+  // after a short pause, return to origin smoothly
+  setTimeout(()=>{
+    no.style.transition = 'transform .8s ease';
+    no.style.transform = 'translate(0,0)';
+    setTimeout(()=>{
+      no.style.transition = 'transform .15s linear';
+      isBouncing = false;
+    }, 850);
+  }, 900);
+}
+
+// Touch-specific tap animation for devices without cursor
+function touchTapAnimate(){
+  if(isBouncing) return;
+  isBouncing = true;
+  // small random hop then return
+  const hopX = Math.floor((Math.random() - 0.5) * (bounds.maxX - bounds.minX) * 0.6);
+  const hopY = Math.floor((Math.random() - 0.5) * (bounds.maxY - bounds.minY) * 0.6);
+  no.style.transition = 'transform .22s ease-out';
+  no.style.transform = `translate(${hopX}px,${hopY}px)`;
+  setTimeout(()=>{
+    no.style.transition = 'transform .6s ease';
+    no.style.transform = 'translate(0,0)';
+    setTimeout(()=>{
+      no.style.transition = 'transform .15s linear';
+      isBouncing = false;
+    }, 620);
+  }, 260);
+}
+
+function moveNo(x,y, pointer){
+  if(isBouncing) return;
+
+  const dx = Math.max(bounds.minX, Math.min(bounds.maxX, x));
+  const dy = Math.max(bounds.minY, Math.min(bounds.maxY, y));
+
+  // compute a push-away vector if the cursor is too close to the No button
+  let pushX = 0, pushY = 0;
+  if(pointer){
+    const noRect = no.getBoundingClientRect();
+    const noCenterX = noRect.left + noRect.width/2;
+    const noCenterY = noRect.top + noRect.height/2;
+    const mx = pointer.clientX;
+    const my = pointer.clientY;
+    const dist = Math.hypot(noCenterX - mx, noCenterY - my) || 1;
+    if(dist < GAP){
+      const pushDist = GAP - dist;
+      const ux = (noCenterX - mx) / dist;
+      const uy = (noCenterY - my) / dist;
+      pushX = ux * pushDist;
+      pushY = uy * pushDist;
+    }
+  }
+
+  const totalX = dx + pushX;
+  const totalY = dy + pushY;
+
+  // detect container wall hit — if clamping changed the value, treat as a hit
+  const clampedX = Math.max(bounds.minX, Math.min(bounds.maxX, totalX));
+  const clampedY = Math.max(bounds.minY, Math.min(bounds.maxY, totalY));
+  if(clampedX === bounds.minX || clampedX === bounds.maxX || clampedY === bounds.minY || clampedY === bounds.maxY){
+    triggerBounce();
+    return;
+  }
+
+  no.style.transform = `translate(${clampedX}px,${clampedY}px)`;
+}
+
+actions.addEventListener("mousemove", e=>{
+  const r = actions.getBoundingClientRect();
+  const cx = r.left + r.width/2;
+  const cy = r.top + r.height/2;
+  moveNo((cx - e.clientX)*0.9,(cy - e.clientY)*0.7, e);
+});
+
+actions.addEventListener("mouseleave", ()=>{
+  no.style.transition = 'transform .35s ease';
+  no.style.transform = 'translate(0,0)';
+  setTimeout(()=> no.style.transition = 'transform .15s linear', 400);
+});
+
+actions.addEventListener("touchstart", e=>{
+  const t = e.touches[0];
+  const r = actions.getBoundingClientRect();
+  // On touch devices, moveNo will be called for dragging, but taps should animate the button
+  const isTap = e.touches.length === 1;
+  if(isTap){
+    // short delay to allow tap handler on the button itself to run
+    const touch = e.touches[0];
+    // If the touch started on the `no` button, play tap animation
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    if(target === no || no.contains(target)){
+      touchTapAnimate();
+      return;
+    }
+  }
+  moveNo((r.left - t.clientX)*.8,(r.top - t.clientY)*.6, t);
+},{passive:true});
+
+actions.addEventListener("touchend", ()=>{
+  no.style.transition = 'transform .35s ease';
+  no.style.transform = 'translate(0,0)';
+  setTimeout(()=> no.style.transition = 'transform .15s linear', 400);
+});
+
+// If device supports touch, add a direct touch/click handler on the `no` button
+const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+if(isTouchDevice){
+  no.addEventListener('click', (e)=>{
+    // on touch devices, treat click as an intentional tap and animate
+    touchTapAnimate();
+    e.stopPropagation();
+  });
+}
+
+yes.onclick = ()=> overlay.classList.add("show");
+close.onclick = ()=> overlay.classList.remove("show");
+overlay.onclick = e=> e.target===overlay && overlay.classList.remove("show");
+</script>
+</body>
+</html>

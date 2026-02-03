@@ -68,6 +68,13 @@ button {
 button:hover {
   background: #2c2c44;
 }
+
+.spotify-container {
+  width: 100%;
+  max-width: 720px;
+  margin-top: 18px;
+}
+.spotify-container iframe { display:block; border:0; border-radius:12px; }
 </style>
 </head>
 
@@ -91,6 +98,11 @@ button:hover {
   <button id="record">● Record</button>
   <button id="play">▶ Play</button>
   <button id="save">⬇ Save</button>
+  <button id="spotify-toggle">♬ Spotify</button>
+</div>
+
+<div id="spotify-container" class="spotify-container" style="display:none;">
+  <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/track/4mdsqeYQoEwCYl0gdnUCLC?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 </div>
 
 <script>
@@ -173,6 +185,17 @@ document.getElementById("save").onclick = () => {
     a.click();
   };
 };
+
+// Spotify toggle
+const spotifyBtn = document.getElementById("spotify-toggle");
+const spotifyContainer = document.getElementById("spotify-container");
+if (spotifyBtn && spotifyContainer) {
+  spotifyBtn.addEventListener("click", () => {
+    const isHidden = spotifyContainer.style.display === "none" || spotifyContainer.style.display === "";
+    spotifyContainer.style.display = isHidden ? "block" : "none";
+    spotifyBtn.textContent = isHidden ? "✕ Hide Spotify" : "♬ Spotify";
+  });
+}
 </script>
 
 </body>
