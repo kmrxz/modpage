@@ -1,0 +1,40 @@
+title=Government Employee Rating System
+
+menu=Menu
+home=Home
+about=About
+more=More
+theme=Theme
+themeSettings=Theme Settings
+
+idea=Idea
+
+p1=The core idea is to bring a new rating system for employees, focusing on government service employees.
+p2=Whenever a government service is delivered, the person receiving the service will provide a rating based on service quality, behavior, and awareness.
+p3=Good service results in good ratings. Poor service results in bad ratings with mandatory evidence submission. All data must remain 100 percent confidential.
+p4=A trusted and independent team will verify, manage, and audit all submitted data to prevent misuse.
+p5=Every staff member will receive increments, promotions, pensions, and benefits based on long-term performance under this system.
+p6=If low ratings continue for a long period, salary and benefits will be reduced. Middle ratings will not affect benefits, while high ratings will provide additional advantages.
+
+pros=Pros
+prosText=Encourages accountability, improves service quality, and rewards honest and efficient employees.
+
+cons=Cons
+consText=Possibility of false complaints, misuse of ratings, and pressure on employees.
+
+fixes=Fixes
+fixesText=Mandatory evidence, independent verification teams, weighted scoring, and audit-based reviews.
+
+scoreTitle=Score Representation
+lastWeek=Last Week Score
+current=Current Score
+rank=Rank Band
+
+conclusion=Conclusion
+final=I was thinking about our system and could not find any better idea to improve it for a better future. And to sort out cheenja kappalandi.
+
+source=Source
+
+addComment=Add Comment
+public=Comment publicly
+publicComments=Public Comments

@@ -1,0 +1,13 @@
+# Comment format
+# name | comment
+
+User 1 | Great initiative, accountability matters.
+User 2 | Needs safeguards against misuse.
+User 3 | Public feedback can improve services.
+User 4 | Risky but necessary reform.
+User 5 | Transparency is key.
+User 6 | Concerned about false complaints.
+User 7 | Strong concept if audited well.
+User 8 | Employee morale should be protected.
+User 9 | Digital proof is essential.
+User 10 | Worth piloting in small scale.
