@@ -236,6 +236,9 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
 .modal-box label{ display:block; margin-top:12px; font-weight:600; }
 .modal-box input[type="color"]{ width:64px; height:36px; padding:4px; border-radius:8px; border:1px solid rgba(0,0,0,0.08); background:#fff; margin-top:6px; }
 .modal-box select{ margin-top:8px; }
+.persistent-dialog{ display:none; }
+.persistent-dialog[aria-hidden="false"]{ display:flex; }
+.persistent-dialog .modal-box{ max-width:520px; }
 </style>
 </head>
 
@@ -323,14 +326,14 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
     <input type="text" name="name" placeholder="Your name (optional)" maxlength="80">
     <textarea name="comment" placeholder="Your comment" required maxlength="1000"></textarea>
     <label>
-      <input type="checkbox" name="public" value="yes">
+      <input type="checkbox" name="public" value="yes" required>
       I consent to post this comment publicly
     </label>
     <button type="submit">Submit</button>
 
     <input type="hidden" name="_captcha" value="false">
     <input type="hidden" name="_template" value="table">
-    <input type="hidden" name="_next" value="https://google.com">
+    <input type="hidden" name="_next" value="https://kmrxz.github.io/modpage/mypage.html">
   </form>
 </div>
 
@@ -360,6 +363,17 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
       <button onclick="applyTheme()">Apply</button>
       <button onclick="resetTheme()">Default</button>
       <button onclick="closeTheme()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Persistent dialog shown after submit or on validation error -->
+<div class="modal persistent-dialog" id="submitDialog" aria-hidden="true">
+  <div class="modal-box">
+    <h3 id="submitDialogHeading">Comment sent for review</h3>
+    <p id="submitDialogMessage">Your comment will be reviewed before pushing to the host. database is under learning.</p>
+    <div class="modal-actions">
+      <button id="submitDialogClose">Close</button>
     </div>
   </div>
 </div>
@@ -489,7 +503,8 @@ function wrapElementsText(selectors){
           for(const ch of text){
             const span = document.createElement('span');
             span.className = 'letter';
-            span.textContent = ch;
+            // preserve regular spaces as non-breaking to avoid collapse between inline-block letters
+            span.textContent = (ch === ' ') ? '\u00A0' : ch;
             frag.appendChild(span);
           }
           el.replaceChild(frag, node);
@@ -574,24 +589,67 @@ function prevComments(){ if(page>0){ page--; renderComments(); } }
 // initial load
 fetchCommentsFile();
 
-// Ensure the add-comment form uses POST and optimistically shows new comments
+// Ensure the add-comment form uses POST and shows a persistent dialog on submit/error
 const commentForm = document.querySelector('form[action*="formsubmit.co"]');
+const submitDialog = document.getElementById('submitDialog');
+const submitDialogHeading = document.getElementById('submitDialogHeading');
+const submitDialogMessage = document.getElementById('submitDialogMessage');
+const submitDialogClose = document.getElementById('submitDialogClose');
+
+function showPersistentDialog(state){
+  // state: {type:'sent'|'error', heading, message}
+  submitDialogHeading.textContent = state.heading || '';
+  submitDialogMessage.innerHTML = state.message || '';
+  // ensure heading is wrapped into per-letter spans (so spaces are preserved correctly)
+  try{ wrapElementsText(['#submitDialogHeading']); }catch(e){}
+  submitDialog.setAttribute('aria-hidden','false');
+  localStorage.setItem('commentDialog', JSON.stringify({visible:true, state}));
+}
+
+function hidePersistentDialog(){
+  submitDialog.setAttribute('aria-hidden','true');
+  localStorage.removeItem('commentDialog');
+}
+
+if(submitDialogClose){ submitDialogClose.addEventListener('click', hidePersistentDialog); }
+
+// restore dialog from storage on load
+try{
+  const stored = JSON.parse(localStorage.getItem('commentDialog'));
+  if(stored && stored.visible && stored.state){
+    // show stored dialog
+    showPersistentDialog(stored.state);
+  }
+}catch(e){}
+
 if(commentForm){
   commentForm.method = 'POST';
-  // defensive: ensure action has no duplicate .com
   commentForm.action = commentForm.action.replace(/\.com\.com/, '.com');
   commentForm.addEventListener('submit', function(e){
     e.preventDefault();
     const name = (this.elements['name'] && this.elements['name'].value.trim()) || 'Anonymous';
     const comment = (this.elements['comment'] && this.elements['comment'].value.trim()) || '';
-    if(comment){
-      // add to top of commentsData and re-render current page
-      commentsData.unshift({name, comment});
-      // keep pagination at first page so user sees their comment
-      page = 0;
-      renderComments();
+    const consent = (this.elements['public']);
+
+    // validate required fields
+    if(!comment || !consent || !consent.checked){
+      const missing = [];
+      if(!comment) missing.push('comment');
+      if(!consent || !consent.checked) missing.push('consent');
+      const heading = 'Incomplete submission';
+      const message = 'Please provide the required fields: ' + missing.join(', ') + '. You must write a comment and consent to post publicly.';
+      showPersistentDialog({type:'error', heading, message});
+      return;
     }
-    // proceed with regular POST submission
+
+    // optimistic UI update
+    commentsData.unshift({name, comment});
+    page = 0; renderComments();
+
+    // show sent dialog and persist it so it remains after refresh/navigation
+    showPersistentDialog({type:'sent', heading: 'Comment sent for review', message: 'Your comment will be reviewed before pushing to the host. Admin is still learning database :).'});
+
+    // proceed with actual POST
     this.submit();
   });
 }
