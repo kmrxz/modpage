@@ -462,6 +462,17 @@ if(savedTheme){
 }
 
 /* LANGUAGE */
+// helper: split a string into user-perceived characters (grapheme clusters)
+function splitGraphemes(text){
+  try{
+    if(typeof Intl !== 'undefined' && Intl.Segmenter){
+      return Array.from(new Intl.Segmenter(undefined, {granularity: 'grapheme'}).segment(text), s=>s.segment);
+    }
+  }catch(e){
+    // fall through to Array.from fallback
+  }
+  return Array.from(text); // fallback: at least preserves surrogate pairs
+}
 async function loadLanguage(lang){
   try{
     const res=await fetch(`lang/${lang}.txt`,{cache:"no-store"});
@@ -477,6 +488,7 @@ async function loadLanguage(lang){
       const k=el.dataset.i18n;
       el.innerText=dict[k]||"";
     });
+
     // wrap translated UI text into per-letter spans and setup button letters
     wrapElementsText();
     setupButtonLetters();
@@ -500,7 +512,8 @@ function wrapElementsText(selectors){
         if(node.nodeType === Node.TEXT_NODE && node.textContent.trim()){
           const text = node.textContent;
           const frag = document.createDocumentFragment();
-          for(const ch of text){
+          const graphemes = splitGraphemes(text);
+          for(const ch of graphemes){
             const span = document.createElement('span');
             span.className = 'letter';
             // preserve regular spaces as non-breaking to avoid collapse between inline-block letters
@@ -666,7 +679,7 @@ function setupButtonLetters(){
     // preserve aria-label if exists
     const aria = btn.getAttribute('aria-label');
     btn.textContent = '';
-    text.split('').forEach(ch=>{
+    splitGraphemes(text).forEach(ch=>{
       const span = document.createElement('span');
       span.className = 'letter';
       span.textContent = ch;
