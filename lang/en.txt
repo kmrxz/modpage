@@ -31,7 +31,7 @@ current=Current Score
 rank=Rank Band
 
 conclusion=Conclusion
-final=I was thinking about our system and could not find any better idea to improve it for a better future. And to sort out cheenja kappalandi.
+final=I was thinking about our system and could not find any better idea to improve it for a better future. And to sort out cheenja kappalandi.You can comment your views and correct me if I'm wrong.
 
 source=Source
 
