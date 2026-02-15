@@ -148,6 +148,7 @@ main{
   display:block;
 }
 .comment-body{
+  color: #4524c0;
   background:var(--container-rgba);
   border-radius:14px;
   padding:10px 14px;
@@ -155,7 +156,27 @@ main{
   display:flex; flex-direction:column; gap:8px;
   word-break:break-word; overflow-wrap:anywhere;
 }
-.comment-text{ margin:0; white-space:pre-wrap; }
+/* admin reply styling: appears below the main comment */
+.comment-reply{
+  background: rgba(82, 58, 218, 0.1);
+  border-radius:10px;
+  padding:8px 10px;
+  margin-top:6px;
+  font-size:0.95rem;
+  color:rgb(26, 194, 194);
+  /*color:var(--text);
+  /* slightly inset so it's visually separated from the main comment */
+  margin-left:56px;
+}
+.reply-head{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.reply-avatar{ width:34px; height:34px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+.comment-reply.no-avatar .reply-avatar{ display:none; }
+  .reply-text{ margin:0; white-space:pre-wrap; }
+  /* text color classes */
+  .comment-author{ color: #0b3d91; }
+  .comment-text{ color: #102a43; margin:0; white-space:pre-wrap; }
+  .comment-admin-name{ color: #0b3d91; }
+  .comment-admin-text{ color: #102a43; margin:0; white-space:pre-wrap; }
 .comment-body b{
   display:block;
   font-size:.95rem;
@@ -268,6 +289,13 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
     <option value="ml">മലയാളം</option>
   </select>
   <button onclick="openTheme()" data-i18n="theme"></button>
+  <button id="shareBtn" onclick="sharePage()" aria-label="Share" title="Share">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M16 6l-4-4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12 2v12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
 </div>
 
 <main>
@@ -289,7 +317,7 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
 <div class="section">
   <h2 data-i18n="scoreTitle"></h2>
   <div class="score-grid">
-    <div class="score-box"><span data-i18n="lastWeek"></span><br>72</div>
+    <div class="score-box"><span data-i18n="lastWeek"></span><br>62</div>
     <div class="score-box"><span data-i18n="current"></span><br>78</div>
     <div class="score-box"><span data-i18n="rank"></span><br>High</div>
   </div>
@@ -326,7 +354,8 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
     <textarea name="comment" placeholder="Your comment" required maxlength="1000"></textarea>
     <label>
       <input type="checkbox" name="public" value="yes" required>
-      I consent to post this publicly,including name and comment content.
+      I consent to post this
+       publicly,including name and comment.<br>(Admin is not collecting any of your details and you will not be notified,so check back if you want to see any updates)
     </label>
     <button type="submit">Submit</button>
 
@@ -370,7 +399,7 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
 <div class="modal persistent-dialog" id="submitDialog" aria-hidden="true">
   <div class="modal-box">
     <h3 id="submitDialogHeading">Comment sent for review</h3>
-    <p id="submitDialogMessage">Your comment will be reviewed before pushing to the host. database is under learning.</p>
+    <p id="submitDialogMessage">Your comment will be reviewed before pushing to the host.Admin is pretty bad with DBMS</p>
     <div class="modal-actions">
       <button id="submitDialogClose">Close</button>
     </div>
@@ -561,10 +590,27 @@ async function fetchCommentsFile(){
     const text = await res.text();
     const lines = text.split(/\r?\n/);
     commentsData = lines.map(l=>l.trim()).filter(l=>l && !l.startsWith('#')).map(l=>{
-      const parts = l.split('|');
-      const name = (parts[0]||'Anonymous').trim();
-      const comment = (parts.slice(1).join('|')||'').trim();
-      return {name, comment};
+        const parts = l.split('|');
+        const name = (parts[0]||'Anonymous').trim();
+        let adminName = '';
+        let reply = '';
+        let comment = '';
+        if(parts.length <= 1){
+          comment = '';
+        } else if(parts.length === 2){
+          comment = parts[1].trim();
+        } else if(parts.length === 3){
+          // name | comment | reply  (no admin name provided)
+          comment = parts[1].trim();
+          reply = parts[2].trim();
+          adminName = 'Admin';
+        } else {
+          // name | comment... | adminName | adminReply
+          reply = parts[parts.length - 1].trim();
+          adminName = parts[parts.length - 2].trim();
+          comment = parts.slice(1, parts.length - 2).join('|').trim();
+        }
+        return {name, comment, reply, adminName};
     });
   }catch(err){
     // fallback to empty
@@ -586,13 +632,14 @@ function renderComments(){
         <img src="images/cat.webp" onerror="this.remove(); this.parentNode.textContent='U';">
       </div>
       <div class="comment-body">
-        <b>${escapeHtml(obj.name)}</b>
+        <b class="comment-author">${escapeHtml(obj.name)}</b>
         <p class="comment-text">${escapeHtml(obj.comment)}</p>
+        ${obj.reply ? (`<div class="comment-reply"><div class="reply-head"><img src="images/ikka1.png" class="reply-avatar" onerror="this.remove(); this.parentNode.parentNode.classList.add('no-avatar');"><b class="comment-admin-name">${escapeHtml(obj.adminName || 'Admin')}</b></div><p class="comment-admin-text">${escapeHtml(obj.reply)}</p></div>`) : ''}
       </div>`;
     commentsDiv.appendChild(div);
   });
   // re-run letter wrapping for newly added comment text
-  wrapElementsText(['.comment-text', '.comment-body b']);
+  wrapElementsText(['.comment-text', '.comment-author', '.comment-admin-text', '.comment-admin-name']);
 }
 
 function nextComments(){ if((page+1)*perPage < commentsData.length){ page++; renderComments(); } }
@@ -659,7 +706,7 @@ if(commentForm){
     page = 0; renderComments();
 
     // show sent dialog and persist it so it remains after refresh/navigation
-    showPersistentDialog({type:'sent', heading: 'Comment sent for review', message: 'Your comment will be reviewed before pushing to the host. Admin is still learning database :).'});
+    showPersistentDialog({type:'sent', heading: 'Comment sent for review', message: 'Your comment will be reviewed before pushing to the host. Admin is pretty bad with DBMS'});
 
     // proceed with actual POST
     this.submit();
@@ -712,6 +759,27 @@ function setupButtonLetters(){
   });
 }
 setupButtonLetters();
+
+function sharePage(){
+  const url = 'https://kmrxz.github.io/modpage/mypage.html';
+  // Prefer native share when available
+  if(navigator.share){
+    navigator.share({ title: document.title || 'modpage', url }).catch(()=>{});
+    return;
+  }
+  // Fallback: copy to clipboard if available
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>{
+      showPersistentDialog({type:'sent', heading: 'Link copied', message: 'Page URL copied to clipboard.'});
+    }, ()=>{
+      // last resort: prompt
+      prompt('Copy this URL', url);
+    });
+    return;
+  }
+  // final fallback: prompt box
+  prompt('Copy this URL', url);
+}
 </script>
 
 </body>
