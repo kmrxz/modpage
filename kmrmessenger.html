@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Supabase Realtime Chat</title>
 
-  <!-- Stable Supabase v2 UMD -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 
   <style>
@@ -51,7 +50,7 @@
 const SUPABASE_URL = "https://sbggyupgkavhkafqapie.supabase.co";
 const SUPABASE_KEY = "sb_publishable_8C0U6Mj4WDuuPeqHJJGS1w_BTNtiFtb";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const chatBox = document.getElementById("chat");
 const sendBtn = document.getElementById("sendBtn");
@@ -65,7 +64,7 @@ function addMessage(msg) {
 }
 
 async function loadMessages() {
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("messages")
     .select("*")
     .order("created_at", { ascending: true });
@@ -85,7 +84,7 @@ async function sendMessage() {
 
   if (!sender || !content) return;
 
-  const { error } = await supabase
+  const { error } = await client
     .from("messages")
     .insert([{ sender, content }]);
 
@@ -98,14 +97,12 @@ async function sendMessage() {
 
 sendBtn.addEventListener("click", sendMessage);
 
-supabase
+client
   .channel("realtime-messages")
   .on(
     "postgres_changes",
     { event: "INSERT", schema: "public", table: "messages" },
-    payload => {
-      addMessage(payload.new);
-    }
+    payload => addMessage(payload.new)
   )
   .subscribe((status) => {
     console.log("Realtime status:", status);
