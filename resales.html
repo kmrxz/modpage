@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casio CT-S100 Keyboard</title>
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    background:#f5f5f5;
+}
+.container{
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:20px;
+}
+.product-title{
+    font-size:24px;
+    font-weight:bold;
+}
+.price{
+    margin:10px 0;
+}
+.sell-price{
+    font-size:28px;
+    color:#d32f2f;
+    font-weight:bold;
+}
+.original-price{
+    text-decoration:line-through;
+    color:gray;
+    margin-left:10px;
+}
+.discount{
+    color:green;
+    margin-left:10px;
+}
+.slider{
+    position:relative;
+    overflow:hidden;
+}
+.slider img{
+    width:100%;
+    display:none;
+}
+.slider img.active{
+    display:block;
+}
+button{
+    padding:12px 20px;
+    border:none;
+    cursor:pointer;
+    font-size:16px;
+}
+.buy-btn{
+    background:#25D366;
+    color:white;
+    width:100%;
+    margin-top:15px;
+}
+.view-btn{
+    background:#1976d2;
+    color:white;
+    margin-top:10px;
+}
+.specs{
+    margin-top:15px;
+    display:none;
+}
+.specs ul{
+    padding-left:18px;
+}
+.nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(0,0,0,0.5);
+    color:white;
+    padding:8px;
+    cursor:pointer;
+}
+.prev{ left:5px;}
+.next{ right:5px;}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="slider">
+    <img src="images/piano1.jpg" class="active">
+    <img src="images/piano2.jpg">
+    <img src="images/piano3.jpg">
+    <img src="images/piano4.jpg">
+    <div class="nav prev" onclick="changeSlide(-1)">❮</div>
+    <div class="nav next" onclick="changeSlide(1)">❯</div>
+</div>
+
+<div class="product-title">
+Casio CT-S100 Casiotone 61-Key Portable Keyboard
+</div>
+
+<div class="price">
+    <span class="sell-price">₹6,900</span>
+    <span class="original-price">₹8,295</span>
+    <span class="discount">16% OFF</span>
+</div>
+
+<button class="buy-btn" 
+onclick="window.location.href='https://wa.me/91XXXXXXXXXX?text=I%20want%20to%20buy%20Casio%20CT-S100%20Keyboard'">
+Buy Now on WhatsApp
+</button>
+
+<button class="view-btn" onclick="toggleSpecs()">View More</button>
+
+<div class="specs" id="specSection">
+<ul>
+<li>61 Non-Weighted Keys (Velocity Sensitive)</li>
+<li>122 Tones | 32 Polyphony</li>
+<li>Built-in Metronome</li>
+<li>4 Types Reverb</li>
+<li>MIDI Port: Yes</li>
+<li>Headphone Jack: Yes</li>
+<li>USB Support: Yes</li>
+<li>Bluetooth: No</li>
+<li>Built-in Speakers (2W + 2W)</li>
+<li>Power: AC Adapter / 6 AA Batteries</li>
+<li>Weight: 3.3 kg</li>
+<li>Dimensions: 93 × 25.6 × 7.3 cm</li>
+<li>Technology: Acoustic & Highly-Compressed Large-Waveform (AHL)</li>
+<li>Warranty: 3 Years (6 months on adapter)</li>
+</ul>
+</div>
+
+</div>
+
+<script>
+let current=0;
+let slides=document.querySelectorAll(".slider img");
+
+function changeSlide(direction){
+    slides[current].classList.remove("active");
+    current=(current+direction+slides.length)%slides.length;
+    slides[current].classList.add("active");
+}
+
+function toggleSpecs(){
+    let section=document.getElementById("specSection");
+    let btn=document.querySelector(".view-btn");
+    if(section.style.display==="block"){
+        section.style.display="none";
+        btn.innerText="View More";
+    }else{
+        section.style.display="block";
+        btn.innerText="View Less";
+    }
+}
+</script>
+
+</body>
+</html>
