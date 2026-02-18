@@ -3,131 +3,154 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>World Chat | Test Build</title>
+  <title>World Chat | Blue Edition</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 
   <style>
     :root {
-      --wa-dark: #0b141a;
-      --wa-header: #202c33;
-      --wa-accent: #00a884;
+      --bg-dark: #010c14;
+      --header-blue: #0a1929;
+      --accent-blue: #007aff;
+      --msg-blue-own: #1a3a5a;
+      --msg-blue-other: #0f253e;
+      --text-main: #e1e9ef;
     }
 
     * { box-sizing: border-box; }
     
     body, html {
       margin: 0; padding: 0; height: 100%; width: 100%;
-      background-color: var(--wa-dark);
-      font-family: 'Segoe UI', Helvetica, sans-serif;
+      background-color: var(--bg-dark);
+      font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
       overflow: hidden; 
     }
 
-    /* --- Hamburger Drawer & Backdrop --- */
+    /* --- Drawer & Backdrop --- */
     #drawer-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); z-index: 3999; display: none;
-      backdrop-filter: blur(4px);
+      background: rgba(0,0,0,0.8); z-index: 3999; display: none;
     }
 
     #drawer {
       position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-      background: #232d36; z-index: 4000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      padding: 25px; box-shadow: 10px 0 20px rgba(0,0,0,0.5);
+      background: var(--header-blue); z-index: 4000; transition: 0.3s;
+      padding: 25px; border-right: 1px solid #1a3a5a;
     }
     #drawer.open { left: 0; }
     .drawer-item {
-      padding: 18px; margin-bottom: 8px; border-radius: 12px;
-      cursor: pointer; color: #e9edef; font-weight: 500;
-      transition: background 0.2s;
+      padding: 15px; margin-bottom: 8px; border-radius: 10px;
+      cursor: pointer; color: var(--text-main); transition: 0.2s;
     }
-    .drawer-item:hover { background: var(--wa-accent); }
+    .drawer-item:hover { background: var(--accent-blue); }
 
-    /* --- Overlays (Login & Rules) --- */
+    /* --- Overlays --- */
     .full-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: var(--wa-dark); z-index: 5000;
+      background: var(--bg-dark); z-index: 5000;
       display: flex; justify-content: center; align-items: center;
     }
 
     .modal-card {
-      background: #232d36; padding: 30px; border-radius: 20px;
+      background: var(--header-blue); padding: 30px; border-radius: 20px;
       width: 85%; max-width: 380px; text-align: center;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-      border: 1px solid #3b4a54;
+      border: 1px solid #1a3a5a;
     }
 
-    /* Fix for readable text in Rules */
     .rules-list {
-      text-align: left; background: #182229; padding: 15px;
-      border-radius: 10px; margin: 20px 0; color: #ffffff; /* Bright white */
-      font-size: 0.95rem; line-height: 1.6;
+      text-align: left; background: #010c14; padding: 15px;
+      border-radius: 10px; margin: 20px 0; color: #94a3b8;
+      font-size: 0.9rem; line-height: 1.5; border: 1px solid #1e293b;
     }
 
     .styled-input {
       width: 100%; padding: 15px; margin: 15px 0;
-      background: #2a3942; border: 2px solid #3b4a54;
-      border-radius: 12px; color: white; font-size: 1rem; outline: none;
+      background: #1e293b; border: 1px solid #334155;
+      border-radius: 12px; color: white; outline: none;
     }
-    .styled-input:focus { border-color: var(--wa-accent); }
 
-    /* --- Main App Container --- */
+    /* --- Main App --- */
     #app { display: none; height: 100%; width: 100%; flex-direction: column; }
 
     header {
-      height: 65px; background: var(--wa-header);
+      height: 65px; background: var(--header-blue);
       display: flex; align-items: center; padding: 0 20px;
-      z-index: 10; border-bottom: 1px solid #313d45;
+      border-bottom: 1px solid #1a3a5a; z-index: 10;
     }
 
-    /* --- Chat Box Area --- */
+    /* --- Improved Chat Box & Bubbles --- */
     #chat-box {
-      position: absolute; top: 65px; bottom: 80px; /* Space for header & footer */
+      position: absolute; top: 65px; bottom: 85px;
       width: 100%; max-width: 800px; left: 50%; transform: translateX(-50%);
-      overflow-y: auto; padding: 20px;
-      background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-      background-color: var(--wa-dark); background-blend-mode: overlay;
-      display: flex; flex-direction: column; gap: 12px;
+      overflow-y: auto; padding: 15px;
+      display: flex; flex-direction: column; gap: 10px;
+      background-image: radial-gradient(#1a3a5a 0.5px, transparent 0.5px);
+      background-size: 20px 20px; /* Subtle pattern */
     }
+
+    .msg-wrapper { 
+      display: flex; 
+      width: 100%; 
+      margin: 2px 0;
+    }
+    .msg-wrapper.own { justify-content: flex-end; }
+    .msg-wrapper.other { justify-content: flex-start; }
 
     .bubble {
-      max-width: 85%; padding: 10px 14px; border-radius: 12px;
-      color: #000; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      max-width: 80%; /* Prevents screen overflow */
+      min-width: 60px;
+      padding: 10px 14px;
+      border-radius: 15px;
+      position: relative;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      animation: pop 0.2s ease-out;
+      word-wrap: break-word; /* Essential for long words */
+      display: inline-block;
     }
-    @keyframes pop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    .msg-wrapper.own { align-self: flex-end; }
-    .msg-wrapper.other { align-self: flex-start; }
+    .msg-wrapper.own .bubble {
+      background-color: var(--msg-blue-own);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
 
-    /* --- System Welcome Alert --- */
+    .msg-wrapper.other .bubble {
+      background-color: var(--msg-blue-other);
+      color: #ffffff;
+      border-bottom-left-radius: 4px;
+    }
+
+    @keyframes pop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
     .system-alert {
-      align-self: center; background: #1e2a30; color: #ffd279;
-      font-size: 0.8rem; padding: 8px 18px; border-radius: 20px;
-      margin: 10px 0; font-weight: 500; text-align: center;
-      border: 1px solid #3b4a54; animation: fadeIn 0.8s ease;
+      align-self: center; background: #0f172a; color: var(--accent-blue);
+      font-size: 0.75rem; padding: 6px 16px; border-radius: 20px;
+      margin: 15px 0; border: 1px solid #1e293b;
     }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* --- THE INPUT FOOTER (Always Visible) --- */
+    /* --- Fixed Input Bar --- */
     footer {
       position: fixed; bottom: 0; left: 0; width: 100%;
-      height: 80px; background: var(--wa-header);
+      height: 85px; background: var(--header-blue);
       display: flex; align-items: center; justify-content: center;
-      padding: 0 15px; z-index: 100;
+      padding: 0 15px; border-top: 1px solid #1a3a5a;
     }
+
     .input-container {
-      width: 100%; max-width: 800px; display: flex; gap: 10px; align-items: center;
+      width: 100%; max-width: 800px; display: flex; gap: 12px;
     }
+
     #message-input {
-      flex: 1; background: #2a3942; border: none; padding: 14px 20px;
-      border-radius: 30px; color: white; outline: none; font-size: 1rem;
+      flex: 1; background: #1e293b; border: 1px solid #334155; 
+      padding: 14px 20px; border-radius: 25px; color: white; outline: none;
     }
+
     .send-btn {
-      background: var(--wa-accent); border: none; width: 50px; height: 50px;
-      border-radius: 50%; color: white; cursor: pointer; font-size: 22px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      background: var(--accent-blue); border: none; width: 50px; height: 50px;
+      border-radius: 50%; color: white; cursor: pointer; font-size: 20px;
+      flex-shrink: 0; transition: 0.2s;
     }
+    .send-btn:active { transform: scale(0.9); }
 
     .hidden { display: none !important; }
   </style>
@@ -136,35 +159,29 @@
 
   <div id="drawer-overlay" onclick="toggleDrawer()"></div>
   <div id="drawer">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h2 style="color:var(--wa-accent); margin:0;">Menu</h2>
-      <button onclick="toggleDrawer()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">✕</button>
-    </div>
+    <h2 style="color:var(--accent-blue)">World Chat</h2>
     <div class="drawer-item">🏠 Home</div>
-    <div class="drawer-item">🎨 Theme</div>
-    <div class="drawer-item">✉️ Suggestion</div>
-    <div class="drawer-item">👥 About</div>
-    <hr style="border:0; border-top:1px solid #313d45; margin: 20px 0;">
-    <div class="drawer-item" onclick="clearUser()" style="color:#ff5e5e;">🚪 Logout</div>
+    <div class="drawer-item">🌙 Dark Mode</div>
+    <div class="drawer-item">💡 Feedback</div>
+    <div class="drawer-item">ℹ️ About</div>
+    <div class="drawer-item" onclick="clearUser()" style="color:#f87171; margin-top:20px;">🚪 Logout</div>
   </div>
 
   <div id="login-overlay" class="full-overlay">
     <div class="modal-card">
-      <h2 style="color:var(--wa-accent)">World Chat</h2>
-      <p style="color:#8696a0">Welcome! Please enter your name.</p>
-      <input type="text" id="username-input" class="styled-input" placeholder="Your Display Name..." maxlength="15">
-      <button class="send-btn" onclick="saveUsername()" style="width:100%; border-radius:12px;">Start Chatting</button>
+      <h2 style="color:var(--accent-blue)">Join Chat</h2>
+      <input type="text" id="username-input" class="styled-input" placeholder="Your Name" maxlength="15">
+      <button class="send-btn" onclick="saveUsername()" style="width:100%; border-radius:12px;">Continue</button>
     </div>
   </div>
 
   <div id="guidelines-overlay" class="full-overlay hidden">
     <div class="modal-card">
-      <img src="https://cdn-icons-png.flaticon.com/512/5602/5602164.png" style="width:70px;">
-      <h3>Room Guidelines</h3>
+      <h3 style="color:var(--accent-blue)">Guidelines</h3>
       <div class="rules-list">
-        1. 🚫 No spamming messages.<br>
-        2. 🤝 Be respectful to everyone.<br>
-        3. ⚡ Old messages clear automatically.
+        • Be respectful to others.<br>
+        • No spamming allowed.<br>
+        • Privacy is protected.
       </div>
       <button class="send-btn" onclick="acceptGuidelines()" style="width:100%; border-radius:12px;">I Agree</button>
     </div>
@@ -172,8 +189,8 @@
 
   <div id="app">
     <header>
-      <div onclick="toggleDrawer()" style="cursor:pointer; font-size:26px; color:var(--wa-accent); padding-right:15px;">☰</div>
-      <div style="flex:1"><b>World Chat</b><br><small id="msg-count" style="color:#8696a0">0/100 messages</small></div>
+      <div onclick="toggleDrawer()" style="cursor:pointer; font-size:24px; color:var(--accent-blue); margin-right:15px;">☰</div>
+      <div style="flex:1; color:white;"><b>World Chat</b><br><small id="msg-count" style="color:#64748b">Syncing...</small></div>
     </header>
 
     <div id="chat-box"></div>
@@ -198,7 +215,7 @@
       document.getElementById("login-overlay").classList.add("hidden");
       document.getElementById("app").style.display = "flex";
       loadMessages();
-      setTimeout(() => addSystemAlert(`Welcome back, ${currentUsername}!`), 1000);
+      setTimeout(() => addSystemAlert("System: Reconnected as " + currentUsername), 500);
     }
   };
 
@@ -215,7 +232,7 @@
   function acceptGuidelines() {
     document.getElementById("guidelines-overlay").classList.add("hidden");
     document.getElementById("app").style.display = "flex";
-    addSystemAlert("System: Be kind and respectful to all members.");
+    addSystemAlert("System: Welcome to World Chat!");
     loadMessages();
   }
 
@@ -226,10 +243,7 @@
     o.style.display = isOpen ? "block" : "none";
   }
 
-  function clearUser() {
-    localStorage.clear();
-    location.reload();
-  }
+  function clearUser() { localStorage.clear(); location.reload(); }
 
   function addSystemAlert(txt) {
     const div = document.createElement("div");
@@ -240,7 +254,7 @@
   }
 
   function getNameColor(name) {
-    const colors = ['#00a884', '#3498db', '#e67e22', '#9b59b6', '#e74c3c'];
+    const colors = ['#38bdf8', '#818cf8', '#fbbf24', '#f87171', '#34d399'];
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
     return colors[Math.abs(hash) % colors.length];
@@ -253,8 +267,8 @@
     if (data) {
       data.forEach(addMessage);
       document.getElementById("msg-count").textContent = `${data.length}/100 messages`;
+      box.scrollTop = box.scrollHeight;
     }
-    box.scrollTop = box.scrollHeight;
   }
 
   function addMessage(msg) {
@@ -264,12 +278,10 @@
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    // Random subtle pastel colors
-    bubble.style.backgroundColor = ['#dcf8c6', '#ffffff', '#e1f5fe', '#fff2e0'][Math.floor(Math.random() * 4)];
     
     bubble.innerHTML = `
-      <div style="font-size:0.75rem; font-weight:bold; color:${getNameColor(msg.sender)}">${msg.sender}</div>
-      <div style="font-size:0.95rem; margin-top:3px; line-height:1.4;">${msg.content}</div>
+      <div style="font-size:0.75rem; font-weight:bold; color:${getNameColor(msg.sender)}; margin-bottom:4px;">${msg.sender}</div>
+      <div style="font-size:0.95rem; line-height:1.4;">${msg.content}</div>
     `;
 
     wrapper.appendChild(bubble);
@@ -286,7 +298,6 @@
 
     await client.from("messages").insert([{ sender: currentUsername, content: text }]);
     
-    // Check Cleanup
     const { count } = await client.from('messages').select('*', { count: 'exact', head: true });
     if (count > 100) {
       const { data: oldest } = await client.from('messages').select('created_at').order('created_at', { ascending: false }).range(99, 99).single();
@@ -302,7 +313,6 @@
   document.getElementById("username-input").onkeypress = (e) => { if(e.key==="Enter") saveUsername(); };
 
   client.channel("room1").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, p => addMessage(p.new)).subscribe();
-
 </script>
 </body>
 </html>
