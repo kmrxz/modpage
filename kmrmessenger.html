@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>World Chat | NextGen</title>
+  <title>World Chat | Pro</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 
@@ -12,147 +12,146 @@
       --wa-dark: #0b141a;
       --wa-header: #202c33;
       --wa-accent: #00a884;
-      --wa-msg-in: #ffffff;
-      --wa-msg-out: #dcf8c6;
+      --bg-overlay: rgba(11, 20, 26, 0.98);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; }
     
     body, html {
       margin: 0; padding: 0; height: 100%; width: 100%;
       background-color: var(--wa-dark);
-      font-family: 'Segoe UI', Roboto, sans-serif;
-      color: #e9edef;
-      overflow: hidden;
-    }
-
-    /* --- Animations --- */
-    @keyframes popIn {
-      0% { transform: scale(0.8); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    @keyframes slideDown {
-      from { transform: translateY(-50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      font-family: 'Segoe UI', Helvetica, sans-serif;
+      overflow: hidden; /* Prevents double scrollbars */
     }
 
     /* --- Hamburger Drawer --- */
     #drawer {
       position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-      background: rgba(32, 44, 51, 0.95); backdrop-filter: blur(10px);
-      z-index: 2000; transition: 0.3s ease; padding: 20px;
+      background: #232d36; z-index: 4000; transition: 0.3s; padding: 20px;
       box-shadow: 5px 0 15px rgba(0,0,0,0.5);
     }
     #drawer.open { left: 0; }
     .drawer-item {
       padding: 15px; margin-bottom: 10px; border-radius: 8px;
-      cursor: pointer; transition: 0.2s; border-bottom: 1px solid #313d45;
+      cursor: pointer; border-bottom: 1px solid #313d45; color: #e9edef;
     }
-    .drawer-item:hover { background: var(--wa-accent); color: white; }
-    
-    .overlay-bg {
+    .drawer-item:hover { background: var(--wa-accent); }
+
+    /* --- Fixed Overlays (Login & Rules) --- */
+    .full-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 1999; display: none;
+      background: var(--wa-dark); z-index: 5000;
+      display: flex; justify-content: center; align-items: center;
     }
 
-    /* --- Responsive App Layout --- */
-    #app { 
-      display: none; flex-direction: column; height: 100vh; width: 100%; 
-      max-width: 1000px; margin: 0 auto; background: var(--wa-dark);
+    .modal-card {
+      background: #232d36; padding: 30px; border-radius: 20px;
+      width: 90%; max-width: 350px; text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: slideDown 0.4s ease-out;
     }
-    
+
+    @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Styled Input for Login */
+    .styled-input {
+      width: 100%; padding: 12px; margin: 15px 0;
+      background: #2a3942; border: 1px solid #3b4a54;
+      border-radius: 10px; color: white; outline: none;
+    }
+
+    /* --- Chat App Structure --- */
+    #app-container {
+      display: flex; flex-direction: column;
+      height: 100vh; width: 100%; max-width: 800px; margin: 0 auto;
+    }
+
     header {
-      background: var(--wa-header); padding: 12px 15px;
-      display: flex; align-items: center; gap: 15px; flex-shrink: 0;
+      height: 60px; background: var(--wa-header);
+      display: flex; align-items: center; padding: 0 15px; gap: 15px;
+      flex-shrink: 0; border-bottom: 1px solid #313d45;
     }
 
-    .menu-btn { font-size: 24px; cursor: pointer; color: var(--wa-accent); }
-
-    /* --- Chat Area --- */
     #chat-box {
       flex: 1; overflow-y: auto; padding: 15px;
-      background: linear-gradient(rgba(11,20,26,0.9), rgba(11,20,26,0.9)), 
-                  url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+      background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+      background-color: var(--wa-dark); background-blend-mode: overlay;
       display: flex; flex-direction: column; gap: 10px;
     }
 
-    /* --- Bubble Animations --- */
-    .msg-wrapper { display: flex; flex-direction: column; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    /* --- Message Animations --- */
+    .msg-wrapper { display: flex; flex-direction: column; animation: pop 0.25s ease-out; }
+    @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    
     .msg-wrapper.own { align-items: flex-end; }
     .msg-wrapper.other { align-items: flex-start; }
 
     .bubble {
-      max-width: 85%; padding: 8px 12px; border-radius: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2); position: relative;
+      max-width: 80%; padding: 8px 12px; border-radius: 12px;
+      color: #000; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
-    .message-text { color: #111b21; font-size: 0.95rem; }
-    .sender-name { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; }
-    
+
     /* --- System Welcome Alert --- */
     .system-alert {
-      align-self: center; background: rgba(32, 44, 51, 0.8);
-      color: #ffd279; font-size: 0.8rem; padding: 6px 15px;
-      border-radius: 20px; margin: 10px 0; border: 1px solid rgba(255,210,121,0.3);
-      animation: fadeIn 1s ease;
+      align-self: center; background: #182229; color: #ffd279;
+      font-size: 0.75rem; padding: 5px 15px; border-radius: 15px; margin: 5px 0;
     }
 
-    /* --- Guidelines Modal --- */
-    .modal-card {
-      background: #232d36; padding: 25px; border-radius: 20px;
-      width: 90%; max-width: 380px; text-align: center;
-      animation: slideDown 0.5s ease;
+    /* --- THE INPUT BAR (Strictly Fixed) --- */
+    .input-bar {
+      height: 70px; background: var(--wa-header);
+      display: flex; align-items: center; padding: 10px 15px; gap: 10px;
+      flex-shrink: 0;
     }
-    .guideline-img { width: 120px; margin-bottom: 15px; border-radius: 10px; }
 
-    /* --- Input Bar --- */
-    .input-bar { background: var(--wa-header); padding: 10px; display: flex; gap: 8px; align-items: center; }
     #message-input {
       flex: 1; background: #2a3942; border: none; padding: 12px 18px;
-      border-radius: 25px; color: white; outline: none;
+      border-radius: 25px; color: white; outline: none; font-size: 1rem;
     }
-    .send-btn { background: var(--wa-accent); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
+
+    .send-btn {
+      background: var(--wa-accent); border: none; width: 45px; height: 45px;
+      border-radius: 50%; color: white; cursor: pointer; font-size: 20px;
+      display: flex; align-items: center; justify-content: center;
+    }
 
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <div id="overlay-bg" class="overlay-bg" onclick="toggleMenu()"></div>
   <div id="drawer">
-    <h2 style="color:var(--wa-accent)">Menu</h2>
+    <h2 style="color:var(--wa-accent)">Settings</h2>
     <div class="drawer-item">🏠 Home</div>
-    <div class="drawer-item">🌙 Theme</div>
-    <div class="drawer-item">💡 Suggestion</div>
-    <div class="drawer-item">ℹ️ About</div>
-    <p style="position: absolute; bottom: 20px; font-size: 0.7rem; color: #8696a0;">World Chat Test v1.2</p>
+    <div class="drawer-item">🎨 Theme</div>
+    <div class="drawer-item">✉️ Suggestion</div>
+    <div class="drawer-item">👥 About</div>
+    <button onclick="clearUser()" style="margin-top:20px; background:red; color:white; border:none; padding:10px; border-radius:5px; width:100%;">Logout/Reset</button>
   </div>
 
-  <div id="login-overlay" class="overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--wa-dark); z-index:3000; display:flex; justify-content:center; align-items:center;">
+  <div id="login-overlay" class="full-overlay">
     <div class="modal-card">
-      <h2>Welcome Back</h2>
-      <input type="text" id="username-input" placeholder="What's your name?" maxlength="15">
+      <h2 style="color:var(--wa-accent)">World Chat</h2>
+      <p style="color:#8696a0">Enter your name to start chatting</p>
+      <input type="text" id="username-input" class="styled-input" placeholder="Your Name..." maxlength="15">
       <button class="send-btn" onclick="saveUsername()" style="width:100%; border-radius:10px;">Continue</button>
     </div>
   </div>
 
-  <div id="guidelines-overlay" class="overlay hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3001; display:flex; justify-content:center; align-items:center;">
+  <div id="guidelines-overlay" class="full-overlay hidden">
     <div class="modal-card">
-      <img src="https://cdn-icons-png.flaticon.com/512/5602/5602164.png" class="guideline-img" alt="Safety">
-      <h3>Community Rules</h3>
-      <p style="font-size: 0.9rem; color: #8696a0;">By entering, you agree to be respectful. We clear history every 100 messages.</p>
-      <button class="send-btn" onclick="acceptGuidelines()" style="width:100%; border-radius:10px;">I Understand</button>
+      <img src="https://cdn-icons-png.flaticon.com/512/5602/5602164.png" style="width:80px; margin-bottom:15px;">
+      <h3>Chat Rules</h3>
+      <p style="text-align:left; font-size:0.9rem; color:#8696a0;">
+        • No spamming.<br>• Be kind to others.<br>• Max 100 messages stored.
+      </p>
+      <button class="send-btn" onclick="acceptGuidelines()" style="width:100%; border-radius:10px;">I Agree</button>
     </div>
   </div>
 
-  <div id="app">
+  <div id="app-container" class="hidden">
     <header>
-      <div class="menu-btn" onclick="toggleMenu()">☰</div>
+      <div onclick="toggleDrawer()" style="cursor:pointer; font-size:24px; color:var(--wa-accent)">☰</div>
       <div style="flex:1"><b>World Chat</b><br><small id="msg-count" style="color:#8696a0">0/100</small></div>
     </header>
 
@@ -169,24 +168,23 @@
   const SUPABASE_KEY = "sb_publishable_8C0U6Mj4WDuuPeqHJJGS1w_BTNtiFtb";
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let currentUsername = localStorage.getItem("chat_username") || "";
-  const chatBox = document.getElementById("chat-box");
+  let currentUsername = localStorage.getItem("chat_user") || "";
 
-  // --- Startup Logic ---
+  // Start logic
   window.onload = () => {
     if (currentUsername) {
       document.getElementById("login-overlay").classList.add("hidden");
-      document.getElementById("app").style.display = "flex";
-      sendSystemAlert(`${currentUsername} re-joined the room.`);
+      document.getElementById("app-container").classList.remove("hidden");
       loadMessages();
+      addSystemAlert("Welcome back, " + currentUsername + "!");
     }
   };
 
   function saveUsername() {
-    const name = document.getElementById("username-input").value.trim();
-    if (name) {
-      currentUsername = name;
-      localStorage.setItem("chat_username", name);
+    const val = document.getElementById("username-input").value.trim();
+    if (val) {
+      currentUsername = val;
+      localStorage.setItem("chat_user", val);
       document.getElementById("login-overlay").classList.add("hidden");
       document.getElementById("guidelines-overlay").classList.remove("hidden");
     }
@@ -194,29 +192,29 @@
 
   function acceptGuidelines() {
     document.getElementById("guidelines-overlay").classList.add("hidden");
-    document.getElementById("app").style.display = "flex";
-    sendSystemAlert(`New member ${currentUsername} joined! Be kind.`);
+    document.getElementById("app-container").classList.remove("hidden");
+    addSystemAlert("Be respectful and kind in the chat!");
     loadMessages();
   }
 
-  // --- UI Interactions ---
-  function toggleMenu() {
-    const d = document.getElementById("drawer");
-    const b = document.getElementById("overlay-bg");
-    d.classList.toggle("open");
-    b.style.display = d.classList.contains("open") ? "block" : "none";
+  function toggleDrawer() {
+    document.getElementById("drawer").classList.toggle("open");
   }
 
-  function sendSystemAlert(text) {
+  function clearUser() {
+    localStorage.clear();
+    location.reload();
+  }
+
+  function addSystemAlert(txt) {
     const div = document.createElement("div");
     div.className = "system-alert";
-    div.textContent = text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    div.textContent = txt;
+    document.getElementById("chat-box").appendChild(div);
   }
 
   function getBubbleColor() {
-    return ['#dcf8c6', '#ffffff', '#e1f5fe', '#fff9c4'][Math.floor(Math.random() * 4)];
+    return ['#dcf8c6', '#ffffff', '#e1f5fe', '#fff2e0'][Math.floor(Math.random() * 4)];
   }
 
   function getNameColor(name) {
@@ -226,10 +224,10 @@
     return colors[Math.abs(hash) % colors.length];
   }
 
-  // --- Core Messaging ---
   async function loadMessages() {
     const { data } = await client.from("messages").select("*").order("created_at", { ascending: true });
-    chatBox.innerHTML = "";
+    const box = document.getElementById("chat-box");
+    box.innerHTML = "";
     if (data) {
       data.forEach(addMessage);
       document.getElementById("msg-count").textContent = `${data.length}/100`;
@@ -245,13 +243,14 @@
     bubble.className = "bubble";
     bubble.style.backgroundColor = getBubbleColor();
     bubble.innerHTML = `
-      <div class="sender-name" style="color: ${getNameColor(msg.sender)}">${msg.sender}</div>
-      <div class="message-text">${msg.content}</div>
+      <div style="font-size:0.7rem; font-weight:bold; color:${getNameColor(msg.sender)}">${msg.sender}</div>
+      <div style="font-size:0.95rem; margin-top:2px;">${msg.content}</div>
     `;
 
     wrapper.appendChild(bubble);
-    chatBox.appendChild(wrapper);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    const box = document.getElementById("chat-box");
+    box.appendChild(wrapper);
+    box.scrollTop = box.scrollHeight;
   }
 
   async function sendMessage() {
@@ -259,10 +258,10 @@
     const text = input.value.trim();
     if (!text) return;
     input.value = "";
-    
+
     await client.from("messages").insert([{ sender: currentUsername, content: text }]);
     
-    // Check Cleanup
+    // Check Cleanup (100 msg limit)
     const { count } = await client.from('messages').select('*', { count: 'exact', head: true });
     if (count > 100) {
       const { data: oldest } = await client.from('messages').select('created_at').order('created_at', { ascending: false }).range(99, 99).single();
@@ -271,9 +270,9 @@
     }
   }
 
-  // Listeners
   document.getElementById("sendBtn").onclick = sendMessage;
   document.getElementById("message-input").onkeypress = (e) => { if(e.key==="Enter") sendMessage(); };
+  document.getElementById("username-input").onkeypress = (e) => { if(e.key==="Enter") saveUsername(); };
 
   client.channel("room1").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, p => addMessage(p.new)).subscribe();
 
