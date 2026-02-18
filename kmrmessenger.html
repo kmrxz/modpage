@@ -8,17 +8,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 
   <style>
-    /* 1. Global & WhatsApp Dark Theme */
+    /* 1. Global Reset */
     * { box-sizing: border-box; }
     body, html {
-      margin: 0; padding: 0; height: 100%;
+      margin: 0; padding: 0; 
+      height: 100%; width: 100%;
       background-color: #0b141a;
       font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
       color: #e9edef;
-      overflow: hidden;
+      display: flex; flex-direction: column;
     }
 
-    /* 2. Overlays (Login & Guidelines) */
+    /* 2. Overlays */
     .overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #0b141a;
@@ -26,31 +27,42 @@
       z-index: 1000; flex-direction: column; text-align: center;
     }
     .modal-card {
-      background: #232d36; padding: 40px; border-radius: 15px;
+      background: #232d36; padding: 30px; border-radius: 15px;
       width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .modal-card h2, .modal-card h3 { color: #00a884; margin-top: 0; }
     .modal-card input {
       width: 100%; padding: 12px; margin: 20px 0;
       background: #2a3942; border: 1px solid #3b4a54;
       border-radius: 8px; color: white; font-size: 1rem;
     }
 
-    /* 3. Main Layout */
-    #app { display: none; flex-direction: column; height: 100vh; max-width: 1000px; margin: 0 auto; border-left: 1px solid #222d34; border-right: 1px solid #222d34; }
+    /* 3. Main Layout Fix */
+    #app { 
+      display: none; /* Hidden until login */
+      flex-direction: column; 
+      height: 100vh; 
+      width: 100%;
+      max-width: 800px; 
+      margin: 0 auto; 
+      border-left: 1px solid #222d34; 
+      border-right: 1px solid #222d34;
+      position: relative;
+    }
     
     header {
-      background: #202c33; padding: 12px 20px;
+      background: #202c33; padding: 15px 20px;
       display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid #313d45;
+      flex-shrink: 0; /* Prevents header from squishing */
     }
-    .status-pill { background: #00a884; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; }
 
-    /* 4. Chat Area & Bubbles */
+    /* 4. Chat Area */
     #chat-box {
-      flex: 1; overflow-y: auto; padding: 20px;
+      flex: 1; /* This makes the chat area take all available space */
+      overflow-y: auto; 
+      padding: 20px;
       background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-      background-color: #0b141a; background-blend-mode: overlay;
+      background-color: #0b141a; 
+      background-blend-mode: overlay;
       display: flex; flex-direction: column; gap: 8px;
     }
 
@@ -59,27 +71,47 @@
     .msg-wrapper.other { align-items: flex-start; }
 
     .bubble {
-      max-width: 70%; padding: 6px 10px 4px 10px; border-radius: 8px;
+      max-width: 80%; padding: 8px 12px; border-radius: 8px;
       position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2);
     }
     .sender-name { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; }
-    .message-text { color: #000; font-size: 0.95rem; word-wrap: break-word; line-height: 1.4; }
-    .msg-time { display: block; text-align: right; font-size: 0.65rem; color: #667781; margin-top: 2px; }
+    .message-text { color: #000; font-size: 1rem; word-wrap: break-word; }
+    .msg-time { display: block; text-align: right; font-size: 0.6rem; color: #667781; margin-top: 4px; }
 
-    /* 5. Input Bar */
-    .input-bar { background: #202c33; padding: 10px 15px; display: flex; gap: 10px; }
-    #message-input {
-      flex: 1; background: #2a3942; border: none; padding: 12px 15px;
-      border-radius: 20px; color: white; outline: none; font-size: 0.95rem;
+    /* 5. Input Bar (Pushed to bottom) */
+    .input-bar { 
+      background: #202c33; 
+      padding: 12px 15px; 
+      display: flex; 
+      gap: 10px; 
+      flex-shrink: 0; /* Keeps bar from disappearing */
+      align-items: center;
     }
-    .send-btn { background: #00a884; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-    .send-btn:hover { background: #06cf9c; }
+    #message-input {
+      flex: 1; 
+      background: #2a3942; 
+      border: none; 
+      padding: 12px 18px;
+      border-radius: 25px; 
+      color: white; 
+      outline: none; 
+      font-size: 1rem;
+    }
+    .send-btn { 
+      background: #00a884; 
+      color: white; 
+      border: none; 
+      padding: 12px 22px; 
+      border-radius: 25px; 
+      cursor: pointer; 
+      font-weight: bold; 
+    }
 
-    /* 6. Cleanup Toast */
+    /* 6. Notification */
     #toast {
       position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
       background: #00a884; color: white; padding: 12px 25px; border-radius: 30px;
-      font-size: 0.9rem; transition: 0.5s ease; z-index: 9999;
+      transition: 0.5s ease; z-index: 9999;
     }
     #toast.active { top: 20px; }
 
@@ -88,35 +120,33 @@
 </head>
 <body>
 
-  <div id="toast">Chat limit reached: History cleared!</div>
+  <div id="toast">100 message limit reached: Old history cleared!</div>
 
   <div id="login-overlay" class="overlay">
     <div class="modal-card">
       <h2>World Chat</h2>
-      <p>Please enter your name to begin</p>
-      <input type="text" id="username-input" placeholder="Display Name" autofocus>
-      <button class="send-btn" onclick="saveUsername()">Join Conversation</button>
+      <p>Enter your name</p>
+      <input type="text" id="username-input" placeholder="Display Name..." maxlength="15">
+      <button class="send-btn" onclick="saveUsername()" style="width:100%">Join</button>
     </div>
   </div>
 
   <div id="guidelines-overlay" class="overlay hidden">
     <div class="modal-card">
-      <h3>Chat Guidelines</h3>
-      <ul style="text-align: left; font-size: 0.85rem; line-height: 1.8;">
-        <li>🚫 No spamming (Max 100 messages total)</li>
-        <li>🤝 Be respectful and kind</li>
-        <li>📢 Keep it civil and safe</li>
-      </ul>
-      <button class="send-btn" onclick="acceptGuidelines()">I Agree & Enter</button>
+      <h3>Guidelines</h3>
+      <p>1. No Spamming<br>2. Be Respectful<br>3. 100 Message Limit</p>
+      <button class="send-btn" onclick="acceptGuidelines()" style="width:100%">I Agree</button>
     </div>
   </div>
 
   <div id="app">
     <header>
-      <div>World Chat <span id="msg-count" style="font-size: 0.7rem; color: #8696a0; margin-left: 10px;"></span></div>
-      <div class="status-pill">Online</div>
+      <div><b>World Chat</b></div>
+      <div id="msg-count" style="font-size: 0.75rem; color: #8696a0;">0/100</div>
     </header>
+
     <div id="chat-box"></div>
+
     <div class="input-bar">
       <input type="text" id="message-input" placeholder="Type a message...">
       <button class="send-btn" id="sendBtn">Send</button>
@@ -132,7 +162,6 @@
   const chatBox = document.getElementById("chat-box");
   const messageInput = document.getElementById("message-input");
 
-  // Logic: User Flow
   function saveUsername() {
     const name = document.getElementById("username-input").value.trim();
     if (name) {
@@ -148,7 +177,6 @@
     loadMessages();
   }
 
-  // Helpers: Random Visuals
   function getNameColor(name) {
     const colors = ['#00a884', '#3498db', '#e67e22', '#9b59b6', '#e74c3c', '#f1c40f'];
     let hash = 0;
@@ -157,40 +185,28 @@
   }
 
   function getBubbleColor() {
-    const lightColors = ['#dcf8c6', '#ffffff', '#e1f5fe', '#fce4ec'];
-    return lightColors[Math.floor(Math.random() * lightColors.length)];
+    return ['#dcf8c6', '#ffffff', '#e1f5fe', '#fce4ec'][Math.floor(Math.random() * 4)];
   }
 
-  function showToast() {
-    const t = document.getElementById("toast");
-    t.classList.add("active");
-    setTimeout(() => t.classList.remove("active"), 3000);
-  }
-
-  // Database Functions
   async function loadMessages() {
-    const { data, error } = await client
-      .from("messages")
-      .select("*")
-      .order("created_at", { ascending: true });
-
-    if (error) return console.error(error);
+    const { data } = await client.from("messages").select("*").order("created_at", { ascending: true });
     chatBox.innerHTML = "";
-    data.forEach(addMessage);
-    updateCount(data.length);
+    if (data) {
+      data.forEach(addMessage);
+      updateCount(data.length);
+    }
   }
 
   function addMessage(msg) {
     const isOwn = msg.sender === currentUsername;
     const time = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "now";
-
+    
     const wrapper = document.createElement("div");
     wrapper.className = `msg-wrapper ${isOwn ? 'own' : 'other'}`;
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
     bubble.style.backgroundColor = getBubbleColor();
-
     bubble.innerHTML = `
       <div class="sender-name" style="color: ${getNameColor(msg.sender)}">${msg.sender}</div>
       <div class="message-text">${msg.content}</div>
@@ -205,50 +221,32 @@
   async function handleCleanup() {
     const { count } = await client.from('messages').select('*', { count: 'exact', head: true });
     updateCount(count);
-
     if (count > 100) {
-      // Find the timestamp of the 100th message
-      const { data: oldest } = await client
-        .from('messages')
-        .select('created_at')
-        .order('created_at', { ascending: false })
-        .range(99, 99)
-        .single();
-
+      const { data: oldest } = await client.from('messages').select('created_at').order('created_at', { ascending: false }).range(99, 99).single();
       if (oldest) {
         await client.from('messages').delete().lt('created_at', oldest.created_at);
-        showToast();
-        loadMessages(); // Refresh UI after delete
+        document.getElementById("toast").classList.add("active");
+        setTimeout(() => document.getElementById("toast").classList.remove("active"), 3000);
+        loadMessages();
       }
     }
   }
 
   async function sendMessage() {
-    const content = messageInput.value.trim();
-    if (!content) return;
-
-    const { error } = await client.from("messages").insert([{ sender: currentUsername, content }]);
-    if (error) console.error(error);
-    
+    const text = messageInput.value.trim();
+    if (!text) return;
     messageInput.value = "";
+    await client.from("messages").insert([{ sender: currentUsername, content: text }]);
     handleCleanup();
   }
 
-  function updateCount(n) {
-    document.getElementById("msg-count").textContent = `${n}/100 messages`;
-  }
+  function updateCount(n) { document.getElementById("msg-count").textContent = `${n}/100`; }
 
-  // Listeners
   document.getElementById("sendBtn").addEventListener("click", sendMessage);
   messageInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
   document.getElementById("username-input").addEventListener("keypress", (e) => { if (e.key === "Enter") saveUsername(); });
 
-  // Realtime
-  client.channel("realtime-messages")
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, payload => addMessage(payload.new))
-    .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, () => loadMessages())
-    .subscribe();
-
+  client.channel("realtime-messages").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, p => addMessage(p.new)).subscribe();
 </script>
 </body>
 </html>
