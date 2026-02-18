@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>World Chat | Pro</title>
+  <title>World Chat | Test Build</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 
@@ -12,7 +12,6 @@
       --wa-dark: #0b141a;
       --wa-header: #202c33;
       --wa-accent: #00a884;
-      --bg-overlay: rgba(11, 20, 26, 0.98);
     }
 
     * { box-sizing: border-box; }
@@ -21,23 +20,30 @@
       margin: 0; padding: 0; height: 100%; width: 100%;
       background-color: var(--wa-dark);
       font-family: 'Segoe UI', Helvetica, sans-serif;
-      overflow: hidden; /* Prevents double scrollbars */
+      overflow: hidden; 
     }
 
-    /* --- Hamburger Drawer --- */
+    /* --- Hamburger Drawer & Backdrop --- */
+    #drawer-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); z-index: 3999; display: none;
+      backdrop-filter: blur(4px);
+    }
+
     #drawer {
       position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-      background: #232d36; z-index: 4000; transition: 0.3s; padding: 20px;
-      box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+      background: #232d36; z-index: 4000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 25px; box-shadow: 10px 0 20px rgba(0,0,0,0.5);
     }
     #drawer.open { left: 0; }
     .drawer-item {
-      padding: 15px; margin-bottom: 10px; border-radius: 8px;
-      cursor: pointer; border-bottom: 1px solid #313d45; color: #e9edef;
+      padding: 18px; margin-bottom: 8px; border-radius: 12px;
+      cursor: pointer; color: #e9edef; font-weight: 500;
+      transition: background 0.2s;
     }
     .drawer-item:hover { background: var(--wa-accent); }
 
-    /* --- Fixed Overlays (Login & Rules) --- */
+    /* --- Overlays (Login & Rules) --- */
     .full-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: var(--wa-dark); z-index: 5000;
@@ -46,73 +52,81 @@
 
     .modal-card {
       background: #232d36; padding: 30px; border-radius: 20px;
-      width: 90%; max-width: 350px; text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      animation: slideDown 0.4s ease-out;
+      width: 85%; max-width: 380px; text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      border: 1px solid #3b4a54;
     }
 
-    @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    /* Fix for readable text in Rules */
+    .rules-list {
+      text-align: left; background: #182229; padding: 15px;
+      border-radius: 10px; margin: 20px 0; color: #ffffff; /* Bright white */
+      font-size: 0.95rem; line-height: 1.6;
+    }
 
-    /* Styled Input for Login */
     .styled-input {
-      width: 100%; padding: 12px; margin: 15px 0;
-      background: #2a3942; border: 1px solid #3b4a54;
-      border-radius: 10px; color: white; outline: none;
+      width: 100%; padding: 15px; margin: 15px 0;
+      background: #2a3942; border: 2px solid #3b4a54;
+      border-radius: 12px; color: white; font-size: 1rem; outline: none;
     }
+    .styled-input:focus { border-color: var(--wa-accent); }
 
-    /* --- Chat App Structure --- */
-    #app-container {
-      display: flex; flex-direction: column;
-      height: 100vh; width: 100%; max-width: 800px; margin: 0 auto;
-    }
+    /* --- Main App Container --- */
+    #app { display: none; height: 100%; width: 100%; flex-direction: column; }
 
     header {
-      height: 60px; background: var(--wa-header);
-      display: flex; align-items: center; padding: 0 15px; gap: 15px;
-      flex-shrink: 0; border-bottom: 1px solid #313d45;
+      height: 65px; background: var(--wa-header);
+      display: flex; align-items: center; padding: 0 20px;
+      z-index: 10; border-bottom: 1px solid #313d45;
     }
 
+    /* --- Chat Box Area --- */
     #chat-box {
-      flex: 1; overflow-y: auto; padding: 15px;
+      position: absolute; top: 65px; bottom: 80px; /* Space for header & footer */
+      width: 100%; max-width: 800px; left: 50%; transform: translateX(-50%);
+      overflow-y: auto; padding: 20px;
       background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
       background-color: var(--wa-dark); background-blend-mode: overlay;
-      display: flex; flex-direction: column; gap: 10px;
+      display: flex; flex-direction: column; gap: 12px;
     }
-
-    /* --- Message Animations --- */
-    .msg-wrapper { display: flex; flex-direction: column; animation: pop 0.25s ease-out; }
-    @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    
-    .msg-wrapper.own { align-items: flex-end; }
-    .msg-wrapper.other { align-items: flex-start; }
 
     .bubble {
-      max-width: 80%; padding: 8px 12px; border-radius: 12px;
-      color: #000; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      max-width: 85%; padding: 10px 14px; border-radius: 12px;
+      color: #000; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    @keyframes pop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .msg-wrapper.own { align-self: flex-end; }
+    .msg-wrapper.other { align-self: flex-start; }
 
     /* --- System Welcome Alert --- */
     .system-alert {
-      align-self: center; background: #182229; color: #ffd279;
-      font-size: 0.75rem; padding: 5px 15px; border-radius: 15px; margin: 5px 0;
+      align-self: center; background: #1e2a30; color: #ffd279;
+      font-size: 0.8rem; padding: 8px 18px; border-radius: 20px;
+      margin: 10px 0; font-weight: 500; text-align: center;
+      border: 1px solid #3b4a54; animation: fadeIn 0.8s ease;
     }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* --- THE INPUT BAR (Strictly Fixed) --- */
-    .input-bar {
-      height: 70px; background: var(--wa-header);
-      display: flex; align-items: center; padding: 10px 15px; gap: 10px;
-      flex-shrink: 0;
-    }
-
-    #message-input {
-      flex: 1; background: #2a3942; border: none; padding: 12px 18px;
-      border-radius: 25px; color: white; outline: none; font-size: 1rem;
-    }
-
-    .send-btn {
-      background: var(--wa-accent); border: none; width: 45px; height: 45px;
-      border-radius: 50%; color: white; cursor: pointer; font-size: 20px;
+    /* --- THE INPUT FOOTER (Always Visible) --- */
+    footer {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      height: 80px; background: var(--wa-header);
       display: flex; align-items: center; justify-content: center;
+      padding: 0 15px; z-index: 100;
+    }
+    .input-container {
+      width: 100%; max-width: 800px; display: flex; gap: 10px; align-items: center;
+    }
+    #message-input {
+      flex: 1; background: #2a3942; border: none; padding: 14px 20px;
+      border-radius: 30px; color: white; outline: none; font-size: 1rem;
+    }
+    .send-btn {
+      background: var(--wa-accent); border: none; width: 50px; height: 50px;
+      border-radius: 50%; color: white; cursor: pointer; font-size: 22px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
 
     .hidden { display: none !important; }
@@ -120,47 +134,56 @@
 </head>
 <body>
 
+  <div id="drawer-overlay" onclick="toggleDrawer()"></div>
   <div id="drawer">
-    <h2 style="color:var(--wa-accent)">Settings</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 style="color:var(--wa-accent); margin:0;">Menu</h2>
+      <button onclick="toggleDrawer()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">✕</button>
+    </div>
     <div class="drawer-item">🏠 Home</div>
     <div class="drawer-item">🎨 Theme</div>
     <div class="drawer-item">✉️ Suggestion</div>
     <div class="drawer-item">👥 About</div>
-    <button onclick="clearUser()" style="margin-top:20px; background:red; color:white; border:none; padding:10px; border-radius:5px; width:100%;">Logout/Reset</button>
+    <hr style="border:0; border-top:1px solid #313d45; margin: 20px 0;">
+    <div class="drawer-item" onclick="clearUser()" style="color:#ff5e5e;">🚪 Logout</div>
   </div>
 
   <div id="login-overlay" class="full-overlay">
     <div class="modal-card">
       <h2 style="color:var(--wa-accent)">World Chat</h2>
-      <p style="color:#8696a0">Enter your name to start chatting</p>
-      <input type="text" id="username-input" class="styled-input" placeholder="Your Name..." maxlength="15">
-      <button class="send-btn" onclick="saveUsername()" style="width:100%; border-radius:10px;">Continue</button>
+      <p style="color:#8696a0">Welcome! Please enter your name.</p>
+      <input type="text" id="username-input" class="styled-input" placeholder="Your Display Name..." maxlength="15">
+      <button class="send-btn" onclick="saveUsername()" style="width:100%; border-radius:12px;">Start Chatting</button>
     </div>
   </div>
 
   <div id="guidelines-overlay" class="full-overlay hidden">
     <div class="modal-card">
-      <img src="https://cdn-icons-png.flaticon.com/512/5602/5602164.png" style="width:80px; margin-bottom:15px;">
-      <h3>Chat Rules</h3>
-      <p style="text-align:left; font-size:0.9rem; color:#8696a0;">
-        • No spamming.<br>• Be kind to others.<br>• Max 100 messages stored.
-      </p>
-      <button class="send-btn" onclick="acceptGuidelines()" style="width:100%; border-radius:10px;">I Agree</button>
+      <img src="https://cdn-icons-png.flaticon.com/512/5602/5602164.png" style="width:70px;">
+      <h3>Room Guidelines</h3>
+      <div class="rules-list">
+        1. 🚫 No spamming messages.<br>
+        2. 🤝 Be respectful to everyone.<br>
+        3. ⚡ Old messages clear automatically.
+      </div>
+      <button class="send-btn" onclick="acceptGuidelines()" style="width:100%; border-radius:12px;">I Agree</button>
     </div>
   </div>
 
-  <div id="app-container" class="hidden">
+  <div id="app">
     <header>
-      <div onclick="toggleDrawer()" style="cursor:pointer; font-size:24px; color:var(--wa-accent)">☰</div>
-      <div style="flex:1"><b>World Chat</b><br><small id="msg-count" style="color:#8696a0">0/100</small></div>
+      <div onclick="toggleDrawer()" style="cursor:pointer; font-size:26px; color:var(--wa-accent); padding-right:15px;">☰</div>
+      <div style="flex:1"><b>World Chat</b><br><small id="msg-count" style="color:#8696a0">0/100 messages</small></div>
     </header>
 
     <div id="chat-box"></div>
 
-    <div class="input-bar">
-      <input type="text" id="message-input" placeholder="Type a message...">
-      <button class="send-btn" id="sendBtn">➤</button>
-    </div>
+    <footer>
+      <div class="input-container">
+        <input type="text" id="message-input" placeholder="Type a message...">
+        <button class="send-btn" id="sendBtn">➤</button>
+      </div>
+    </footer>
   </div>
 
 <script>
@@ -170,13 +193,12 @@
 
   let currentUsername = localStorage.getItem("chat_user") || "";
 
-  // Start logic
   window.onload = () => {
     if (currentUsername) {
       document.getElementById("login-overlay").classList.add("hidden");
-      document.getElementById("app-container").classList.remove("hidden");
+      document.getElementById("app").style.display = "flex";
       loadMessages();
-      addSystemAlert("Welcome back, " + currentUsername + "!");
+      setTimeout(() => addSystemAlert(`Welcome back, ${currentUsername}!`), 1000);
     }
   };
 
@@ -192,13 +214,16 @@
 
   function acceptGuidelines() {
     document.getElementById("guidelines-overlay").classList.add("hidden");
-    document.getElementById("app-container").classList.remove("hidden");
-    addSystemAlert("Be respectful and kind in the chat!");
+    document.getElementById("app").style.display = "flex";
+    addSystemAlert("System: Be kind and respectful to all members.");
     loadMessages();
   }
 
   function toggleDrawer() {
-    document.getElementById("drawer").classList.toggle("open");
+    const d = document.getElementById("drawer");
+    const o = document.getElementById("drawer-overlay");
+    const isOpen = d.classList.toggle("open");
+    o.style.display = isOpen ? "block" : "none";
   }
 
   function clearUser() {
@@ -211,10 +236,7 @@
     div.className = "system-alert";
     div.textContent = txt;
     document.getElementById("chat-box").appendChild(div);
-  }
-
-  function getBubbleColor() {
-    return ['#dcf8c6', '#ffffff', '#e1f5fe', '#fff2e0'][Math.floor(Math.random() * 4)];
+    document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
   }
 
   function getNameColor(name) {
@@ -230,8 +252,9 @@
     box.innerHTML = "";
     if (data) {
       data.forEach(addMessage);
-      document.getElementById("msg-count").textContent = `${data.length}/100`;
+      document.getElementById("msg-count").textContent = `${data.length}/100 messages`;
     }
+    box.scrollTop = box.scrollHeight;
   }
 
   function addMessage(msg) {
@@ -241,10 +264,12 @@
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    bubble.style.backgroundColor = getBubbleColor();
+    // Random subtle pastel colors
+    bubble.style.backgroundColor = ['#dcf8c6', '#ffffff', '#e1f5fe', '#fff2e0'][Math.floor(Math.random() * 4)];
+    
     bubble.innerHTML = `
-      <div style="font-size:0.7rem; font-weight:bold; color:${getNameColor(msg.sender)}">${msg.sender}</div>
-      <div style="font-size:0.95rem; margin-top:2px;">${msg.content}</div>
+      <div style="font-size:0.75rem; font-weight:bold; color:${getNameColor(msg.sender)}">${msg.sender}</div>
+      <div style="font-size:0.95rem; margin-top:3px; line-height:1.4;">${msg.content}</div>
     `;
 
     wrapper.appendChild(bubble);
@@ -261,12 +286,14 @@
 
     await client.from("messages").insert([{ sender: currentUsername, content: text }]);
     
-    // Check Cleanup (100 msg limit)
+    // Check Cleanup
     const { count } = await client.from('messages').select('*', { count: 'exact', head: true });
     if (count > 100) {
       const { data: oldest } = await client.from('messages').select('created_at').order('created_at', { ascending: false }).range(99, 99).single();
-      if (oldest) await client.from('messages').delete().lt('created_at', oldest.created_at);
-      loadMessages();
+      if (oldest) {
+        await client.from('messages').delete().lt('created_at', oldest.created_at);
+        loadMessages();
+      }
     }
   }
 
