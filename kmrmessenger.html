@@ -2,33 +2,59 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Supabase Chat</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Supabase Realtime Chat</title>
+
+  <!-- Stable Supabase v2 UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+
   <style>
-    body { font-family: Arial; max-width: 600px; margin: 40px auto; }
-    #chat { border: 1px solid #ccc; height: 300px; overflow-y: auto; padding: 10px; margin-bottom: 10px; }
-    .msg { margin-bottom: 8px; }
-    input { padding: 8px; margin-right: 5px; }
-    button { padding: 8px; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+    }
+
+    #chat {
+      border: 1px solid #ccc;
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .msg {
+      margin-bottom: 6px;
+    }
+
+    input {
+      padding: 8px;
+      margin-right: 5px;
+    }
+
+    button {
+      padding: 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-<h2>Simple Realtime Chat</h2>
+<h2>Realtime Chat</h2>
 
 <div id="chat"></div>
 
 <input id="name" placeholder="Your name">
 <input id="message" placeholder="Type message">
-<button onclick="sendMessage()">Send</button>
+<button id="sendBtn">Send</button>
 
 <script>
 const SUPABASE_URL = "https://sbggyupgkavhkafqapie.supabase.co";
 const SUPABASE_KEY = "sb_publishable_8C0U6Mj4WDuuPeqHJJGS1w_BTNtiFtb";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const chatBox = document.getElementById("chat");
+const sendBtn = document.getElementById("sendBtn");
 
 function addMessage(msg) {
   const div = document.createElement("div");
@@ -39,10 +65,15 @@ function addMessage(msg) {
 }
 
 async function loadMessages() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("messages")
     .select("*")
     .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Load error:", error);
+    return;
+  }
 
   chatBox.innerHTML = "";
   data.forEach(addMessage);
@@ -54,18 +85,31 @@ async function sendMessage() {
 
   if (!sender || !content) return;
 
-  await supabase.from("messages").insert([{ sender, content }]);
+  const { error } = await supabase
+    .from("messages")
+    .insert([{ sender, content }]);
+
+  if (error) {
+    console.error("Insert error:", error);
+  }
+
   document.getElementById("message").value = "";
 }
 
+sendBtn.addEventListener("click", sendMessage);
+
 supabase
-  .channel("realtime-chat")
+  .channel("realtime-messages")
   .on(
     "postgres_changes",
     { event: "INSERT", schema: "public", table: "messages" },
-    payload => addMessage(payload.new)
+    payload => {
+      addMessage(payload.new);
+    }
   )
-  .subscribe();
+  .subscribe((status) => {
+    console.log("Realtime status:", status);
+  });
 
 loadMessages();
 </script>
