@@ -3,39 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>KmrMessenger | Blue</title>
+  <title>KmrMessenger</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
   <style>
     :root { --bg: #010c14; --header: #0a1929; --blue: #007aff; --own: #1a3a5a; --other: #0f253e; }
-    body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); font-family: sans-serif; color: white; overflow: hidden; }
     
-    /* Login Overlay */
-    #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 99; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    /* Layout Fix for Keyboard */
+    body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); font-family: sans-serif; color: white; display: flex; flex-direction: column; }
+    
+    /* Auth Overlay */
+    #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .card { background: var(--header); padding: 25px; border-radius: 15px; width: 100%; max-width: 350px; text-align: center; border: 1px solid #1a3a5a; }
-    input { width: 100%; padding: 12px; margin: 10px 0; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: white; outline: none; }
     
-    /* Layout */
-    #app { display: none; height: 100%; flex-direction: column; }
-    header { padding: 15px 20px; background: var(--header); border-bottom: 1px solid #1a3a5a; display: flex; justify-content: space-between; align-items: center; }
-    #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+    header { height: 60px; background: var(--header); display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid #1a3a5a; justify-content: space-between; }
     
-    /* Chat Bubbles */
-    .msg-wrapper { display: flex; width: 100%; }
-    .msg-wrapper.own { justify-content: flex-end; }
-    .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; cursor: pointer; word-wrap: break-word; line-height: 1.4; position: relative; }
+    /* Respectful Alert Box */
+    .alert-banner { background: rgba(0, 122, 255, 0.1); border: 1px solid var(--blue); padding: 10px; margin: 10px; border-radius: 8px; font-size: 0.8rem; text-align: center; color: #a0cfff; }
+
+    #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+    
+    /* Input Area - Non-fixed to stay above keyboard */
+    footer { background: var(--header); border-top: 1px solid #1a3a5a; padding: 10px 15px 30px 15px; display: flex; gap: 10px; align-items: center; }
+    
+    input { flex: 1; padding: 12px; background: #1e293b; border: 1px solid #334155; border-radius: 10px; color: white; outline: none; font-size: 16px; }
+    
+    .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; cursor: pointer; word-wrap: break-word; line-height: 1.4; }
+    .msg-wrapper.own { align-self: flex-end; }
     .msg-wrapper.own .bubble { background: var(--own); border-bottom-right-radius: 4px; }
+    .msg-wrapper.other { align-self: flex-start; }
     .msg-wrapper.other .bubble { background: var(--other); border-bottom-left-radius: 4px; }
     
-    .system-msg { align-self: center; background: #1e293b; color: #ffd279; font-size: 0.7rem; padding: 5px 12px; border-radius: 10px; margin: 5px 0; border: 1px solid #334155; }
+    .system-msg { align-self: center; background: #1e293b; color: #ffd279; font-size: 0.7rem; padding: 5px 12px; border-radius: 10px; }
     
-    /* Popup Menu */
-    #menu { position: fixed; display: none; background: #1e293b; border-radius: 8px; z-index: 100; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 160px; }
-    .menu-btn { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #334155; font-size: 0.9rem; }
+    /* Context Menu */
+    #menu { position: fixed; display: none; background: #1e293b; border-radius: 8px; z-index: 1000; border: 1px solid #334155; width: 150px; }
+    .menu-btn { padding: 12px; cursor: pointer; border-bottom: 1px solid #334155; font-size: 0.9rem; }
     .menu-btn:last-child { border: none; color: #f87171; }
-
-    footer { padding: 15px; background: var(--header); border-top: 1px solid #1a3a5a; display: flex; gap: 10px; }
-    .send-btn { background: var(--blue); border: none; padding: 10px 20px; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; }
+    
     .hidden { display: none !important; }
+    .btn-main { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -43,54 +49,54 @@
 <div id="auth-screen">
   <div class="card" id="login-box">
     <h2 style="color:var(--blue)">KmrMessenger</h2>
-    <p style="color:#94a3b8; font-size:0.85rem">Enter phone and PIN to start</p>
-    <input type="number" id="phone" placeholder="Phone (e.g. 123456789)">
+    <input type="number" id="phone" placeholder="Phone Number">
     <input type="password" id="pin" placeholder="4-Digit PIN">
-    <button class="send-btn" style="width:100%" onclick="handleLogin()">Login / Sign Up</button>
+    <button class="btn-main" style="width:100%" onclick="handleLogin()">Continue</button>
   </div>
   <div class="card hidden" id="name-box">
     <h3>New Account</h3>
-    <p style="color:#94a3b8; font-size:0.85rem">Choose a username</p>
-    <input type="text" id="new-name" placeholder="Your Username">
-    <button class="send-btn" style="width:100%" onclick="finishSignUp()">Join Chat</button>
+    <input type="text" id="new-name" placeholder="Username">
+    <button class="btn-main" style="width:100%" onclick="finishSignUp()">Start Chatting</button>
   </div>
 </div>
+
+<header>
+  <span><b>KmrMessenger</b></span>
+  <span onclick="logout()" style="color:#f87171; font-size:0.8rem">Logout</span>
+</header>
+
+<div class="alert-banner">
+  ⚠️ Please be respectful and kind to others in the chat.
+</div>
+
+<div id="chat-box"></div>
 
 <div id="menu">
   <div class="menu-btn" onclick="copyMsg()">Copy</div>
   <div class="menu-btn" id="del-btn" onclick="deleteMsg()">Delete for Everyone</div>
 </div>
 
-<div id="app">
-  <header>
-    <b>KmrMessenger</b>
-    <span onclick="logout()" style="font-size: 0.8rem; color: #f87171; cursor: pointer;">Logout</span>
-  </header>
-  <div id="chat-box"></div>
-  <footer>
-    <input type="text" id="msg-input" placeholder="Type a message...">
-    <button class="send-btn" onclick="send()">➤</button>
-  </footer>
-</div>
+<footer>
+  <input type="text" id="msg-input" placeholder="Type message...">
+  <button class="btn-main" onclick="send()">➤</button>
+</footer>
 
 <script>
   const SUPABASE_URL = "https://sbggyupgkavhkafqapie.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_8C0U6Mj4WDuuPeqHJJGS1w_BTNtiFtb"; // Replace with your actual key if this isn't it
+  const SUPABASE_KEY = "sb_publishable_8C0U6Mj4WDuuPeqHJJGS1w_BTNtiFtb";
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let user = JSON.parse(localStorage.getItem("kmr_user")) || null;
   let activeId = null; let activeText = "";
 
-  if (user) showApp();
+  if (user) document.getElementById('auth-screen').classList.add('hidden');
 
   async function handleLogin() {
     const phone = document.getElementById('phone').value;
     const pin = document.getElementById('pin').value;
-    if (!phone) return alert("Enter phone number");
-    
     const { data } = await client.from('profiles').select('*').eq('phone', phone).single();
     if (data) {
-      if (data.pin && data.pin !== pin) return alert("Incorrect PIN");
+      if (data.pin && data.pin !== pin) return alert("Wrong PIN");
       user = data; loginDone();
     } else {
       document.getElementById('login-box').classList.add('hidden');
@@ -102,23 +108,20 @@
     const phone = document.getElementById('phone').value;
     const pin = document.getElementById('pin').value;
     const name = document.getElementById('new-name').value;
-    if (!name) return alert("Enter a username");
-    
     const { data } = await client.from('profiles').insert([{ phone, pin, username: name }]).select().single();
     user = data; loginDone();
   }
 
   function loginDone() {
     localStorage.setItem("kmr_user", JSON.stringify(user));
-    showApp();
+    document.getElementById('auth-screen').classList.add('hidden');
     client.from('messages').insert([{ sender: 'SYSTEM', content: `${user.username} joined`, sender_phone: '0', is_system: true }]);
+    init();
   }
 
-  function showApp() {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
+  function init() {
     load();
-    client.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, load).subscribe();
+    client.channel('room1').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, load).subscribe();
   }
 
   async function load() {
@@ -134,7 +137,7 @@
         const isOwn = m.sender_phone === user.phone;
         wrap.className = `msg-wrapper ${isOwn ? 'own' : 'other'}`;
         wrap.innerHTML = `<div class="bubble" onclick="openMenu(event, '${m.id}', '${m.sender_phone}', \`${m.content}\`)">
-          <small style="color:var(--blue)">${m.sender}</small><br>${m.content}</div>`;
+          <small style="color:var(--blue); font-size:0.7rem">${m.sender}</small><br>${m.content}</div>`;
       }
       box.appendChild(wrap);
     });
@@ -146,14 +149,15 @@
     if (!input.value.trim()) return;
     await client.from('messages').insert([{ sender: user.username, content: input.value, sender_phone: user.phone }]);
     input.value = '';
+    input.focus();
   }
 
   function openMenu(e, id, phone, text) {
     activeId = id; activeText = text;
     const menu = document.getElementById('menu');
     menu.style.display = 'block';
-    menu.style.top = e.clientY + 'px';
-    menu.style.left = Math.min(e.clientX, window.innerWidth - 170) + 'px';
+    menu.style.top = (e.clientY - 20) + 'px';
+    menu.style.left = Math.min(e.clientX, window.innerWidth - 160) + 'px';
     document.getElementById('del-btn').style.display = (phone === user.phone) ? 'block' : 'none';
   }
 
@@ -162,6 +166,7 @@
   function closeMenu() { document.getElementById('menu').style.display = 'none'; }
   function logout() { localStorage.clear(); location.reload(); }
   document.addEventListener('click', (e) => { if (!e.target.closest('.bubble')) closeMenu(); });
+  if (user) init();
 </script>
 </body>
 </html>
