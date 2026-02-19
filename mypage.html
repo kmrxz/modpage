@@ -154,7 +154,7 @@ main{
   padding:10px 14px;
   width:100%;
   display:flex; flex-direction:column; gap:8px;
-  word-break:break-word; overflow-wrap:anywhere;
+  word-break: normal; overflow-wrap: normal; white-space: normal;
 }
 /* admin reply styling: appears below the main comment */
 .comment-reply{
@@ -260,6 +260,25 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
 .persistent-dialog{ display:none; }
 .persistent-dialog[aria-hidden="false"]{ display:flex; }
 .persistent-dialog .modal-box{ max-width:520px; }
+
+/* GALLERY */
+.gov-gallery{ padding:18px 0 28px; }
+.gov-gallery .gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+}
+.gov-gallery .gallery-grid img{
+  width:100%; height:160px; object-fit:cover; display:block; border-radius:10px; border:1px solid rgba(0,0,0,0.06);
+}
+.page-footer{ text-align:center; padding:18px; font-size:0.95rem; color:rgba(0,0,0,0.6); background:transparent; }
+/* Prevent mid-word breaks site-wide (avoid splitting words). */
+p, li, a, h1, h2, h3, span { word-break: normal; overflow-wrap: normal; white-space: normal; }
+
+/* LIGHTBOX */
+#lightboxModal .modal-box{ background:transparent; box-shadow:none; padding:8px; max-width:95%; }
+#lightboxImg{ display:block; max-width:100%; max-height:80vh; margin:0 auto; border-radius:10px; }
+#lightboxClose{ position:absolute; right:12px; top:8px; z-index:220; background:rgba(0,0,0,0.55); color:#fff; border:none; width:40px; height:40px; border-radius:50%; font-size:20px; cursor:pointer; }
 </style>
 </head>
 
@@ -305,6 +324,14 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
   <p data-i18n="p1"></p>
   <p data-i18n="p2"></p>
   <p data-i18n="p3"></p>
+
+    <!-- Lightbox modal for gallery images -->
+    <div class="modal" id="lightboxModal" aria-hidden="true" style="display:none;">
+      <div class="modal-box">
+        <button id="lightboxClose" onclick="closeLightbox()">×</button>
+        <img id="lightboxImg" src="" alt="" />
+      </div>
+    </div>
   <p data-i18n="p4"></p>
   <p data-i18n="p5"></p>
   <p data-i18n="p6"></p>
@@ -366,8 +393,18 @@ button:hover{ background:var(--button-hover); transform:translateY(-2px); }
 </div>
 
 </main>
+ 
+<!-- GOV GALLERY -->
+<section class="section gov-gallery" id="gov-gallery">
+  <h2>Some thoughts</h2>
+  <div class="gallery-grid" id="galleryGrid">
+    <!-- images in images/gov will be injected here -->
+  </div>
+</section>
 
-<div class="modal" id="themeModal">
+<footer class="page-footer">this is a non profitable webpage,hence no ads are shown</footer>
+
+  <div class="modal" id="themeModal">
   <div class="modal-box">
     <h3 data-i18n="themeSettings">Theme Settings</h3>
     <p class="theme-desc">Choose page, container and text colors. Avoid pairing a dark background with a dark text color — that reduces readability. Theme changes are saved locally; refreshing the page will not clear them. Use the <strong>Default</strong> button below to revert.</p>
@@ -529,8 +566,9 @@ async function loadLanguage(lang){
 loadLanguage(localStorage.getItem("lang")||"en");
 
 // wrap text nodes into per-letter spans for given selectors
+// NOTE: keep per-letter wrapping limited to headings/links/buttons only
 function wrapElementsText(selectors){
-  if(!selectors) selectors = ['header h1', '.section h2', '.section p', '.rules', '.drawer a', '.modal-box h3', '.modal-box label', '.comment-nav button', '.top-controls button', '.comment-text', '.comment-body b'];
+  if(!selectors) selectors = ['header h1', '.section h2', '.drawer a', '.modal-box h3', '.modal-box label', '.comment-nav button', '.top-controls button'];
   selectors.forEach(sel=>{
     document.querySelectorAll(sel).forEach(el=>{
       // skip inputs, buttons already processed
@@ -638,8 +676,7 @@ function renderComments(){
       </div>`;
     commentsDiv.appendChild(div);
   });
-  // re-run letter wrapping for newly added comment text
-  wrapElementsText(['.comment-text', '.comment-author', '.comment-admin-text', '.comment-admin-name']);
+  // do not re-run per-letter wrapping for comment text to avoid breaking words
 }
 
 function nextComments(){ if((page+1)*perPage < commentsData.length){ page++; renderComments(); } }
@@ -659,8 +696,7 @@ function showPersistentDialog(state){
   // state: {type:'sent'|'error', heading, message}
   submitDialogHeading.textContent = state.heading || '';
   submitDialogMessage.innerHTML = state.message || '';
-  // ensure heading is wrapped into per-letter spans (so spaces are preserved correctly)
-  try{ wrapElementsText(['#submitDialogHeading']); }catch(e){}
+  // do not apply per-letter wrapping to dialog headings to avoid splitting words
   submitDialog.setAttribute('aria-hidden','false');
   localStorage.setItem('commentDialog', JSON.stringify({visible:true, state}));
 }
@@ -780,6 +816,46 @@ function sharePage(){
   // final fallback: prompt box
   prompt('Copy this URL', url);
 }
+
+// Populate GOV gallery (images located in images/gov)
+(function populateGovGallery(){
+  const imgs = [
+    'images/gov/1.jpeg',
+    'images/gov/2.jpeg',
+    'images/gov/3.jpeg'
+  ];
+  const grid = document.getElementById('galleryGrid');
+  if(!grid) return;
+  imgs.forEach(src=>{
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    const img = document.createElement('img');
+    img.src = src; img.alt = 'gov image'; img.loading = 'lazy';
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', (e)=>{ e.preventDefault(); openLightbox(src); });
+    wrapper.appendChild(img);
+    grid.appendChild(wrapper);
+  });
+})();
+
+/* Lightbox behavior */
+function openLightbox(src){
+  let modal = document.getElementById('lightboxModal');
+  if(!modal) return;
+  const img = document.getElementById('lightboxImg');
+  img.src = src;
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden','false');
+}
+function closeLightbox(){
+  const modal = document.getElementById('lightboxModal');
+  if(!modal) return;
+  const img = document.getElementById('lightboxImg');
+  img.src = '';
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden','true');
+}
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeLightbox(); });
 </script>
 
 </body>
