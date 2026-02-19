@@ -3,316 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>World Chat | Blue Edition</title>
-
+  <title>KmrMessenger | Blue</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
-
   <style>
-    :root {
-      --bg-dark: #010c14;
-      --header-blue: #0a1929;
-      --accent-blue: #007aff;
-      --msg-blue-own: #1a3a5a;
-      --msg-blue-other: #0f253e;
-      --text-main: #e1e9ef;
-    }
-
-    * { box-sizing: border-box; }
+    :root { --bg: #010c14; --header: #0a1929; --blue: #007aff; --own: #1a3a5a; --other: #0f253e; }
+    body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); font-family: sans-serif; color: white; overflow: hidden; }
     
-    body, html {
-      margin: 0; padding: 0; height: 100%; width: 100%;
-      background-color: var(--bg-dark);
-      font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
-      overflow: hidden; 
-    }
-
-    /* --- Drawer & Backdrop --- */
-    #drawer-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8); z-index: 3999; display: none;
-    }
-
-    #drawer {
-      position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-      background: var(--header-blue); z-index: 4000; transition: 0.3s;
-      padding: 25px; border-right: 1px solid #1a3a5a;
-    }
-    #drawer.open { left: 0; }
-    .drawer-item {
-      padding: 15px; margin-bottom: 8px; border-radius: 10px;
-      cursor: pointer; color: var(--text-main); transition: 0.2s;
-    }
-    .drawer-item:hover { background: var(--accent-blue); }
-
-    /* --- Overlays --- */
-    .full-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: var(--bg-dark); z-index: 5000;
-      display: flex; justify-content: center; align-items: center;
-    }
-
-    .modal-card {
-      background: var(--header-blue); padding: 30px; border-radius: 20px;
-      width: 85%; max-width: 380px; text-align: center;
-      border: 1px solid #1a3a5a;
-    }
-
-    .rules-list {
-      text-align: left; background: #010c14; padding: 15px;
-      border-radius: 10px; margin: 20px 0; color: #94a3b8;
-      font-size: 0.9rem; line-height: 1.5; border: 1px solid #1e293b;
-    }
-
-    .styled-input {
-      width: 100%; padding: 15px; margin: 15px 0;
-      background: #1e293b; border: 1px solid #334155;
-      border-radius: 12px; color: white; outline: none;
-    }
-
-    /* --- Main App --- */
-    #app { display: none; height: 100%; width: 100%; flex-direction: column; }
-
-    header {
-      height: 65px; background: var(--header-blue);
-      display: flex; align-items: center; padding: 0 20px;
-      border-bottom: 1px solid #1a3a5a; z-index: 10;
-    }
-
-    /* --- Improved Chat Box & Bubbles --- */
-    #chat-box {
-      position: absolute; top: 65px; bottom: 85px;
-      width: 100%; max-width: 800px; left: 50%; transform: translateX(-50%);
-      overflow-y: auto; padding: 15px;
-      display: flex; flex-direction: column; gap: 10px;
-      background-image: radial-gradient(#1a3a5a 0.5px, transparent 0.5px);
-      background-size: 20px 20px; /* Subtle pattern */
-    }
-
-    .msg-wrapper { 
-      display: flex; 
-      width: 100%; 
-      margin: 2px 0;
-    }
+    /* Login Overlay */
+    #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 99; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .card { background: var(--header); padding: 25px; border-radius: 15px; width: 100%; max-width: 350px; text-align: center; border: 1px solid #1a3a5a; }
+    input { width: 100%; padding: 12px; margin: 10px 0; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: white; outline: none; }
+    
+    /* Layout */
+    #app { display: none; height: 100%; flex-direction: column; }
+    header { padding: 15px 20px; background: var(--header); border-bottom: 1px solid #1a3a5a; display: flex; justify-content: space-between; align-items: center; }
+    #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+    
+    /* Chat Bubbles */
+    .msg-wrapper { display: flex; width: 100%; }
     .msg-wrapper.own { justify-content: flex-end; }
-    .msg-wrapper.other { justify-content: flex-start; }
+    .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; cursor: pointer; word-wrap: break-word; line-height: 1.4; position: relative; }
+    .msg-wrapper.own .bubble { background: var(--own); border-bottom-right-radius: 4px; }
+    .msg-wrapper.other .bubble { background: var(--other); border-bottom-left-radius: 4px; }
+    
+    .system-msg { align-self: center; background: #1e293b; color: #ffd279; font-size: 0.7rem; padding: 5px 12px; border-radius: 10px; margin: 5px 0; border: 1px solid #334155; }
+    
+    /* Popup Menu */
+    #menu { position: fixed; display: none; background: #1e293b; border-radius: 8px; z-index: 100; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 160px; }
+    .menu-btn { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #334155; font-size: 0.9rem; }
+    .menu-btn:last-child { border: none; color: #f87171; }
 
-    .bubble {
-      max-width: 80%; /* Prevents screen overflow */
-      min-width: 60px;
-      padding: 10px 14px;
-      border-radius: 15px;
-      position: relative;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-      animation: pop 0.2s ease-out;
-      word-wrap: break-word; /* Essential for long words */
-      display: inline-block;
-    }
-
-    .msg-wrapper.own .bubble {
-      background-color: var(--msg-blue-own);
-      color: #ffffff;
-      border-bottom-right-radius: 4px;
-    }
-
-    .msg-wrapper.other .bubble {
-      background-color: var(--msg-blue-other);
-      color: #ffffff;
-      border-bottom-left-radius: 4px;
-    }
-
-    @keyframes pop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    .system-alert {
-      align-self: center; background: #0f172a; color: var(--accent-blue);
-      font-size: 0.75rem; padding: 6px 16px; border-radius: 20px;
-      margin: 15px 0; border: 1px solid #1e293b;
-    }
-
-    /* --- Fixed Input Bar --- */
-    footer {
-      position: fixed; bottom: 0; left: 0; width: 100%;
-      height: 85px; background: var(--header-blue);
-      display: flex; align-items: center; justify-content: center;
-      padding: 0 15px; border-top: 1px solid #1a3a5a;
-    }
-
-    .input-container {
-      width: 100%; max-width: 800px; display: flex; gap: 12px;
-    }
-
-    #message-input {
-      flex: 1; background: #1e293b; border: 1px solid #334155; 
-      padding: 14px 20px; border-radius: 25px; color: white; outline: none;
-    }
-
-    .send-btn {
-      background: var(--accent-blue); border: none; width: 50px; height: 50px;
-      border-radius: 50%; color: white; cursor: pointer; font-size: 20px;
-      flex-shrink: 0; transition: 0.2s;
-    }
-    .send-btn:active { transform: scale(0.9); }
-
+    footer { padding: 15px; background: var(--header); border-top: 1px solid #1a3a5a; display: flex; gap: 10px; }
+    .send-btn { background: var(--blue); border: none; padding: 10px 20px; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; }
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <div id="drawer-overlay" onclick="toggleDrawer()"></div>
-  <div id="drawer">
-    <h2 style="color:var(--accent-blue)">World Chat</h2>
-    <div class="drawer-item">🏠 Home</div>
-    <div class="drawer-item">🌙 Dark Mode</div>
-    <div class="drawer-item">💡 Feedback</div>
-    <div class="drawer-item">ℹ️ About</div>
-    <div class="drawer-item" onclick="clearUser()" style="color:#f87171; margin-top:20px;">🚪 Logout</div>
+<div id="auth-screen">
+  <div class="card" id="login-box">
+    <h2 style="color:var(--blue)">KmrMessenger</h2>
+    <p style="color:#94a3b8; font-size:0.85rem">Enter phone and PIN to start</p>
+    <input type="number" id="phone" placeholder="Phone (e.g. 123456789)">
+    <input type="password" id="pin" placeholder="4-Digit PIN">
+    <button class="send-btn" style="width:100%" onclick="handleLogin()">Login / Sign Up</button>
   </div>
-
-  <div id="login-overlay" class="full-overlay">
-    <div class="modal-card">
-      <h2 style="color:var(--accent-blue)">Join Chat</h2>
-      <input type="text" id="username-input" class="styled-input" placeholder="Your Name" maxlength="15">
-      <button class="send-btn" onclick="saveUsername()" style="width:100%; border-radius:12px;">Continue</button>
-    </div>
+  <div class="card hidden" id="name-box">
+    <h3>New Account</h3>
+    <p style="color:#94a3b8; font-size:0.85rem">Choose a username</p>
+    <input type="text" id="new-name" placeholder="Your Username">
+    <button class="send-btn" style="width:100%" onclick="finishSignUp()">Join Chat</button>
   </div>
+</div>
 
-  <div id="guidelines-overlay" class="full-overlay hidden">
-    <div class="modal-card">
-      <h3 style="color:var(--accent-blue)">Guidelines</h3>
-      <div class="rules-list">
-        • Be respectful to others.<br>
-        • No spamming allowed.<br>
-        • Privacy is protected.
-      </div>
-      <button class="send-btn" onclick="acceptGuidelines()" style="width:100%; border-radius:12px;">I Agree</button>
-    </div>
-  </div>
+<div id="menu">
+  <div class="menu-btn" onclick="copyMsg()">Copy</div>
+  <div class="menu-btn" id="del-btn" onclick="deleteMsg()">Delete for Everyone</div>
+</div>
 
-  <div id="app">
-    <header>
-      <div onclick="toggleDrawer()" style="cursor:pointer; font-size:24px; color:var(--accent-blue); margin-right:15px;">☰</div>
-      <div style="flex:1; color:white;"><b>World Chat</b><br><small id="msg-count" style="color:#64748b">Syncing...</small></div>
-    </header>
-
-    <div id="chat-box"></div>
-
-    <footer>
-      <div class="input-container">
-        <input type="text" id="message-input" placeholder="Type a message...">
-        <button class="send-btn" id="sendBtn">➤</button>
-      </div>
-    </footer>
-  </div>
+<div id="app">
+  <header>
+    <b>KmrMessenger</b>
+    <span onclick="logout()" style="font-size: 0.8rem; color: #f87171; cursor: pointer;">Logout</span>
+  </header>
+  <div id="chat-box"></div>
+  <footer>
+    <input type="text" id="msg-input" placeholder="Type a message...">
+    <button class="send-btn" onclick="send()">➤</button>
+  </footer>
+</div>
 
 <script>
   const SUPABASE_URL = "https://sbggyupgkavhkafqapie.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_8C0U6Mj4WDuuPeqHJJGS1w_BTNtiFtb";
+  const SUPABASE_KEY = "sb_publishable_8C0U6Mj4WDuuPeqHJJGS1w_BTNtiFtb"; // Replace with your actual key if this isn't it
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let currentUsername = localStorage.getItem("chat_user") || "";
+  let user = JSON.parse(localStorage.getItem("kmr_user")) || null;
+  let activeId = null; let activeText = "";
 
-  window.onload = () => {
-    if (currentUsername) {
-      document.getElementById("login-overlay").classList.add("hidden");
-      document.getElementById("app").style.display = "flex";
-      loadMessages();
-      setTimeout(() => addSystemAlert("System: Reconnected as " + currentUsername), 500);
-    }
-  };
+  if (user) showApp();
 
-  function saveUsername() {
-    const val = document.getElementById("username-input").value.trim();
-    if (val) {
-      currentUsername = val;
-      localStorage.setItem("chat_user", val);
-      document.getElementById("login-overlay").classList.add("hidden");
-      document.getElementById("guidelines-overlay").classList.remove("hidden");
-    }
-  }
-
-  function acceptGuidelines() {
-    document.getElementById("guidelines-overlay").classList.add("hidden");
-    document.getElementById("app").style.display = "flex";
-    addSystemAlert("System: Welcome to World Chat!");
-    loadMessages();
-  }
-
-  function toggleDrawer() {
-    const d = document.getElementById("drawer");
-    const o = document.getElementById("drawer-overlay");
-    const isOpen = d.classList.toggle("open");
-    o.style.display = isOpen ? "block" : "none";
-  }
-
-  function clearUser() { localStorage.clear(); location.reload(); }
-
-  function addSystemAlert(txt) {
-    const div = document.createElement("div");
-    div.className = "system-alert";
-    div.textContent = txt;
-    document.getElementById("chat-box").appendChild(div);
-    document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
-  }
-
-  function getNameColor(name) {
-    const colors = ['#38bdf8', '#818cf8', '#fbbf24', '#f87171', '#34d399'];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return colors[Math.abs(hash) % colors.length];
-  }
-
-  async function loadMessages() {
-    const { data } = await client.from("messages").select("*").order("created_at", { ascending: true });
-    const box = document.getElementById("chat-box");
-    box.innerHTML = "";
-    if (data) {
-      data.forEach(addMessage);
-      document.getElementById("msg-count").textContent = `${data.length}/100 messages`;
-      box.scrollTop = box.scrollHeight;
-    }
-  }
-
-  function addMessage(msg) {
-    const isOwn = msg.sender === currentUsername;
-    const wrapper = document.createElement("div");
-    wrapper.className = `msg-wrapper ${isOwn ? 'own' : 'other'}`;
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
+  async function handleLogin() {
+    const phone = document.getElementById('phone').value;
+    const pin = document.getElementById('pin').value;
+    if (!phone) return alert("Enter phone number");
     
-    bubble.innerHTML = `
-      <div style="font-size:0.75rem; font-weight:bold; color:${getNameColor(msg.sender)}; margin-bottom:4px;">${msg.sender}</div>
-      <div style="font-size:0.95rem; line-height:1.4;">${msg.content}</div>
-    `;
+    const { data } = await client.from('profiles').select('*').eq('phone', phone).single();
+    if (data) {
+      if (data.pin && data.pin !== pin) return alert("Incorrect PIN");
+      user = data; loginDone();
+    } else {
+      document.getElementById('login-box').classList.add('hidden');
+      document.getElementById('name-box').classList.remove('hidden');
+    }
+  }
 
-    wrapper.appendChild(bubble);
-    const box = document.getElementById("chat-box");
-    box.appendChild(wrapper);
+  async function finishSignUp() {
+    const phone = document.getElementById('phone').value;
+    const pin = document.getElementById('pin').value;
+    const name = document.getElementById('new-name').value;
+    if (!name) return alert("Enter a username");
+    
+    const { data } = await client.from('profiles').insert([{ phone, pin, username: name }]).select().single();
+    user = data; loginDone();
+  }
+
+  function loginDone() {
+    localStorage.setItem("kmr_user", JSON.stringify(user));
+    showApp();
+    client.from('messages').insert([{ sender: 'SYSTEM', content: `${user.username} joined`, sender_phone: '0', is_system: true }]);
+  }
+
+  function showApp() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    load();
+    client.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, load).subscribe();
+  }
+
+  async function load() {
+    const { data } = await client.from('messages').select('*').order('created_at', { ascending: true });
+    const box = document.getElementById('chat-box');
+    box.innerHTML = '';
+    data?.forEach(m => {
+      const wrap = document.createElement('div');
+      if (m.is_system) {
+        wrap.className = 'system-msg';
+        wrap.innerText = m.content;
+      } else {
+        const isOwn = m.sender_phone === user.phone;
+        wrap.className = `msg-wrapper ${isOwn ? 'own' : 'other'}`;
+        wrap.innerHTML = `<div class="bubble" onclick="openMenu(event, '${m.id}', '${m.sender_phone}', \`${m.content}\`)">
+          <small style="color:var(--blue)">${m.sender}</small><br>${m.content}</div>`;
+      }
+      box.appendChild(wrap);
+    });
     box.scrollTop = box.scrollHeight;
   }
 
-  async function sendMessage() {
-    const input = document.getElementById("message-input");
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = "";
-
-    await client.from("messages").insert([{ sender: currentUsername, content: text }]);
-    
-    const { count } = await client.from('messages').select('*', { count: 'exact', head: true });
-    if (count > 100) {
-      const { data: oldest } = await client.from('messages').select('created_at').order('created_at', { ascending: false }).range(99, 99).single();
-      if (oldest) {
-        await client.from('messages').delete().lt('created_at', oldest.created_at);
-        loadMessages();
-      }
-    }
+  async function send() {
+    const input = document.getElementById('msg-input');
+    if (!input.value.trim()) return;
+    await client.from('messages').insert([{ sender: user.username, content: input.value, sender_phone: user.phone }]);
+    input.value = '';
   }
 
-  document.getElementById("sendBtn").onclick = sendMessage;
-  document.getElementById("message-input").onkeypress = (e) => { if(e.key==="Enter") sendMessage(); };
-  document.getElementById("username-input").onkeypress = (e) => { if(e.key==="Enter") saveUsername(); };
+  function openMenu(e, id, phone, text) {
+    activeId = id; activeText = text;
+    const menu = document.getElementById('menu');
+    menu.style.display = 'block';
+    menu.style.top = e.clientY + 'px';
+    menu.style.left = Math.min(e.clientX, window.innerWidth - 170) + 'px';
+    document.getElementById('del-btn').style.display = (phone === user.phone) ? 'block' : 'none';
+  }
 
-  client.channel("room1").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, p => addMessage(p.new)).subscribe();
+  function copyMsg() { navigator.clipboard.writeText(activeText); closeMenu(); }
+  async function deleteMsg() { await client.from('messages').delete().eq('id', activeId); closeMenu(); }
+  function closeMenu() { document.getElementById('menu').style.display = 'none'; }
+  function logout() { localStorage.clear(); location.reload(); }
+  document.addEventListener('click', (e) => { if (!e.target.closest('.bubble')) closeMenu(); });
 </script>
 </body>
 </html>
