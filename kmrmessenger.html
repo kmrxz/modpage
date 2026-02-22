@@ -7,57 +7,37 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
   <style>
     :root { --bg: #010c14; --header: #0a1929; --blue: #007aff; --own: #1a3a5a; --other: #0f253e; }
-    
-    body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); font-family: sans-serif; color: white; display: flex; flex-direction: column; overflow: hidden; 
-      user-select: none; -webkit-user-select: none; }
-
-    /* Auth Screen */
+    body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: var(--bg); font-family: sans-serif; color: white; display: flex; flex-direction: column; overflow: hidden; user-select: none; -webkit-user-select: none; }
     #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .card { background: var(--header); padding: 25px; border-radius: 15px; width: 100%; max-width: 350px; text-align: center; border: 1px solid #1a3a5a; }
     input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box; }
-    
     header { height: 60px; background: var(--header); display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid #1a3a5a; justify-content: space-between; flex-shrink: 0; }
-    
-    /* Drawer Fix */
     #drawer { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; background: var(--header); z-index: 2000; transition: transform 0.28s ease, opacity 0.28s ease; border-right: 1px solid #1a3a5a; padding: 20px; transform: translateX(-100%); opacity: 0; pointer-events: none; }
     #drawer.open { transform: translateX(0); opacity: 1; pointer-events: auto; }
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1900; }
     .overlay.open { display: block; }
     .drawer-item { display: block; padding: 15px 0; color: #94a3b8; text-decoration: none; border-bottom: 1px solid #1a3a5a; font-weight: bold; }
-
-    /* Theater Mode (Bottom Controls) */
     #image-viewer { position: fixed; inset: 0; background: #000; z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     #viewer-img { max-width: 100%; max-height: 75vh; object-fit: contain; }
     .viewer-footer { position: absolute; bottom: 0; width: 100%; height: 100px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; }
     .v-btn { background: var(--blue); border: none; color: white; padding: 15px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; }
     .close-btn { background: #334155; }
-
-    .alert-banner { background: rgba(0, 122, 255, 0.1); border: 1px solid var(--blue); padding: 12px; margin: 10px; border-radius: 10px; font-size: 0.85rem; text-align: center; color: #a0cfff; flex-shrink: 0; }
-
     #chat-box { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 12px; }
-    
     footer { background: var(--header); border-top: 1px solid #1a3a5a; padding: 10px 15px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
-    
     .media-btn { background: #1e293b; border: 1px solid #334155; color: white; font-size: 20px; width: 45px; height: 45px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     input#msg-input { flex: 1; padding: 12px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; color: white; outline: none; font-size: 16px; user-select: text !important; -webkit-user-select: text !important; }
-    
     .msg-wrapper { display: flex; width: 100%; flex-direction: column; }
     .msg-wrapper.own { align-items: flex-end; }
     .msg-wrapper.other { align-items: flex-start; }
     .bubble { max-width: 85%; padding: 12px; border-radius: 18px; cursor: pointer; word-wrap: break-word; line-height: 1.4; position: relative; }
     .own .bubble { background: var(--own); border-bottom-right-radius: 4px; }
     .other .bubble { background: var(--other); border-bottom-left-radius: 4px; }
-    
     .time { font-size: 0.65rem; color: #64748b; display: block; text-align: right; margin-top: 4px; }
     .chat-img { max-width: 100%; border-radius: 10px; margin-top: 5px; display: block; max-height: 250px; }
-    .inline-del { color: #f87171; font-size: 0.75rem; background: none; border: none; padding: 5px; cursor: pointer; font-weight: bold; }
-
     #menu { position: fixed; display: none; background: #1e293b; border-radius: 10px; z-index: 2500; border: 1px solid #334155; width: 160px; }
     .menu-btn { padding: 14px; cursor: pointer; border-bottom: 1px solid #334155; font-size: 0.95rem; text-align: center; }
     .menu-btn:last-child { border: none; color: #f87171; }
-    
     .btn-send { background: var(--blue); border: none; width: 45px; height: 45px; border-radius: 12px; color: white; font-size: 18px; cursor: pointer; }
-    .system-msg { align-self: center; background: #1e293b; color: #ffd279; font-size: 0.75rem; padding: 6px 14px; border-radius: 20px; margin: 8px 0; }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -81,18 +61,16 @@
   </div>
   <div class="card hidden" id="signup-box">
     <h3>Create Account</h3>
-    <input type="password" id="signup-pin" maxlength="4" placeholder="Choose a 4-digit PIN">
     <input type="text" id="signup-username" placeholder="Choose a username">
+    <input type="password" id="signup-pin" maxlength="4" placeholder="Choose a 4-digit PIN">
     <button class="btn-send" style="width:100%" onclick="finishSignUp()">Create</button>
     <div style="margin-top:10px; font-size:0.9rem; color:#94a3b8;">Already have an account? <a href="#" onclick="showLogin(); return false;">Login</a></div>
   </div>
 </div>
 
 <div class="overlay" onclick="closeDrawer()"></div>
-<div id="drawer" aria-hidden="true">
+<div id="drawer">
   <h2 style="color:var(--blue)">Echora</h2>
-  <a href="index.html" target="_blank" class="drawer-item">🏠 Home</a>
-  <a href="about.html" class="drawer-item">ℹ️ About</a>
   <p onclick="logout()" style="color:#f87171; cursor:pointer; font-weight:bold; margin-top:20px;">Logout</p>
 </div>
 
@@ -102,13 +80,11 @@
   <div style="width: 24px;"></div>
 </header>
 
-<div class="alert-banner" id="alert-banner">⚠️Please be disrespectful or mean to others in the chat.</div>
-
 <div id="chat-box"></div>
 
 <div id="menu">
-  <div class="menu-btn" onclick="copyMsg()">Copy Text only</div>
-  <div class="menu-btn" id="del-btn" onclick="deleteMsg()">Delete for Everyone</div>
+  <div class="menu-btn" onclick="copyMsg()">Copy Text</div>
+  <div class="menu-btn" id="del-btn" onclick="deleteMsg()">Delete Message</div>
 </div>
 
 <footer>
@@ -124,74 +100,59 @@
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let user = JSON.parse(localStorage.getItem("kmr_user")) || null;
-  let activeId = null; let activeText = "";
+  let activeId = null; 
+  let activeText = "";
 
-  const overlayEl = document.querySelector('.overlay');
-  if (user) document.getElementById('auth-screen').classList.add('hidden');
+  if (user) {
+    document.getElementById('auth-screen').classList.add('hidden');
+    init();
+  }
 
   function toggleDrawer() {
-    // open drawer only from explicit call (hamburger)
-    const d = document.getElementById('drawer');
-    d.classList.add('open');
-    overlayEl.classList.add('open');
-    d.setAttribute('aria-hidden', 'false');
+    document.getElementById('drawer').classList.add('open');
+    document.querySelector('.overlay').classList.add('open');
   }
   function closeDrawer() {
-    const d = document.getElementById('drawer');
-    d.classList.remove('open');
-    overlayEl.classList.remove('open');
-    d.setAttribute('aria-hidden', 'true');
+    document.getElementById('drawer').classList.remove('open');
+    document.querySelector('.overlay').classList.remove('open');
   }
-
-  // Close drawer when clicking anywhere outside it (but don't open it)
-  document.addEventListener('click', (e) => {
-    const d = document.getElementById('drawer');
-    if (d.classList.contains('open') && !e.target.closest('#drawer') && !e.target.closest('[onclick="toggleDrawer()"]')) {
-      closeDrawer();
-    }
-  });
-
-  // Theater Mode Logic
-  function openViewer(url) {
-    const v = document.getElementById('image-viewer');
-    document.getElementById('viewer-img').src = url;
-    v.style.display = 'flex';
-    document.getElementById('dl-trigger').onclick = async () => {
-      const resp = await fetch(url);
-      const blob = await resp.blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = "Echora_" + Date.now() + ".jpg";
-      a.click();
-    };
-  }
-  function closeViewer() { document.getElementById('image-viewer').style.display = 'none'; }
 
   async function handleLogin() {
     const username = document.getElementById('login-username').value.trim();
     const pin = document.getElementById('login-pin').value.trim();
-    if (!username || !pin) return alert('Enter username and PIN');
-    const { data } = await client.from('profiles').select('*').eq('username', username).single();
-    if (data) {
-      if (data.pin !== pin) return alert("Wrong PIN");
-      user = data; loginDone();
-    } else {
-      // not found
+    if (!username || !pin) return alert('Enter credentials');
+
+    const { data, error } = await client.from('profiles').select('*').eq('username', username);
+    
+    if (error || !data || data.length === 0) {
       alert('Account not found. Please create one.');
-      showSignup();
+      return;
+    }
+
+    const foundUser = data[0];
+    if (String(foundUser.pin) === String(pin)) {
+      user = foundUser;
+      loginDone();
+    } else {
+      alert('Incorrect PIN');
     }
   }
 
   async function finishSignUp() {
+    const username = document.getElementById('signup-username').value.trim();
     const pin = document.getElementById('signup-pin').value.trim();
-    const name = document.getElementById('signup-username').value.trim();
-    if (!/^[0-9]{4}$/.test(pin)) return alert('PIN must be 4 digits');
-    if (!name) return alert('Choose a username');
-    // check username uniqueness
-    const { data: exists } = await client.from('profiles').select('id').eq('username', name).single();
-    if (exists) return alert('Username already taken');
-    const { data } = await client.from('profiles').insert([{ pin, username: name }]).select().single();
-    user = data; loginDone();
+    if (!username || !/^[0-9]{4}$/.test(pin)) return alert('Username required & PIN must be 4 digits');
+
+    const { data: existing } = await client.from('profiles').select('username').eq('username', username);
+    if (existing && existing.length > 0) return alert('Username taken');
+
+    // Inserting only what we know exists: username and pin. 
+    // Phone/id will be handled by DB defaults.
+    const { data, error } = await client.from('profiles').insert([{ username, pin: String(pin) }]).select();
+    if (error) return alert('Signup Error: ' + error.message);
+    
+    user = data[0];
+    loginDone();
   }
 
   function loginDone() {
@@ -200,99 +161,91 @@
     init();
   }
 
+  function logout() {
+    localStorage.removeItem("kmr_user");
+    location.reload();
+  }
+
   function init() {
     load();
     client.channel('room1').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, load).subscribe();
   }
 
   async function load() {
-    const { data } = await client.from('messages').select('*').order('created_at', { ascending: true });
+    const { data, error } = await client.from('messages').select('*').order('created_at', { ascending: true });
+    if (error) return;
+
     const box = document.getElementById('chat-box');
     box.innerHTML = '';
-    data?.forEach(m => {
+    
+    data.forEach(m => {
       const wrap = document.createElement('div');
-      if (m.is_system) {
-        wrap.className = 'system-msg';
-        wrap.innerText = m.content;
-      } else {
-        const isOwn = m.sender === user.username;
-        wrap.className = `msg-wrapper ${isOwn ? 'own' : 'other'}`;
-        const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        let contentHTML = m.content;
-        let isImg = (m.content || '').startsWith('http') && (m.content.match(/\.(jpeg|jpg|gif|png|webp)$/) != null);
-        
-        if (isImg) {
-          contentHTML = `<img src="${m.content}" class="chat-img" onclick="openViewer('${m.content}')">`;
-        }
-
-        wrap.innerHTML = `
-          <div class="bubble" onclick="openMenu(event, '${m.id}', '${m.sender}', \`${m.content}\`)">
-            <small style="color:var(--blue); font-size:0.75rem; font-weight:bold;">${m.sender}</small><br>
-            ${contentHTML}
-            <span class="time">${time}</span>
-          </div>
-          ${(isImg && isOwn) ? `<button class="inline-del" onclick="activeId='${m.id}';deleteMsg()">Delete Image</button>` : ''}
-        `;
+      const isOwn = user && (m.sender === user.username);
+      wrap.className = `msg-wrapper ${isOwn ? 'own' : 'other'}`;
+      const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      
+      let contentHTML = m.content;
+      const isImg = (m.content || '').startsWith('http') && (m.content.match(/\.(jpeg|jpg|gif|png|webp)/i));
+      
+      if (isImg) {
+        contentHTML = `<img src="${m.content}" class="chat-img" onclick="openViewer('${m.content}')">`;
       }
+
+      wrap.innerHTML = `
+        <div class="bubble" onclick="openMenu(event, '${m.id}', '${m.sender}', \`${m.content}\`)">
+          <small style="color:var(--blue); font-size:0.75rem; font-weight:bold;">${m.sender}</small><br>
+          ${contentHTML}
+          <span class="time">${time}</span>
+        </div>
+      `;
       box.appendChild(wrap);
     });
     box.scrollTop = box.scrollHeight;
   }
 
-  async function uploadFile(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const fileName = `${Date.now()}_${file.name}`;
-    const { data, error } = await client.storage.from('chat-files').upload(fileName, file);
-    if (error) return alert("Upload failed!");
-    const { data: urlData } = client.storage.from('chat-files').getPublicUrl(fileName);
-    await client.from('messages').insert([{ sender: user.username, content: urlData.publicUrl }]);
-    // hide banner on first user message/upload
-    localStorage.setItem('kmr_banner_dismissed', '1');
-    document.getElementById('alert-banner').classList.add('hidden');
-  }
-
   async function send() {
     const input = document.getElementById('msg-input');
-    if (!input.value.trim()) return;
-    await client.from('messages').insert([{ sender: user.username, content: input.value }]);
-    // hide banner on first user message
-    localStorage.setItem('kmr_banner_dismissed', '1');
-    document.getElementById('alert-banner').classList.add('hidden');
+    const val = input.value.trim();
+    if (!val || !user) return;
+    
+    await client.from('messages').insert([{ sender: user.username, content: val }]);
     input.value = '';
   }
 
-  function openMenu(e, id, senderName, text) {
+  async function uploadFile(input) {
+    const file = input.files[0];
+    if (!file || !user) return;
+    const path = `${Date.now()}_${file.name}`;
+    
+    const { error: uploadErr } = await client.storage.from('chat-files').upload(path, file);
+    if (uploadErr) return alert("Upload failed");
+
+    const { data: urlData } = client.storage.from('chat-files').getPublicUrl(path);
+    await client.from('messages').insert([{ sender: user.username, content: urlData.publicUrl }]);
+  }
+
+  function openMenu(e, id, sender, text) {
     activeId = id; activeText = text;
     const menu = document.getElementById('menu');
     menu.style.display = 'block';
-    menu.style.top = (e.clientY - 40) + 'px';
+    menu.style.top = (e.clientY > window.innerHeight - 100 ? e.clientY - 100 : e.clientY) + 'px';
     menu.style.left = Math.min(e.clientX, window.innerWidth - 170) + 'px';
-    document.getElementById('del-btn').style.display = (senderName === user.username) ? 'block' : 'none';
+    document.getElementById('del-btn').style.display = (sender === user.username) ? 'block' : 'none';
   }
 
+  function closeMenu() { document.getElementById('menu').style.display = 'none'; }
   function copyMsg() { navigator.clipboard.writeText(activeText); closeMenu(); }
   async function deleteMsg() { await client.from('messages').delete().eq('id', activeId); closeMenu(); }
-  function closeMenu() { document.getElementById('menu').style.display = 'none'; }
-  function logout() { localStorage.clear(); location.reload(); }
+  
+  function openViewer(url) {
+    document.getElementById('viewer-img').src = url;
+    document.getElementById('image-viewer').style.display = 'flex';
+  }
+  function closeViewer() { document.getElementById('image-viewer').style.display = 'none'; }
+
   document.addEventListener('click', (e) => { if (!e.target.closest('.bubble')) closeMenu(); });
-
-  function showSignup() {
-    document.getElementById('login-box').classList.add('hidden');
-    document.getElementById('signup-box').classList.remove('hidden');
-  }
-  function showLogin() {
-    document.getElementById('signup-box').classList.add('hidden');
-    document.getElementById('login-box').classList.remove('hidden');
-  }
-
-  // Hide banner if user already dismissed it previously
-  if (localStorage.getItem('kmr_banner_dismissed') === '1') {
-    document.getElementById('alert-banner').classList.add('hidden');
-  }
-
-  if (user) init();
+  function showSignup() { document.getElementById('login-box').classList.add('hidden'); document.getElementById('signup-box').classList.remove('hidden'); }
+  function showLogin() { document.getElementById('signup-box').classList.add('hidden'); document.getElementById('login-box').classList.remove('hidden'); }
 </script>
 </body>
 </html>
