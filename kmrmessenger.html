@@ -19,8 +19,8 @@
     header { height: 60px; background: var(--header); display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid #1a3a5a; justify-content: space-between; flex-shrink: 0; }
     
     /* Drawer Fix */
-    #drawer { position: fixed; left: -280px; top: 0; bottom: 0; width: 280px; background: var(--header); z-index: 2000; transition: 0.3s; border-right: 1px solid #1a3a5a; padding: 20px; }
-    #drawer.open { left: 0; }
+    #drawer { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; background: var(--header); z-index: 2000; transition: transform 0.28s ease, opacity 0.28s ease; border-right: 1px solid #1a3a5a; padding: 20px; transform: translateX(-100%); opacity: 0; pointer-events: none; }
+    #drawer.open { transform: translateX(0); opacity: 1; pointer-events: auto; }
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1900; }
     .overlay.open { display: block; }
     .drawer-item { display: block; padding: 15px 0; color: #94a3b8; text-decoration: none; border-bottom: 1px solid #1a3a5a; font-weight: bold; }
@@ -74,19 +74,22 @@
 <div id="auth-screen">
   <div class="card" id="login-box">
     <h2 style="color:var(--blue)">Echora</h2>
-    <input type="number" id="phone" placeholder="Phone Number">
-    <input type="password" id="pin" placeholder="PIN">
+    <input type="text" id="login-username" placeholder="Username">
+    <input type="password" id="login-pin" maxlength="4" placeholder="4-digit PIN">
     <button class="btn-send" style="width:100%" onclick="handleLogin()">Login</button>
+    <div style="margin-top:10px; font-size:0.9rem; color:#94a3b8;">Don't have an account? <a href="#" onclick="showSignup(); return false;">Create one</a></div>
   </div>
-  <div class="card hidden" id="name-box">
-    <h3>Set Username</h3>
-    <input type="text" id="new-name" placeholder="Name">
-    <button class="btn-send" style="width:100%" onclick="finishSignUp()">Join</button>
+  <div class="card hidden" id="signup-box">
+    <h3>Create Account</h3>
+    <input type="password" id="signup-pin" maxlength="4" placeholder="Choose a 4-digit PIN">
+    <input type="text" id="signup-username" placeholder="Choose a username">
+    <button class="btn-send" style="width:100%" onclick="finishSignUp()">Create</button>
+    <div style="margin-top:10px; font-size:0.9rem; color:#94a3b8;">Already have an account? <a href="#" onclick="showLogin(); return false;">Login</a></div>
   </div>
 </div>
 
-<div class="overlay" onclick="toggleDrawer()"></div>
-<div id="drawer">
+<div class="overlay" onclick="closeDrawer()"></div>
+<div id="drawer" aria-hidden="true">
   <h2 style="color:var(--blue)">Echora</h2>
   <a href="index.html" target="_blank" class="drawer-item">🏠 Home</a>
   <a href="about.html" class="drawer-item">ℹ️ About</a>
@@ -95,16 +98,16 @@
 
 <header>
   <span onclick="toggleDrawer()" style="font-size: 24px; cursor: pointer;">☰</span>
-  <b>Echora Messenger</b>
+  <b>Echora Chat</b>
   <div style="width: 24px;"></div>
 </header>
 
-<div class="alert-banner">⚠️ Please be respectful and kind to others in the chat.</div>
+<div class="alert-banner" id="alert-banner">⚠️Please be disrespectful or mean to others in the chat.</div>
 
 <div id="chat-box"></div>
 
 <div id="menu">
-  <div class="menu-btn" onclick="copyMsg()">Copy Text</div>
+  <div class="menu-btn" onclick="copyMsg()">Copy Text only</div>
   <div class="menu-btn" id="del-btn" onclick="deleteMsg()">Delete for Everyone</div>
 </div>
 
@@ -123,12 +126,30 @@
   let user = JSON.parse(localStorage.getItem("kmr_user")) || null;
   let activeId = null; let activeText = "";
 
+  const overlayEl = document.querySelector('.overlay');
   if (user) document.getElementById('auth-screen').classList.add('hidden');
 
   function toggleDrawer() {
-    document.getElementById('drawer').classList.toggle('open');
-    document.querySelector('.overlay').classList.toggle('open');
+    // open drawer only from explicit call (hamburger)
+    const d = document.getElementById('drawer');
+    d.classList.add('open');
+    overlayEl.classList.add('open');
+    d.setAttribute('aria-hidden', 'false');
   }
+  function closeDrawer() {
+    const d = document.getElementById('drawer');
+    d.classList.remove('open');
+    overlayEl.classList.remove('open');
+    d.setAttribute('aria-hidden', 'true');
+  }
+
+  // Close drawer when clicking anywhere outside it (but don't open it)
+  document.addEventListener('click', (e) => {
+    const d = document.getElementById('drawer');
+    if (d.classList.contains('open') && !e.target.closest('#drawer') && !e.target.closest('[onclick="toggleDrawer()"]')) {
+      closeDrawer();
+    }
+  });
 
   // Theater Mode Logic
   function openViewer(url) {
@@ -147,23 +168,29 @@
   function closeViewer() { document.getElementById('image-viewer').style.display = 'none'; }
 
   async function handleLogin() {
-    const phone = document.getElementById('phone').value;
-    const pin = document.getElementById('pin').value;
-    const { data } = await client.from('profiles').select('*').eq('phone', phone).single();
+    const username = document.getElementById('login-username').value.trim();
+    const pin = document.getElementById('login-pin').value.trim();
+    if (!username || !pin) return alert('Enter username and PIN');
+    const { data } = await client.from('profiles').select('*').eq('username', username).single();
     if (data) {
       if (data.pin !== pin) return alert("Wrong PIN");
       user = data; loginDone();
     } else {
-      document.getElementById('login-box').classList.add('hidden');
-      document.getElementById('name-box').classList.remove('hidden');
+      // not found
+      alert('Account not found. Please create one.');
+      showSignup();
     }
   }
 
   async function finishSignUp() {
-    const phone = document.getElementById('phone').value;
-    const pin = document.getElementById('pin').value;
-    const name = document.getElementById('new-name').value;
-    const { data } = await client.from('profiles').insert([{ phone, pin, username: name }]).select().single();
+    const pin = document.getElementById('signup-pin').value.trim();
+    const name = document.getElementById('signup-username').value.trim();
+    if (!/^[0-9]{4}$/.test(pin)) return alert('PIN must be 4 digits');
+    if (!name) return alert('Choose a username');
+    // check username uniqueness
+    const { data: exists } = await client.from('profiles').select('id').eq('username', name).single();
+    if (exists) return alert('Username already taken');
+    const { data } = await client.from('profiles').insert([{ pin, username: name }]).select().single();
     user = data; loginDone();
   }
 
@@ -188,19 +215,19 @@
         wrap.className = 'system-msg';
         wrap.innerText = m.content;
       } else {
-        const isOwn = m.sender_phone === user.phone;
+        const isOwn = m.sender === user.username;
         wrap.className = `msg-wrapper ${isOwn ? 'own' : 'other'}`;
         const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         
         let contentHTML = m.content;
-        let isImg = m.content.startsWith('http') && (m.content.match(/\.(jpeg|jpg|gif|png|webp)$/) != null);
+        let isImg = (m.content || '').startsWith('http') && (m.content.match(/\.(jpeg|jpg|gif|png|webp)$/) != null);
         
         if (isImg) {
           contentHTML = `<img src="${m.content}" class="chat-img" onclick="openViewer('${m.content}')">`;
         }
 
         wrap.innerHTML = `
-          <div class="bubble" onclick="openMenu(event, '${m.id}', '${m.sender_phone}', \`${m.content}\`)">
+          <div class="bubble" onclick="openMenu(event, '${m.id}', '${m.sender}', \`${m.content}\`)">
             <small style="color:var(--blue); font-size:0.75rem; font-weight:bold;">${m.sender}</small><br>
             ${contentHTML}
             <span class="time">${time}</span>
@@ -220,23 +247,29 @@
     const { data, error } = await client.storage.from('chat-files').upload(fileName, file);
     if (error) return alert("Upload failed!");
     const { data: urlData } = client.storage.from('chat-files').getPublicUrl(fileName);
-    await client.from('messages').insert([{ sender: user.username, content: urlData.publicUrl, sender_phone: user.phone }]);
+    await client.from('messages').insert([{ sender: user.username, content: urlData.publicUrl }]);
+    // hide banner on first user message/upload
+    localStorage.setItem('kmr_banner_dismissed', '1');
+    document.getElementById('alert-banner').classList.add('hidden');
   }
 
   async function send() {
     const input = document.getElementById('msg-input');
     if (!input.value.trim()) return;
-    await client.from('messages').insert([{ sender: user.username, content: input.value, sender_phone: user.phone }]);
+    await client.from('messages').insert([{ sender: user.username, content: input.value }]);
+    // hide banner on first user message
+    localStorage.setItem('kmr_banner_dismissed', '1');
+    document.getElementById('alert-banner').classList.add('hidden');
     input.value = '';
   }
 
-  function openMenu(e, id, phone, text) {
+  function openMenu(e, id, senderName, text) {
     activeId = id; activeText = text;
     const menu = document.getElementById('menu');
     menu.style.display = 'block';
     menu.style.top = (e.clientY - 40) + 'px';
     menu.style.left = Math.min(e.clientX, window.innerWidth - 170) + 'px';
-    document.getElementById('del-btn').style.display = (phone === user.phone) ? 'block' : 'none';
+    document.getElementById('del-btn').style.display = (senderName === user.username) ? 'block' : 'none';
   }
 
   function copyMsg() { navigator.clipboard.writeText(activeText); closeMenu(); }
@@ -244,7 +277,21 @@
   function closeMenu() { document.getElementById('menu').style.display = 'none'; }
   function logout() { localStorage.clear(); location.reload(); }
   document.addEventListener('click', (e) => { if (!e.target.closest('.bubble')) closeMenu(); });
-  
+
+  function showSignup() {
+    document.getElementById('login-box').classList.add('hidden');
+    document.getElementById('signup-box').classList.remove('hidden');
+  }
+  function showLogin() {
+    document.getElementById('signup-box').classList.add('hidden');
+    document.getElementById('login-box').classList.remove('hidden');
+  }
+
+  // Hide banner if user already dismissed it previously
+  if (localStorage.getItem('kmr_banner_dismissed') === '1') {
+    document.getElementById('alert-banner').classList.add('hidden');
+  }
+
   if (user) init();
 </script>
 </body>
