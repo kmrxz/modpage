@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Privacy & Conduct - Echora</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --bg: #010c14; 
+            --header: #0a1929; 
+            --blue: #007aff; 
+            --blue-light: #66b3ff; 
+        }
+        
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: var(--bg); 
+            font-family: sans-serif; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Using your custom Dialogue Box styling for the notice card */
+        .notice-container {
+            background: var(--header);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid #1a3a5a;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .icon-shield {
+            font-size: 50px;
+            color: var(--blue);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: var(--blue-light);
+            margin-top: 0;
+            letter-spacing: 1px;
+        }
+
+        .content {
+            text-align: left;
+            line-height: 1.6;
+            font-size: 15px;
+            margin: 20px 0;
+            color: #cbd5e1;
+        }
+
+        .rule-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .rule-item i {
+            color: var(--blue);
+            margin-top: 4px;
+        }
+
+        .btn-redirect {
+            background: var(--blue);
+            border: none;
+            width: 100%;
+            height: 50px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn-redirect:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="notice-container">
+        <i class="fa-solid fa-user-shield icon-shield"></i>
+        <h2>Privacy Notice</h2>
+        
+        <div class="content">
+            <div class="rule-item">
+                <i class="fa-solid fa-lock"></i>
+                <span>Do not share sensitive credentials (PINs or passwords) within the chat.</span>
+            </div>
+            
+            <div class="rule-item">
+                <i class="fa-solid fa-handshake"></i>
+                <span>Keep manners at all times. Harassment will not be tolerated.</span>
+            </div>
+            
+            <div class="rule-item">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>Treat everyone equally. Every user is a valued part of our journey.</span>
+            </div>
+        </div>
+
+        <button class="btn-redirect" onclick="location.href='index.html'">
+            OK
+        </button>
+    </div>
+
+</body>
+</html>
