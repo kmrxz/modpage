@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Echora Messenger</title>
     
-    <meta name="description" content="Welcome to Echora world chat,bu limited to a few users. Join a part of our small journey.">
+    <meta name="description" content="Welcome to Echora world chat, but limited to a few users. Join a part of our small journey.">
     <meta property="og:image" content="echora/images/banner.png">
     <meta property="og:title" content="Echora Messenger">
     <meta property="og:description" content="Join a part of our small journey">
@@ -16,11 +16,17 @@
     <style>
         :root { 
             --bg: #010c14; --header: #0a1929; --blue: #007aff; 
-            --blue-light: #66b3ff; --own: #2e2a57bd; --other: #1e2161cb;
+            --blue-light: #66b3ff; --own: #1a3a5a; --other: #0f253e;
             user-select: none;
         }
         
-        html, body { margin: 0; padding: 0; width: 100%; height: 100vh; background: var(--bg); font-family: sans-serif; color: white; display: flex; flex-direction: column; overflow: hidden; position: fixed; }
+        /* FIX: Changed height to 100dvh and removed position: fixed so it fits mobile screens perfectly */
+        html, body { 
+            margin: 0; padding: 0; width: 100%; 
+            height: 100%; height: 100dvh; 
+            background: var(--bg); font-family: sans-serif; 
+            color: white; display: flex; flex-direction: column; overflow: hidden; 
+        }
 
         .admin-name { color: #ff4d4d !important; font-weight: bold; text-shadow: 0 0 8px #ff0000; animation: glow 1.5s infinite alternate; }
         @keyframes glow { from { text-shadow: 0 0 5px #ff0000; } to { text-shadow: 0 0 15px #ff4d4d; } }
@@ -42,25 +48,32 @@
         #dialogue-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 5000; display: none; align-items: center; justify-content: center; }
         .dialogue-box { background: var(--header); width: 85%; max-width: 320px; border-radius: 15px; padding: 25px; text-align: center; border: 1px solid #1a3a5a; }
 
-        header { height: 60px; background: var(--header); display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid #1a3a5a; justify-content: space-between; }
+        header { flex-shrink: 0; height: 60px; background: var(--header); display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid #1a3a5a; justify-content: space-between; }
+        
+        /* FIX: Ensures chat box takes up remaining space properly */
         #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         
-        .join-alert { 
-          align-self: center; 
-          font-size: 16px; 
-          color: #3464a7; 
-          margin: 5px 0; 
-          font-style: italic; }
+        .join-alert { align-self: center; font-size: 12px; color: #64748b; margin: 5px 0; font-style: italic; }
 
         .bubble { max-width: 75%; padding: 12px; border-radius: 18px; font-size: 15px; position: relative; }
         .own { align-self: flex-end; background: var(--own); border-bottom-right-radius: 4px; }
         .other { align-self: flex-start; background: var(--other); border-bottom-left-radius: 4px; }
 
-        footer { background: var(--header); padding: 10px; display: flex; gap: 8px; align-items: center; }
-        .btn-media { background: #1e293b; border: none; width: 45px; height: 45px; border-radius: 10px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s; }
+        /* FIX: Safe area padding prevents iPhone gesture bar from covering the input */
+        footer { 
+            flex-shrink: 0; background: var(--header); padding: 10px; 
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+            display: flex; gap: 8px; align-items: center; 
+        }
+        
+        .btn-media { background: #1e293b; border: none; width: 45px; height: 45px; border-radius: 10px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s; flex-shrink: 0; }
         .btn-media:active { opacity: 0.7; }
         
         input[type="text"], input[type="password"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; outline: none; box-sizing: border-box; margin-bottom: 10px; }
+        
+        /* FIX: Prevent bottom margin on the chat input specifically */
+        #msg-input { margin-bottom: 0; flex: 1; }
+        
         .btn-send { background: var(--blue); border: none; width: 50px; height: 45px; border-radius: 50%; color: white; flex-shrink: 0; cursor: pointer; font-size: 18px; }
         
         .hidden { display: none !important; }
@@ -109,7 +122,7 @@
     <p id="drawer-user" style="margin: -10px 0 15px 0; font-size: 14px; color: var(--blue-light); border-bottom: 1px solid #1a3a5a; padding-bottom: 10px;"></p>
     
     <div onclick="toggleDrawer()" style="padding:15px; cursor:pointer;"><i class="fa-solid fa-house" style="margin-right:10px;"></i> Home</div>
-    <div onclick="openDiag('About', 'Echora Messenger v3.1\n~by Kmrxz and  sleeping Orange Cat\n\nYeah I use AI Tools\nif you have any queries,keep it to yourself')" style="padding:15px; cursor:pointer;"><i class="fa-solid fa-circle-info" style="margin-right:10px;"></i> About</div>
+    <div onclick="openDiag('About', 'Echora Messenger v3.1\nCreated by Kmrxz\nJoin a part of our small journey.')" style="padding:15px; cursor:pointer;"><i class="fa-solid fa-circle-info" style="margin-right:10px;"></i> About</div>
     <div onclick="toggleDrawer(); logout()" style="padding:15px; cursor:pointer; color:#f87171; margin-top:20px;"><i class="fa-solid fa-door-open" style="margin-right:10px;"></i> Logout</div>
 </div>
 
@@ -168,6 +181,14 @@
     window.onload = () => {
         setTimeout(() => { document.getElementById('splash-screen').classList.add('hidden'); }, 2000);
         if (user) init();
+        
+        // FIX: Scroll to bottom smoothly when mobile keyboard opens
+        document.getElementById('msg-input').addEventListener('focus', () => {
+            setTimeout(() => {
+                const box = document.getElementById('chat-box');
+                box.scrollTop = box.scrollHeight;
+            }, 300);
+        });
     };
 
     function openDiag(t, m) { 
@@ -233,7 +254,6 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
         
         const path = `uploads/${Date.now()}_${file.name}`;
-        // Assumes your supabase bucket is named 'media'
         const { data, error } = await client.storage.from('media').upload(path, file);
         
         if (error) {
@@ -245,7 +265,7 @@
         await client.from('messages').insert([{ sender: user.username, content: publicUrl }]);
         
         btn.innerHTML = ogHTML;
-        e.target.value = ""; // Reset input
+        e.target.value = ""; 
     }
 
     function openPreview(src) {
@@ -269,7 +289,7 @@
             a.click();
             window.URL.revokeObjectURL(url);
         } catch (e) {
-            window.open(src, '_blank'); // Fallback if fetch fails due to CORS
+            window.open(src, '_blank'); 
         }
     }
 
@@ -310,10 +330,10 @@
         let seenUsers = new Set();
 
         msgs.forEach(m => {
-            const displayName = (m.sender === 'Kmrxz') ? "KMRXZ(Admin)" : m.sender;
+            const displayName = (m.sender === 'Kmrxz') ? "KMRXZ(admin)" : m.sender;
 
             if (!seenUsers.has(m.sender)) {
-                chatHTML += `<div class="join-alert">${displayName} joined the chat,Say hi</div>`;
+                chatHTML += `<div class="join-alert">${displayName} joined the chat, Say hi</div>`;
                 seenUsers.add(m.sender);
             }
             
@@ -329,13 +349,11 @@
                 avatarPath = `images/${avatarNum}.png`;
             }
             
-            // Check if content is an image URL
             const isImage = m.content.match(/\.(jpeg|jpg|gif|png|webp)$/i) || m.content.includes('supabase.co/storage');
             const displayContent = isImage 
                 ? `<img src="${m.content}" style="max-width:100%; border-radius:10px; cursor:pointer;" onclick="openPreview('${m.content}')">` 
                 : m.content;
             
-            // Added data attributes for copy/delete context menu
             chatHTML += `
                 <div class="bubble ${isOwn ? 'own' : 'other'}" oncontextmenu="showContextMenu(event, this)" data-id="${m.id}" data-sender="${m.sender}" data-content="${encodeURIComponent(m.content)}">
                     <img src="${avatarPath}" class="avatar">
